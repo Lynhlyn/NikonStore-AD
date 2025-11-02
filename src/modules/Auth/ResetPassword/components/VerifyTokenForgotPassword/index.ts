@@ -1,0 +1,2 @@
+export {VerifyTokenForgotPassword} from './VerifyTokenForgotPassword'
+

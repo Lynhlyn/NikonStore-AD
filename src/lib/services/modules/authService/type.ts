@@ -8,6 +8,7 @@ export interface ILoginPayload {
 
 export interface IForgotPasswordPayload {
   email: string;
+  role?: EUserRole;
 }
 
 export interface IResetPassword {
