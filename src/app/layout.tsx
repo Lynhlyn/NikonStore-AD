@@ -20,10 +20,6 @@ const ReduxProvider = dynamic(() => import('@/lib/Provider/StoreProvider'), {
   ssr: false,
 });
 
-const ThemeProvider = dynamic(() => import('@/lib/Provider/ThemeProvider').then(mod => ({ default: mod.ThemeProvider })), {
-  ssr: false,
-});
-
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -33,17 +29,10 @@ export default async function RootLayout({
     <html suppressHydrationWarning>
       <body className={notoSans.className}>
         <ReduxProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <Suspense>
-              {children}
-            </Suspense>
-            <Toaster />
-          </ThemeProvider>
+          <Suspense>
+            {children}
+          </Suspense>
+          <Toaster />
         </ReduxProvider>
       </body>
     </html>

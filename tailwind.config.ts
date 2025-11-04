@@ -127,9 +127,9 @@ const colorsConfig = {
   bgPrimaryTonalHover: BaseColors.brand200,
   bgPrimaryTonalFocus: BaseColors.brand300,
 
-  bgPrimarySolidDefault: BaseColors.brand500,
-  bgPrimarySolidHover: BaseColors.brand400,
-  bgPrimarySolidFocus: BaseColors.brand600,
+  bgPrimarySolidDefault: 'var(--bg-primary-solid-default)',
+  bgPrimarySolidHover: 'var(--bg-primary-solid-hover)',
+  bgPrimarySolidFocus: 'var(--bg-primary-solid-focus)',
 
   bgPrimaryHighContrast: BaseColors.brand700,
 

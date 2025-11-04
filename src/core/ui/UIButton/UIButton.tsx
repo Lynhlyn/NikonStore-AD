@@ -22,7 +22,7 @@ const UIButton: React.FC<IUIButtonProps> = (props) => {
 
     const buttonClass = twMerge(
         clsx(
-            `flex justify-center items-center rounded-[10px] border-1`,
+            `flex justify-center items-center rounded-sm border-1`,
             sizeButtonClass,
             'bg-bgPrimarySolidDefault text-white focus:outline-none focus:ring-1 focus:ring-opacity-50',
             className,

@@ -50,7 +50,7 @@ const UITextField: React.FC<IUITextFieldProps> = (props) => {
 
   const inputStyleWrapper = twMerge(
     clsx(
-      'w-full gap-2 flex items-center justify-center focus:outline-none focus:ring-1 rounded-[10px]',
+      'w-full gap-2 flex items-center justify-center focus:outline-none focus:ring-1 rounded-sm',
       textFieldSizeClass,
       resolveStateFactory.default,
       className,

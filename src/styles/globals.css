@@ -14,14 +14,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  border-radius: 6px;
+  border-radius: 2px;
   background: #f6f8fa;
   opacity: 0.37;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #00aa9f;
-  border-radius: 6px;
+  border-radius: 2px;
   opacity: 0.12;
 }
 
@@ -63,7 +63,7 @@ body {
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    --radius: 0.125rem;
     --sidebar-background: #ffffff;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -72,6 +72,9 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    --bg-primary-solid-default: #00AA9F;
+    --bg-primary-solid-hover: #33BBB2;
+    --bg-primary-solid-focus: #4CD596;
   }
   .dark {
     --background: 0 0% 3.9%;
