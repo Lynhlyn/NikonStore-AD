@@ -1,0 +1,2 @@
+export { UITextArea } from './UITextArea';
+
