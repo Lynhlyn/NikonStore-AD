@@ -1,6 +1,8 @@
 export interface IListQuery {
   page?: number | null;
   keyword?: string;
+  name?: string;
+  slug?: string;
   code?: string;
   state?: string | null;
   status?: string | number;

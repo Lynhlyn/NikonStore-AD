@@ -1,8 +1,9 @@
 import { type PayloadAction, createSlice } from '@reduxjs/toolkit';
 import type { ISidebarDashboardState } from './type';
+import { ListRouteDashboardGroup } from './utils';
 
 const initialState: ISidebarDashboardState = {
-  listRoute: [],
+  listRoute: ListRouteDashboardGroup,
 };
 
 export const sidebarDashboardSlice = createSlice({

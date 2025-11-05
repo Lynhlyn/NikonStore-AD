@@ -9,7 +9,7 @@ import {
 import { ISidebarDashboardState } from '@/lib/features/sidebarDashboardSlice/type';
 import { RootState } from '@/lib/services/store';
 import * as React from 'react';
-import { AppSideBarItem } from './components';
+import { AppSideBarItem, AppSideBarGroup } from './components';
 import { useAppSelector } from '@/lib/hook/redux';
 import { usePathname } from 'next/navigation';
 import { useAppNavigation } from '@/common/hooks';
@@ -43,6 +43,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                         if (subItem?.type === 'item') {
                                             return (
                                                 <AppSideBarItem key={subIndex.toString()}
+                                                    route={subItem}
+                                                />
+                                            );
+                                        }
+                                        if (subItem?.type === 'group') {
+                                            return (
+                                                <AppSideBarGroup key={subIndex.toString()}
                                                     route={subItem}
                                                 />
                                             );

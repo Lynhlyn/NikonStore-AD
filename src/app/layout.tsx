@@ -4,6 +4,7 @@ import '@/styles/globals.css';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { Toaster } from '@/core/shadcn/components/ui/sonner';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
 const notoSans = Noto_Sans({
   weight: ['400', '500', '700', '600', '800', '900'],
@@ -30,7 +31,9 @@ export default async function RootLayout({
       <body className={notoSans.className}>
         <ReduxProvider>
           <Suspense>
-            {children}
+            <NuqsAdapter>
+              {children}
+            </NuqsAdapter>
           </Suspense>
           <Toaster />
         </ReduxProvider>
