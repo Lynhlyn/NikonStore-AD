@@ -3,7 +3,7 @@ import { IRouterItem } from '@/common/types/item';
 import { routerApp } from '@/router';
 import { ISidebarDashboardGroup } from './type';
 import React from 'react';
-import { Home, Package, Circle } from 'lucide-react';
+import { Home, Package, Circle, ShoppingBag } from 'lucide-react';
 
 const ListRouteDashboard: IRouterItem[] = [
   {
@@ -11,6 +11,20 @@ const ListRouteDashboard: IRouterItem[] = [
     routerActive: [routerApp.dashboard.dashboard],
     icon: React.createElement(Home, { className: "w-5 h-5" }),
     route: routerApp.dashboard.dashboard,
+    type: 'item',
+    visibleRoles: [
+      EUserRole.ADMIN,
+    ],
+  },
+  {
+    name: 'Quản lý sản phẩm',
+    routerActive: [
+      routerApp.product.list,
+      routerApp.product.form,
+      '/main/products/:id/edit',
+    ],
+    icon: React.createElement(ShoppingBag, { className: "w-5 h-5" }),
+    route: routerApp.product.list,
     type: 'item',
     visibleRoles: [
       EUserRole.ADMIN,

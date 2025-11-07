@@ -161,6 +161,7 @@ export function useProductFormProvider(id?: number) {
     setIsConfirmModalOpen,
     confirmModalConfig,
     handleConfirmSubmit,
+    product,
   };
 }
 
