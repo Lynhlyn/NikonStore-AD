@@ -8,6 +8,14 @@ import {
   useFetchProductByIdQuery,
   useUpdateProductMutation
 } from '@/lib/services/modules/productService';
+import {
+  useFetchProductTagsByProductIdQuery,
+  useUpdateProductTagsMutation
+} from '@/lib/services/modules/productTagService';
+import {
+  useFetchProductFeaturesByProductIdQuery,
+  useUpdateProductFeaturesMutation
+} from '@/lib/services/modules/productFeatureService';
 import { TProductFormField } from '@/modules/Product/ProductForm/components/ProductForm.type';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { notFound, useRouter } from 'next/navigation';
@@ -39,6 +47,8 @@ export function useProductFormProvider(id?: number) {
   const { getRouteWithRole } = useAppNavigation();
 
   const { data: product, isFetching: isProductFetching, error } = useFetchProductByIdQuery(id!, { skip: !id });
+  const { data: productTags, isFetching: isTagsFetching } = useFetchProductTagsByProductIdQuery(id!, { skip: !id });
+  const { data: productFeatures, isFetching: isFeaturesFetching } = useFetchProductFeaturesByProductIdQuery(id!, { skip: !id });
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [confirmModalConfig, setConfirmModalConfig] = useState({
     title: '',
@@ -53,6 +63,8 @@ export function useProductFormProvider(id?: number) {
 
   const [addProduct, { isLoading: isAddLoading }] = useAddProductMutation();
   const [updateProduct, { isLoading: isUpdateLoading }] = useUpdateProductMutation();
+  const [updateProductTags] = useUpdateProductTagsMutation();
+  const [updateProductFeatures] = useUpdateProductFeaturesMutation();
 
   const methods = useForm<TProductFormField>({
     resolver: yupResolver(productSchema),
@@ -74,8 +86,8 @@ export function useProductFormProvider(id?: number) {
 
   useEffect(() => {
     if (id && product) {
-      const tagIds = product.tags?.map(t => t.id) || [];
-      const featureIds = product.features?.map(f => f.id) || [];
+      const tagIds = productTags?.map(pt => pt.tagId) || [];
+      const featureIds = productFeatures?.map(pf => pf.featureId) || [];
 
       const brandId = product.brand?.id || 0;
       const categoryId = product.category?.id || 0;
@@ -96,9 +108,9 @@ export function useProductFormProvider(id?: number) {
         featureIds: featureIds,
       });
     }
-  }, [product, id, methods]);
+  }, [product, productTags, productFeatures, id, methods]);
 
-  const isLoading = isAddLoading || isUpdateLoading || (id ? isProductFetching : false);
+  const isLoading = isAddLoading || isUpdateLoading || (id ? (isProductFetching || isTagsFetching || isFeaturesFetching) : false);
 
   const handleConfirmSubmit = async (data: TProductFormField) => {
     setConfirmModalConfig(prev => ({ ...prev, isLoading: true }));
@@ -114,14 +126,45 @@ export function useProductFormProvider(id?: number) {
         materialId: data.materialId || undefined,
         strapTypeId: data.strapTypeId || undefined,
         status: data.status,
-        tagIds: data.tagIds || [],
-        featureIds: data.featureIds || [],
       };
 
+      let productId: number;
+
       if (id) {
-        await updateProduct({ id, ...productData }).unwrap();
+        const updatedProduct = await updateProduct({ id, ...productData }).unwrap();
+        productId = updatedProduct.id;
       } else {
-        await addProduct(productData).unwrap();
+        const newProduct = await addProduct(productData).unwrap();
+        productId = newProduct.id;
+      }
+
+      try {
+        if (data.tagIds && data.tagIds.length > 0) {
+          await updateProductTags({
+            productId: productId,
+            tagIds: data.tagIds,
+          }).unwrap();
+        } else if (id) {
+          await updateProductTags({
+            productId: productId,
+            tagIds: [],
+          }).unwrap();
+        }
+
+        if (data.featureIds && data.featureIds.length > 0) {
+          await updateProductFeatures({
+            productId: productId,
+            featureIds: data.featureIds,
+          }).unwrap();
+        } else if (id) {
+          await updateProductFeatures({
+            productId: productId,
+            featureIds: [],
+          }).unwrap();
+        }
+      } catch (relationError) {
+        console.error('Error updating product relations:', relationError);
+        toast.warning('Sản phẩm đã được tạo/cập nhật nhưng có lỗi khi cập nhật tags/features');
       }
 
       toast.success(id ? 'Đã cập nhật thành công sản phẩm' : 'Đã thêm thành công sản phẩm');

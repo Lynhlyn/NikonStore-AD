@@ -10,10 +10,12 @@ import { useFetchBrandsQuery } from '@/lib/services/modules/brandService';
 import { useFetchCategoriesQuery } from '@/lib/services/modules/categoryService';
 import { useFetchMaterialsQuery } from '@/lib/services/modules/materialService';
 import { useFetchStrapTypesQuery } from '@/lib/services/modules/strapTypeService';
-import { useFetchTagsQuery } from '@/lib/services/modules/tagService';
-import { useFetchFeaturesQuery } from '@/lib/services/modules/featureService';
+import { useAddTagMutation, useFetchTagsQuery } from '@/lib/services/modules/tagService';
+import { useAddFeatureMutation, useFetchFeaturesQuery } from '@/lib/services/modules/featureService';
 import { EStatusEnumString } from '@/common/enums/status';
 import type { SelectOption } from '@/core/ui/UISelectSearch/UISelectSearch.types';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 const NameInput = () => {
   const { control, formState: { errors } } = useProductFormContext();
@@ -153,6 +155,7 @@ const BrandInput = () => {
               bindLabel="label"
               bindValue="value"
               size={ESize.L}
+              placeholder="Chọn thương hiệu"
               className="rounded-md border border-gray-300"
               renderOption={(props) => <UISingleSelect.Option {...props} />}
               renderSelected={(props) => <UISingleSelect.Selected {...props} />}
@@ -197,6 +200,7 @@ const CategoryInput = () => {
               bindLabel="label"
               bindValue="value"
               size={ESize.L}
+              placeholder="Chọn danh mục"
               className="rounded-md border border-gray-300"
               renderOption={(props) => <UISingleSelect.Option {...props} />}
               renderSelected={(props) => <UISingleSelect.Selected {...props} />}
@@ -241,6 +245,7 @@ const MaterialInput = () => {
               bindLabel="label"
               bindValue="value"
               size={ESize.L}
+              placeholder="Chọn chất liệu"
               className="rounded-md border border-gray-300"
               renderOption={(props) => <UISingleSelect.Option {...props} />}
               renderSelected={(props) => <UISingleSelect.Selected {...props} />}
@@ -285,6 +290,7 @@ const StrapTypeInput = () => {
               bindLabel="label"
               bindValue="value"
               size={ESize.L}
+              placeholder="Chọn loại dây đeo"
               className="rounded-md border border-gray-300"
               renderOption={(props) => <UISingleSelect.Option {...props} />}
               renderSelected={(props) => <UISingleSelect.Selected {...props} />}
@@ -300,17 +306,46 @@ const StrapTypeInput = () => {
 };
 
 const TagsInput = () => {
-  const { control, formState: { errors } } = useProductFormContext();
-  const { data: tagsData } = useFetchTagsQuery({
+  const { control, formState: { errors }, setValue, getValues } = useProductFormContext();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const { data: tagsData, isFetching, refetch } = useFetchTagsQuery({
     page: 0,
     size: 100,
     isAll: true,
+    keyword: searchQuery || undefined,
   });
+
+  const [addTag] = useAddTagMutation();
 
   const tagOptions: SelectOption[] = (tagsData?.data || []).map(tag => ({
     value: tag.id,
     label: tag.name,
   }));
+
+  const handleCreateTag = async (tagName: string) => {
+    try {
+      const slug = tagName
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+      const newTag = await addTag({
+        name: tagName,
+        slug,
+        status: EStatusEnumString.ACTIVE
+      }).unwrap();
+      toast.success('Đã thêm thành công tag');
+      await refetch();
+      const currentValue = getValues('tagIds') as number[] || [];
+      setValue('tagIds', [...currentValue, newTag.id], { shouldValidate: true });
+    } catch (error: any) {
+      toast.error('Đã xảy ra lỗi khi thêm tag: ' + error.message);
+    }
+  };
 
   return (
     <UIFormControl>
@@ -319,25 +354,31 @@ const TagsInput = () => {
         control={control}
         name="tagIds"
         render={({ field: { onChange, value } }) => {
-          const selectedValues = Array.isArray(value) 
-            ? tagOptions.filter(opt => value.includes(opt.value))
-            : [];
+          const selectedOptions = tagOptions.filter(option =>
+            value && value.includes(option.value as number)
+          );
 
           return (
             <UISelectSearch
-              multiple
               options={tagOptions}
-              value={selectedValues.length > 0 ? selectedValues : null}
+              value={selectedOptions.length > 0 ? selectedOptions : null}
+              size={ESize.L}
               onChange={(selected) => {
                 if (Array.isArray(selected)) {
-                  onChange(selected.map(s => s.value));
+                  onChange(selected.map(item => item.value));
                 } else {
-                  onChange([]);
+                  onChange(selected ? [selected.value] : []);
                 }
               }}
-              placeholder="Chọn tags..."
-              searchable
-              size={ESize.L}
+              onSearch={setSearchQuery}
+              onCreateNew={handleCreateTag}
+              placeholder="Chọn tags"
+              searchable={true}
+              multiple={true}
+              loading={isFetching}
+              noDataText="Không tìm thấy tag"
+              showCreateButton={true}
+              createButtonText="Thêm tag"
               className="rounded-md border border-gray-300"
             />
           );
@@ -351,44 +392,69 @@ const TagsInput = () => {
 };
 
 const FeaturesInput = () => {
-  const { control, formState: { errors } } = useProductFormContext();
-  const { data: featuresData } = useFetchFeaturesQuery({
+  const { control, formState: { errors }, setValue, getValues } = useProductFormContext();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const { data: featuresData, isFetching, refetch } = useFetchFeaturesQuery({
     page: 0,
     size: 100,
     isAll: true,
+    keyword: searchQuery || undefined,
   });
+
+  const [addFeature] = useAddFeatureMutation();
 
   const featureOptions: SelectOption[] = (featuresData?.data || []).map(feature => ({
     value: feature.id,
     label: feature.name,
   }));
 
+  const handleCreateFeature = async (featureName: string) => {
+    try {
+      const newFeature = await addFeature({
+        name: featureName,
+      }).unwrap();
+      toast.success('Đã thêm thành công tính năng');
+      await refetch();
+      const currentValue = getValues('featureIds') as number[] || [];
+      setValue('featureIds', [...currentValue, newFeature.id], { shouldValidate: true });
+    } catch (error: any) {
+      toast.error('Đã xảy ra lỗi khi thêm tính năng: ' + error.message);
+    }
+  };
+
   return (
     <UIFormControl>
-      <UIFormControl.Label>Features</UIFormControl.Label>
+      <UIFormControl.Label>Tính năng</UIFormControl.Label>
       <Controller
         control={control}
         name="featureIds"
         render={({ field: { onChange, value } }) => {
-          const selectedValues = Array.isArray(value)
-            ? featureOptions.filter(opt => value.includes(opt.value))
-            : [];
+          const selectedOptions = featureOptions.filter(option =>
+            value && value.includes(option.value as number)
+          );
 
           return (
             <UISelectSearch
-              multiple
               options={featureOptions}
-              value={selectedValues.length > 0 ? selectedValues : null}
+              value={selectedOptions.length > 0 ? selectedOptions : null}
+              size={ESize.L}
               onChange={(selected) => {
                 if (Array.isArray(selected)) {
-                  onChange(selected.map(s => s.value));
+                  onChange(selected.map(item => item.value));
                 } else {
-                  onChange([]);
+                  onChange(selected ? [selected.value] : []);
                 }
               }}
-              placeholder="Chọn features..."
-              searchable
-              size={ESize.L}
+              onSearch={setSearchQuery}
+              onCreateNew={handleCreateFeature}
+              placeholder="Chọn tính năng"
+              searchable={true}
+              multiple={true}
+              loading={isFetching}
+              noDataText="Không tìm thấy tính năng"
+              showCreateButton={true}
+              createButtonText="Thêm tính năng"
               className="rounded-md border border-gray-300"
             />
           );
