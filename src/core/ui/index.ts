@@ -4,4 +4,5 @@ export * from './UIFormControl';
 export * from './UISingleSelect';
 export * from './UISelectSearch';
 export * from './UITextArea';
+export * from './UIPagination';
 
