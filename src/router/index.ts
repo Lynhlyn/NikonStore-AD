@@ -14,61 +14,67 @@ const routerDashboard = {
 };
 
 const routerBrand = {
-  list: `${routerRoot.main}/brands`,
-  form: `${routerRoot.main}/brands/new`,
-  formEdit: (params: { id: number | string }) => `${routerRoot.main}/brands/${params.id}/edit`,
+  list: '/brands',
+  form: '/brands/new',
+  formEdit: (params: { id: number | string }) => `/brands/${params.id}/edit`,
 };
 
 const routerColor = {
-  list: `${routerRoot.main}/colors`,
-  form: `${routerRoot.main}/colors/new`,
-  formEdit: (params: { id: number | string }) => `${routerRoot.main}/colors/${params.id}/edit`,
+  list: '/colors',
+  form: '/colors/new',
+  formEdit: (params: { id: number | string }) => `/colors/${params.id}/edit`,
 };
 
 const routerCapacity = {
-  list: `${routerRoot.main}/capacities`,
-  form: `${routerRoot.main}/capacities/new`,
-  formEdit: (params: { id: number | string }) => `${routerRoot.main}/capacities/${params.id}/edit`,
+  list: '/capacities',
+  form: '/capacities/new',
+  formEdit: (params: { id: number | string }) => `/capacities/${params.id}/edit`,
 };
 
 const routerCategory = {
-  list: `${routerRoot.main}/categories`,
-  form: `${routerRoot.main}/categories/new`,
-  formEdit: (params: { id: number | string }) => `${routerRoot.main}/categories/${params.id}/edit`,
+  list: '/categories',
+  form: '/categories/new',
+  formEdit: (params: { id: number | string }) => `/categories/${params.id}/edit`,
 };
 
 const routerTag = {
-  list: `${routerRoot.main}/tags`,
-  form: `${routerRoot.main}/tags/new`,
-  formEdit: (params: { id: number | string }) => `${routerRoot.main}/tags/${params.id}/edit`,
+  list: '/tags',
+  form: '/tags/new',
+  formEdit: (params: { id: number | string }) => `/tags/${params.id}/edit`,
 };
 
 const routerFeature = {
-  list: `${routerRoot.main}/features`,
-  form: `${routerRoot.main}/features/new`,
-  formEdit: (params: { id: number | string }) => `${routerRoot.main}/features/${params.id}/edit`,
+  list: '/features',
+  form: '/features/new',
+  formEdit: (params: { id: number | string }) => `/features/${params.id}/edit`,
 };
 
 const routerMaterial = {
-  list: `${routerRoot.main}/materials`,
-  form: `${routerRoot.main}/materials/new`,
-  formEdit: (params: { id: number | string }) => `${routerRoot.main}/materials/${params.id}/edit`,
+  list: '/materials',
+  form: '/materials/new',
+  formEdit: (params: { id: number | string }) => `/materials/${params.id}/edit`,
 };
 
 const routerStrapType = {
-  list: `${routerRoot.main}/strap-types`,
-  form: `${routerRoot.main}/strap-types/new`,
-  formEdit: (params: { id: number | string }) => `${routerRoot.main}/strap-types/${params.id}/edit`,
+  list: '/strap-types',
+  form: '/strap-types/new',
+  formEdit: (params: { id: number | string }) => `/strap-types/${params.id}/edit`,
 };
 
 const routerProduct = {
-  list: `${routerRoot.main}/products`,
-  form: `${routerRoot.main}/products/new`,
-  formEdit: (params: { id: number | string }) => `${routerRoot.main}/products/${params.id}/edit`,
+  list: '/products',
+  form: '/products/new',
+  formEdit: (params: { id: number | string }) => `/products/${params.id}/edit`,
 };
 
 const routerCustomer = {
-  list: `${routerRoot.main}/customers`,
+  list: '/customers',
+};
+
+const routerStaff = {
+  list: '/staff',
+  form: '/staff/new',
+  formEdit: (params: { id: number | string }) => `/staff/${params.id}/edit`,
 };
 
 const routerApp = {
@@ -84,6 +90,7 @@ const routerApp = {
   strapType: routerStrapType,
   product: routerProduct,
   customer: routerCustomer,
+  staff: routerStaff,
 };
 
 export { routerApp };

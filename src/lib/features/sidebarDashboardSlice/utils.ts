@@ -21,7 +21,7 @@ const ListRouteDashboard: IRouterItem[] = [
     routerActive: [
       routerApp.product.list,
       routerApp.product.form,
-      '/main/products/:id/edit',
+      routerApp.product.formEdit({ id: ':id' }),
     ],
     icon: React.createElement(ShoppingBag, { className: "w-5 h-5" }),
     route: routerApp.product.list,
@@ -37,6 +37,20 @@ const ListRouteDashboard: IRouterItem[] = [
     ],
     icon: React.createElement(Users, { className: "w-5 h-5" }),
     route: routerApp.customer.list,
+    type: 'item',
+    visibleRoles: [
+      EUserRole.ADMIN,
+    ],
+  },
+  {
+    name: 'Quản lý nhân viên',
+    routerActive: [
+      routerApp.staff.list,
+      routerApp.staff.form,
+      routerApp.staff.formEdit({ id: ':id' }),
+    ],
+    icon: React.createElement(Users, { className: "w-5 h-5" }),
+    route: routerApp.staff.list,
     type: 'item',
     visibleRoles: [
       EUserRole.ADMIN,
