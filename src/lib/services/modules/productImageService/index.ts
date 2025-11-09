@@ -7,7 +7,7 @@ import type {
   IProductImageResponse,
 } from './type';
 
-const productImage = '/api/admin/v1/product-images';
+const productImage = '/product-images';
 
 export const productImageApi = apiSlice.injectEndpoints({
   endpoints: (build) => ({

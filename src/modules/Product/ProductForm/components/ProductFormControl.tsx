@@ -16,6 +16,7 @@ import { EStatusEnumString } from '@/common/enums/status';
 import type { SelectOption } from '@/core/ui/UISelectSearch/UISelectSearch.types';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useDebounce } from '@/common/hooks';
 
 const NameInput = () => {
   const { control, formState: { errors } } = useProductFormContext();
@@ -308,12 +309,13 @@ const StrapTypeInput = () => {
 const TagsInput = () => {
   const { control, formState: { errors }, setValue, getValues } = useProductFormContext();
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const { data: tagsData, isFetching, refetch } = useFetchTagsQuery({
     page: 0,
     size: 100,
     isAll: true,
-    keyword: searchQuery || undefined,
+    keyword: debouncedSearchQuery || undefined,
   });
 
   const [addTag] = useAddTagMutation();
@@ -394,12 +396,13 @@ const TagsInput = () => {
 const FeaturesInput = () => {
   const { control, formState: { errors }, setValue, getValues } = useProductFormContext();
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const { data: featuresData, isFetching, refetch } = useFetchFeaturesQuery({
     page: 0,
     size: 100,
     isAll: true,
-    keyword: searchQuery || undefined,
+    keyword: debouncedSearchQuery || undefined,
   });
 
   const [addFeature] = useAddFeatureMutation();

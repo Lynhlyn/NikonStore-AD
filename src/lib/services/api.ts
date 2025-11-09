@@ -27,6 +27,18 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
+const uploadBaseQuery = fetchBaseQuery({
+  baseUrl: `${process.env.NEXT_PUBLIC_API_UPLOAD_URL}/api/upload`,
+  prepareHeaders: (headers, { getState }) => {
+    const token = (getState() as RootState).auth.token;
+
+    if (token?.accessToken) {
+      headers.set("Authorization", `Bearer ${token.accessToken}`);
+    }
+    return headers;
+  },
+});
+
 const mutex = new Mutex();
 
 const baseQueryWithInterceptor: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
@@ -36,12 +48,15 @@ const baseQueryWithInterceptor: BaseQueryFn<string | FetchArgs, unknown, FetchBa
 ) => {
   await mutex.waitForUnlock();
 
-  let result = await baseQuery(args, api, extraOptions);
+  const isUploadEndpoint = api.endpoint === 'uploadImages' || api.endpoint === 'uploadImage';
+  const queryFn = isUploadEndpoint ? uploadBaseQuery : baseQuery;
 
-  if (result.error && (result.error.status === 401 || result.error.status === 403) && (api.endpoint !== "login")) {
+  let result = await queryFn(args, api, extraOptions);
+
+  if (result.error && (result.error.status === 401 || result.error.status === 403) && (api.endpoint !== "login" && api.endpoint !== "register")) {
     if (mutex.isLocked()) {
       await mutex.waitForUnlock();
-      result = await baseQuery(args, api, extraOptions);
+      result = await queryFn(args, api, extraOptions);
     } else {
       const release = await mutex.acquire();
       const authToken = TokenService.getToken();
@@ -68,7 +83,7 @@ const baseQueryWithInterceptor: BaseQueryFn<string | FetchArgs, unknown, FetchBa
             }
           });
 
-          result = await baseQuery(args, api, extraOptions);
+          result = await queryFn(args, api, extraOptions);
         } else {
           api.dispatch({ type: "auth/setLogout" });
         }
@@ -93,7 +108,7 @@ function isHydrateAction(action: Action): action is Action<typeof REHYDRATE> & {
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithInterceptor,
-  tagTypes: [],
+  tagTypes: ['Customer', 'ShippingAddress', 'CustomerVoucher', 'TemplateEmail'],
   extractRehydrationInfo(action, { reducerPath }): any {
     if (isHydrateAction(action)) {
       if (action.key === 'key used with redux-persist') {

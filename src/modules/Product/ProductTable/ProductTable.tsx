@@ -3,7 +3,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/core/shadcn/components/ui/table";
 import { Button } from "@/core/shadcn/components/ui/button";
 import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
-import { SquarePen, ArrowUp, ArrowDown, Plus, Trash2 } from "lucide-react";
+import { SquarePen, ArrowUp, ArrowDown, Plus, Trash2, Eye } from "lucide-react";
 import { useAppNavigation } from "@/common/hooks";
 import { useFetchProductsQuery, useDeleteProductMutation } from "@/lib/services/modules/productService";
 import { useFetchBrandsQuery } from "@/lib/services/modules/brandService";
@@ -288,6 +288,15 @@ const ProductTable = () => {
         const id = row.original.id;
         return (
           <div className="flex gap-2 justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push(getRouteWithRole(`/products/${id}/product-details`))}
+              className="text-blue-600 hover:text-blue-700 hover:border-blue-300"
+              title="Xem chi tiết sản phẩm"
+            >
+              <Eye className="w-4 h-4" />
+            </Button>
             <Button
               variant="outline"
               size="sm"
