@@ -1,0 +1,2 @@
+export { CustomerTable } from './CustomerTable';
+

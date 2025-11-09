@@ -67,6 +67,10 @@ const routerProduct = {
   formEdit: (params: { id: number | string }) => `${routerRoot.main}/products/${params.id}/edit`,
 };
 
+const routerCustomer = {
+  list: `${routerRoot.main}/customers`,
+};
+
 const routerApp = {
   dashboard: routerDashboard,
   auth: routerAuth,
@@ -79,6 +83,7 @@ const routerApp = {
   material: routerMaterial,
   strapType: routerStrapType,
   product: routerProduct,
+  customer: routerCustomer,
 };
 
 export { routerApp };

@@ -1,0 +1,2 @@
+export { CustomerDetailModal } from './CustomerDetailModal';
+

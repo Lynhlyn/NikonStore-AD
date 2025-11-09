@@ -1,0 +1,2 @@
+export { BlockCustomerModal } from './BlockCustomerModal';
+
