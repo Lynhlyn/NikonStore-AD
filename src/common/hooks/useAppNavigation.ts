@@ -29,6 +29,26 @@ const useAppNavigation = () => {
   const getRouteWithRole = (url: string, params: Record<string, string> = {}, query: Record<string, string> = {}) => {
     const pathRole = pathname.split('/')[1];
     if (pathRole && isValidRolePathName(pathRole)) {
+      let processedUrl = url;
+      
+      if (params && Object.keys(params).length > 0) {
+        processedUrl = Object.keys(params).reduce((acc, key) => {
+          return acc.replace(new RegExp(`:${key}`, 'g'), params[key]);
+        }, processedUrl);
+      }
+
+      if (query && Object.keys(query).length > 0) {
+        processedUrl = Object.keys(query).reduce((acc, key, index) => {
+          return `${acc}${index === 0 ? '?' : '&'}${key}=${query[key]}`;
+        }, processedUrl);
+      }
+
+      if (processedUrl.startsWith(`/${pathRole}`)) {
+        return processedUrl;
+      }
+
+      return `/${pathRole}${processedUrl}`;
+    } else {
       const routerWithParams = Object.keys(params).reduce((acc, key) => {
         return acc.replace(new RegExp(`:${key}`, 'g'), params[key]);
       }, url);
@@ -37,9 +57,7 @@ const useAppNavigation = () => {
         return `${acc}${index === 0 ? '?' : '&'}${key}=${query[key]}`;
       }, routerWithParams);
 
-      return `/${pathRole}${routerWithQuery}`;
-    } else {
-      return '/admin';
+      return routerWithQuery.startsWith('/main') ? routerWithQuery : `/main${routerWithQuery}`;
     }
   };
 

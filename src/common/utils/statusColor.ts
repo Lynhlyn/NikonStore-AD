@@ -30,3 +30,16 @@ export const getStatusDisplay = (status: EStatusEnumString) => {
   }
 };
 
+export const getStatusColor = (status: EStatusEnumString): string => {
+  switch (status) {
+    case EStatusEnumString.ACTIVE:
+      return 'text-green-600';
+    case EStatusEnumString.INACTIVE:
+      return 'text-gray-600';
+    case EStatusEnumString.DELETED:
+      return 'text-red-600';
+    default:
+      return 'text-gray-600';
+  }
+};
+

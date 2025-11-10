@@ -77,6 +77,13 @@ const routerStaff = {
   formEdit: (params: { id: number | string }) => `/staff/${params.id}/edit`,
 };
 
+const routerVoucher = {
+  list: '/vouchers',
+  form: '/vouchers/new',
+  formEdit: (params: { id: number | string }) => `/vouchers/${params.id}/edit`,
+  formView: (params: { id: number | string }) => `/vouchers/${params.id}/view`,
+};
+
 const routerApp = {
   dashboard: routerDashboard,
   auth: routerAuth,
@@ -91,6 +98,7 @@ const routerApp = {
   product: routerProduct,
   customer: routerCustomer,
   staff: routerStaff,
+  voucher: routerVoucher,
 };
 
 export { routerApp };

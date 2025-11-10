@@ -22,7 +22,7 @@ export const customerApi = apiSlice.injectEndpoints({
       createdToDate?: string;
     }>({
       query: (queryParams) => {
-        const params = { ...queryParams };
+        const params: any = { ...queryParams };
         if (params.status !== undefined && params.status !== 'all') {
           if (params.status === 1 || params.status === '1') {
             params.status = 'ACTIVE';
@@ -31,6 +31,12 @@ export const customerApi = apiSlice.injectEndpoints({
           }
         } else if (params.status === 'all') {
           delete params.status;
+        }
+
+        if (params.keyword) {
+          params.fullName = params.keyword;
+          params.email = params.keyword;
+          params.phoneNumber = params.keyword;
         }
 
         Object.keys(params).forEach(key => {

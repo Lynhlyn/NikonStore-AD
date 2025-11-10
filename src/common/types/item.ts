@@ -13,7 +13,7 @@ export interface IRouterItem {
   query?: string[];
   type?: 'item' | 'group';
   routerActive?: string[];
-  icon?: React.ReactNode | string;
+  icon?: string | React.ReactNode;
   countNotification?: number;
   subsRoute?: IRouterItem[];
   visibleRoles?: EUserRole[];

@@ -1,2 +1,1 @@
-export * from './AppSideBarItem';
-
+export { AppSideBarItem } from './AppSideBarItem';

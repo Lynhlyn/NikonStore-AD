@@ -2,14 +2,12 @@ import { EUserRole } from '@/common/enums';
 import { IRouterItem } from '@/common/types/item';
 import { routerApp } from '@/router';
 import { ISidebarDashboardGroup } from './type';
-import React from 'react';
-import { Home, Package, Circle, ShoppingBag, Users } from 'lucide-react';
 
 const ListRouteDashboard: IRouterItem[] = [
   {
     name: 'Trang chủ',
     routerActive: [routerApp.dashboard.dashboard],
-    icon: React.createElement(Home, { className: "w-5 h-5" }),
+    icon: 'Home',
     route: routerApp.dashboard.dashboard,
     type: 'item',
     visibleRoles: [
@@ -23,7 +21,7 @@ const ListRouteDashboard: IRouterItem[] = [
       routerApp.product.form,
       routerApp.product.formEdit({ id: ':id' }),
     ],
-    icon: React.createElement(ShoppingBag, { className: "w-5 h-5" }),
+    icon: 'ShoppingBag',
     route: routerApp.product.list,
     type: 'item',
     visibleRoles: [
@@ -35,7 +33,7 @@ const ListRouteDashboard: IRouterItem[] = [
     routerActive: [
       routerApp.customer.list,
     ],
-    icon: React.createElement(Users, { className: "w-5 h-5" }),
+    icon: 'Users',
     route: routerApp.customer.list,
     type: 'item',
     visibleRoles: [
@@ -49,8 +47,23 @@ const ListRouteDashboard: IRouterItem[] = [
       routerApp.staff.form,
       routerApp.staff.formEdit({ id: ':id' }),
     ],
-    icon: React.createElement(Users, { className: "w-5 h-5" }),
+    icon: 'Users',
     route: routerApp.staff.list,
+    type: 'item',
+    visibleRoles: [
+      EUserRole.ADMIN,
+    ],
+  },
+  {
+    name: 'Quản lý voucher',
+    routerActive: [
+      routerApp.voucher.list,
+      routerApp.voucher.form,
+      routerApp.voucher.formEdit({ id: ':id' }),
+      routerApp.voucher.formView({ id: ':id' }),
+    ],
+    icon: 'Gift',
+    route: routerApp.voucher.list,
     type: 'item',
     visibleRoles: [
       EUserRole.ADMIN,
@@ -61,30 +74,30 @@ const ListRouteDashboard: IRouterItem[] = [
     routerActive: [
       routerApp.brand.list,
       routerApp.brand.form,
-      '/main/brands/:id/edit',
+      routerApp.brand.formEdit({ id: ':id' }),
       routerApp.color.list,
       routerApp.color.form,
-      '/main/colors/:id/edit',
+      routerApp.color.formEdit({ id: ':id' }),
       routerApp.capacity.list,
       routerApp.capacity.form,
-      '/main/capacities/:id/edit',
+      routerApp.capacity.formEdit({ id: ':id' }),
       routerApp.category.list,
       routerApp.category.form,
-      '/main/categories/:id/edit',
+      routerApp.category.formEdit({ id: ':id' }),
       routerApp.tag.list,
       routerApp.tag.form,
-      '/main/tags/:id/edit',
+      routerApp.tag.formEdit({ id: ':id' }),
       routerApp.feature.list,
       routerApp.feature.form,
-      '/main/features/:id/edit',
+      routerApp.feature.formEdit({ id: ':id' }),
       routerApp.material.list,
       routerApp.material.form,
-      '/main/materials/:id/edit',
+      routerApp.material.formEdit({ id: ':id' }),
       routerApp.strapType.list,
       routerApp.strapType.form,
-      '/main/strap-types/:id/edit',
+      routerApp.strapType.formEdit({ id: ':id' }),
     ],
-    icon: React.createElement(Package, { className: "w-5 h-5" }),
+    icon: 'ProductAttributeManagement',
     type: 'group',
     visibleRoles: [
       EUserRole.ADMIN,
@@ -96,10 +109,10 @@ const ListRouteDashboard: IRouterItem[] = [
         routerActive: [
           routerApp.brand.list,
           routerApp.brand.form,
-          '/main/brands/:id/edit',
+          routerApp.brand.formEdit({ id: ':id' }),
         ],
         type: 'item',
-        icon: React.createElement(Circle, { className: "w-3 h-3" }),
+        icon: 'Circle',
       },
       {
         name: 'Quản lý màu sắc',
@@ -107,10 +120,10 @@ const ListRouteDashboard: IRouterItem[] = [
         routerActive: [
           routerApp.color.list,
           routerApp.color.form,
-          '/main/colors/:id/edit',
+          routerApp.color.formEdit({ id: ':id' }),
         ],
         type: 'item',
-        icon: React.createElement(Circle, { className: "w-3 h-3" }),
+        icon: 'Circle',
       },
       {
         name: 'Quản lý dung tích',
@@ -118,10 +131,10 @@ const ListRouteDashboard: IRouterItem[] = [
         routerActive: [
           routerApp.capacity.list,
           routerApp.capacity.form,
-          '/main/capacities/:id/edit',
+          routerApp.capacity.formEdit({ id: ':id' }),
         ],
         type: 'item',
-        icon: React.createElement(Circle, { className: "w-3 h-3" }),
+        icon: 'Circle',
       },
       {
         name: 'Quản lý danh mục',
@@ -129,10 +142,10 @@ const ListRouteDashboard: IRouterItem[] = [
         routerActive: [
           routerApp.category.list,
           routerApp.category.form,
-          '/main/categories/:id/edit',
+          routerApp.category.formEdit({ id: ':id' }),
         ],
         type: 'item',
-        icon: React.createElement(Circle, { className: "w-3 h-3" }),
+        icon: 'Circle',
       },
       {
         name: 'Quản lý tag',
@@ -140,10 +153,10 @@ const ListRouteDashboard: IRouterItem[] = [
         routerActive: [
           routerApp.tag.list,
           routerApp.tag.form,
-          '/main/tags/:id/edit',
+          routerApp.tag.formEdit({ id: ':id' }),
         ],
         type: 'item',
-        icon: React.createElement(Circle, { className: "w-3 h-3" }),
+        icon: 'Circle',
       },
       {
         name: 'Quản lý tính năng',
@@ -151,10 +164,10 @@ const ListRouteDashboard: IRouterItem[] = [
         routerActive: [
           routerApp.feature.list,
           routerApp.feature.form,
-          '/main/features/:id/edit',
+          routerApp.feature.formEdit({ id: ':id' }),
         ],
         type: 'item',
-        icon: React.createElement(Circle, { className: "w-3 h-3" }),
+        icon: 'Circle',
       },
       {
         name: 'Quản lý chất liệu',
@@ -162,10 +175,10 @@ const ListRouteDashboard: IRouterItem[] = [
         routerActive: [
           routerApp.material.list,
           routerApp.material.form,
-          '/main/materials/:id/edit',
+          routerApp.material.formEdit({ id: ':id' }),
         ],
         type: 'item',
-        icon: React.createElement(Circle, { className: "w-3 h-3" }),
+        icon: 'Circle',
       },
       {
         name: 'Quản lý loại dây đeo',
@@ -173,10 +186,10 @@ const ListRouteDashboard: IRouterItem[] = [
         routerActive: [
           routerApp.strapType.list,
           routerApp.strapType.form,
-          '/main/strap-types/:id/edit',
+          routerApp.strapType.formEdit({ id: ':id' }),
         ],
         type: 'item',
-        icon: React.createElement(Circle, { className: "w-3 h-3" }),
+        icon: 'Circle',
       },
     ],
   },

@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { IAppSideBarGroupProps } from "./AppSideBarGroup.type";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/core/shadcn/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 import clsx from "clsx";
@@ -7,6 +8,9 @@ import { cn } from "@/core/shadcn/lib/utils";
 import { AppSideBarItem } from "../AppSideBarItem";
 import { useCheckRouter } from "@/common/hooks/useCheckRouter";
 import { usePathname } from "next/navigation";
+import { isValidIcon } from "@/common/utils/icon";
+import { renderIcon } from "@/common/LayoutRootDashboard/utils/utils";
+import { addRolePrefixToRoutes, extractRoleFromPath } from "@/common/utils/prependRoleToRoutes";
 import { useAppSelector } from '@/lib/hook/redux';
 import { RootState } from '@/lib/services/store';
 import { 
@@ -25,11 +29,12 @@ import Link from "next/link";
 
 const AppSideBarGroup: React.FC<IAppSideBarGroupProps> = (props) => {
     const pathName = usePathname();
+    const role = extractRoleFromPath(pathName);
     const isOpenSidebar = useAppSelector<RootState, boolean>(
         (state) => state.app.isOpenSidebar
     );
 
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = React.useState(false);
     const {
         route,
     } = props;
@@ -38,12 +43,12 @@ const AppSideBarGroup: React.FC<IAppSideBarGroupProps> = (props) => {
     
     const appSideBarClassName = twMerge(
         clsx(
-            cn("p-3 flex items-center gap-3 bg-white text-[#A5A5A5] hover:bg-[#F6F6F6] hover:text-[#333333] cursor-pointer transition-all duration-200"),
+            cn("relative px-4 py-3 flex items-center gap-3 bg-slate-800/50 text-slate-200 hover:text-white hover:bg-slate-700 cursor-pointer transition-all duration-200 rounded-lg group font-medium"),
             {
-                "bg-[#F6F6F6] text-[#333333] border-l-4 border-[#4cd596]": isActived(route)
+                "bg-blue-600 text-white shadow-lg shadow-blue-500/40 font-semibold": isActived(route)
             },
             {
-                "justify-center": !isOpenSidebar
+                "justify-center px-3": !isOpenSidebar
             }
         )
     );
@@ -51,16 +56,18 @@ const AppSideBarGroup: React.FC<IAppSideBarGroupProps> = (props) => {
     useEffect(() => {
         if (isActived(route)) {
             setIsOpen(true);
+        } else {
+            setIsOpen(false);
         }
-    }, [pathName, route, isActived]);
+    }, [pathName]);
 
-    const iconElement = typeof route.icon === 'string' ? (
-        <span>{route.icon}</span>
-    ) : (
-        route.icon
-    );
+    const iconElement = route.icon && renderIcon(route.icon);
 
-    const visibleSubRoutes = route.subsRoute || [];
+    const visibleSubRoutes = route.subsRoute?.filter((subItem) => {
+        const subItemWithRole = role ? addRolePrefixToRoutes([subItem], role) : [subItem];
+        const currentSubRouteItem = subItemWithRole[0];
+        return !currentSubRouteItem.visibleRoles || currentSubRouteItem.visibleRoles.includes(role);
+    }) || [];
 
     // Khi sidebar đóng, hiển thị dropdown menu
     if (!isOpenSidebar) {
@@ -71,34 +78,33 @@ const AppSideBarGroup: React.FC<IAppSideBarGroupProps> = (props) => {
                         <TooltipTrigger asChild>
                             <DropdownMenuTrigger asChild>
                                 <div className={appSideBarClassName}>
-                                    {iconElement && <div className="w-5 h-5 shrink-0 flex items-center justify-center">{iconElement}</div>}
+                                    {iconElement}
                                 </div>
                             </DropdownMenuTrigger>
                         </TooltipTrigger>
-                        <TooltipContent side="right" className="ml-2">
-                            <p>{route.name}</p>
+                        <TooltipContent side="right" className="ml-2 bg-slate-700 text-white border border-slate-600 shadow-xl">
+                            <p className="font-medium text-sm">{route.name}</p>
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
-                <DropdownMenuContent side="right" align="start" className="ml-2 min-w-48">
+                <DropdownMenuContent side="right" align="start" className="ml-2 min-w-48 bg-slate-700 border border-slate-600 text-white shadow-2xl rounded-lg p-1.5">
                     {visibleSubRoutes.map((subItem, subIndex) => {
-                        const subIconElement = typeof subItem.icon === 'string' ? (
-                            <span>{subItem.icon}</span>
-                        ) : (
-                            subItem.icon
-                        );
+                        const subItemWithRole = role ? addRolePrefixToRoutes([subItem], role) : [subItem];
+                        const currentSubRouteItem = subItemWithRole[0];
                         
                         return (
                             <DropdownMenuItem key={subIndex.toString()} asChild>
                                 <Link 
-                                    href={subItem.route || "#"}
-                                    className="flex items-center gap-2 w-full cursor-pointer"
+                                    href={currentSubRouteItem.route || "#"}
+                                    className="flex items-center gap-2.5 w-full cursor-pointer px-3 py-2.5 rounded-md hover:bg-slate-600 transition-colors duration-150 text-slate-200 hover:text-white font-medium"
                                 >
-                                    {subIconElement && <div className="w-4 h-4 shrink-0 flex items-center justify-center">{subIconElement}</div>}
-                                    <span>{subItem.name}</span>
-                                    {subItem.countNotification && (
-                                        <div className="w-4 h-4 bg-red-500 text-[9px] text-white rounded-full flex items-center justify-center ml-auto">
-                                            {subItem.countNotification}
+                                    <div className="text-slate-300">
+                                        {currentSubRouteItem.icon && renderIcon(currentSubRouteItem.icon)}
+                                    </div>
+                                    <span className="text-sm">{currentSubRouteItem.name}</span>
+                                    {currentSubRouteItem.countNotification && (
+                                        <div className="w-4 h-4 bg-red-500 text-[9px] text-white rounded-full flex items-center justify-center ml-auto font-bold shadow-md">
+                                            {currentSubRouteItem.countNotification}
                                         </div>
                                     )}
                                 </Link>
@@ -110,42 +116,62 @@ const AppSideBarGroup: React.FC<IAppSideBarGroupProps> = (props) => {
         );
     }
 
-    // Khi sidebar mở, hiển thị collapsible
+    // Khi sidebar mở, hiển thị collapsible như bình thường
     return (
-        <div className="w-full space-y-2">
-            <div 
-                className={appSideBarClassName}
-                onClick={() => setIsOpen(!isOpen)}
-            >
-                {iconElement && <div className="w-5 h-5 shrink-0 flex items-center justify-center">{iconElement}</div>}
-                <div className="flex flex-1 font-medium">
-                    <span>{route.name}</span>
-                </div>
-                {route.countNotification && (
-                    <div className="w-5 h-5 bg-red-500 text-[10px] text-white rounded-full flex items-center justify-center shrink-0">
-                        {route.countNotification}
+        <Collapsible
+            open={isOpen}
+            onOpenChange={setIsOpen}
+            className="w-full space-y-2"
+        >
+            <CollapsibleTrigger asChild>
+                <div className={appSideBarClassName}>
+                    <div className={cn("flex-shrink-0 transition-all duration-200", {
+                        "text-blue-200": isActived(route),
+                        "text-slate-300 group-hover:text-white": !isActived(route)
+                    })}>
+                        {iconElement}
                     </div>
-                )}
-                <ChevronDown
-                    className={`h-4 w-4 transform duration-300 shrink-0 ${isOpen ? 'rotate-180' : ''}`}
-                />
-            </div>
-            {isOpen && (
-                <div className="space-y-2 px-2 flex flex-col gap-[2px]">
-                    {visibleSubRoutes.map((subItem, subIndex) => {
-                        if (subItem?.type === 'item') {
-                            return (
-                                <AppSideBarItem key={subIndex.toString()}
-                                    route={subItem}
-                                />
-                            );
-                        }
-                        // Nested group không được hỗ trợ trong implementation này
-                        return null;
-                    })}
+                    <div className="flex flex-1 text-sm">
+                        <span className="truncate">{route.name}</span>
+                    </div>
+                    {route.countNotification && (
+                        <div className="w-5 h-5 bg-red-500 text-[10px] text-white rounded-full flex items-center justify-center shrink-0 font-bold shadow-lg">
+                            {route.countNotification}
+                        </div>
+                    )}
+                    <ChevronDown
+                        className={cn("h-4 w-4 transform duration-200 shrink-0 transition-all", {
+                            "rotate-180 text-blue-200": isOpen,
+                            "text-slate-300 group-hover:text-white": !isOpen
+                        })}
+                    />
+                    {isActived(route) && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-blue-400 rounded-r-full shadow-lg shadow-blue-400/60"></div>
+                    )}
                 </div>
-            )}
-        </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-1 px-2 flex flex-col gap-1 mt-1 data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up overflow-hidden">
+                {visibleSubRoutes.map((subItem, subIndex) => {
+                    const subItemWithRole = role ? addRolePrefixToRoutes([subItem], role) : [subItem];
+                    const currentSubRouteItem = subItemWithRole[0];
+
+                    if (subItem?.type === 'item') {
+                        return (
+                            <AppSideBarItem key={subIndex.toString()}
+                                route={currentSubRouteItem}
+                                isSubItem={true}
+                            />
+                        );
+                    }
+                    return (
+                        <AppSideBarGroup
+                            route={currentSubRouteItem}
+                            key={subIndex.toString()} 
+                        />
+                    );
+                })}
+            </CollapsibleContent>
+        </Collapsible>
     );
 };
 
