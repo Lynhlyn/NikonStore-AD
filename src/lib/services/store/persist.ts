@@ -7,6 +7,7 @@ import type { Storage } from 'redux-persist';
 import createCookieRoleStorage from './cookieAuthStorage';
 import appSlice from '@/lib/features/appSlice';
 import sidebarDashboardSlice from '@/lib/features/sidebarDashboardSlice';
+import userSlice from '@/lib/features/userSlice';
 
 const persist = (key: string, storage: Storage, reducer: Reducer) => persistReducer(
   {
@@ -28,5 +29,6 @@ export default combineReducers({
   app: persist('app', localStorage, appSlice),
   auth: persist('_SR', cookieRoleStorage, authSlice),
   sidebarDashboard: sidebarDashboardSlice,
+  user: userSlice,
 });
 

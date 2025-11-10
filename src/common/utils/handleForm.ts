@@ -69,3 +69,20 @@ export const getErrors = <T extends AnyObject>(
   return 'Đã xảy ra lỗi';
 };
 
+export const getSimpleError = (error: any): string => {
+  if (error.data?.message && typeof error.data.message === 'object') {
+    const firstEntry = Object.entries(error.data.message)[0];
+    return firstEntry ? (firstEntry[1] as string) : 'Đã xảy ra lỗi';
+  }
+
+  if (error.data?.message && typeof error.data.message === 'string') {
+    return error.data.message;
+  }
+
+  if (error.message && typeof error.message === 'string') {
+    return error.message;
+  }
+
+  return 'Đã xảy ra lỗi';
+};
+
