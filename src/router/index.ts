@@ -84,6 +84,21 @@ const routerVoucher = {
   formView: (params: { id: number | string }) => `/vouchers/${params.id}/view`,
 };
 
+const routerOrder = {
+  online: '/order/online',
+  offline: '/order/offline',
+  history: '/order/history',
+  detail: (params: { id: number | string }) => `/order/${params.id}/detail`,
+  statusHistory: '/order/status-history',
+};
+
+const routerTemplateEmail = {
+  list: '/template-emails',
+  new: '/template-emails/new',
+  edit: (params: { id: number | string }) => `/template-emails/${params.id}/edit`,
+  view: (params: { id: number | string }) => `/template-emails/${params.id}/view`,
+};
+
 const routerApp = {
   dashboard: routerDashboard,
   auth: routerAuth,
@@ -99,6 +114,8 @@ const routerApp = {
   customer: routerCustomer,
   staff: routerStaff,
   voucher: routerVoucher,
+  order: routerOrder,
+  templateEmail: routerTemplateEmail,
 };
 
 export { routerApp };
