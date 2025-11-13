@@ -70,6 +70,67 @@ const ListRouteDashboard: IRouterItem[] = [
     ],
   },
   {
+    name: 'Quản lý template email',
+    routerActive: [
+      routerApp.templateEmail.list,
+      routerApp.templateEmail.new,
+      routerApp.templateEmail.edit({ id: ':id' }),
+      routerApp.templateEmail.view({ id: ':id' }),
+    ],
+    icon: 'Mail',
+    route: routerApp.templateEmail.list,
+    type: 'item',
+    visibleRoles: [
+      EUserRole.ADMIN,
+    ],
+  },
+  {
+    name: 'Quản lý đơn hàng',
+    routerActive: [
+      routerApp.order.online,
+      routerApp.order.offline,
+      routerApp.order.history,
+      routerApp.order.detail({ id: ':id' }),
+      routerApp.order.statusHistory,
+    ],
+    icon: 'ShoppingCart',
+    type: 'group',
+    visibleRoles: [
+      EUserRole.ADMIN,
+    ],
+    subsRoute: [
+      {
+        name: 'Đơn hàng online',
+        route: routerApp.order.online,
+        routerActive: [
+          routerApp.order.online,
+          routerApp.order.detail({ id: ':id' }),
+        ],
+        type: 'item',
+        icon: 'Circle',
+      },
+      {
+        name: 'Đơn hàng offline',
+        route: routerApp.order.offline,
+        routerActive: [
+          routerApp.order.offline,
+          routerApp.order.detail({ id: ':id' }),
+        ],
+        type: 'item',
+        icon: 'Circle',
+      },
+      {
+        name: 'Lịch sử đơn hàng',
+        route: routerApp.order.history,
+        routerActive: [
+          routerApp.order.history,
+        ],
+        type: 'item',
+        icon: 'Circle',
+      },
+    ],
+  },
+  {
     name: 'Quản lý thuộc tính',
     routerActive: [
       routerApp.brand.list,
