@@ -84,6 +84,13 @@ const routerVoucher = {
   formView: (params: { id: number | string }) => `/vouchers/${params.id}/view`,
 };
 
+const routerPromotion = {
+  list: '/promotions',
+  form: '/promotions/new',
+  formEdit: (params: { id: number | string }) => `/promotions/${params.id}/edit`,
+  formView: (params: { id: number | string }) => `/promotions/${params.id}/view`,
+};
+
 const routerOrder = {
   online: '/order/online',
   offline: '/order/offline',
@@ -114,6 +121,7 @@ const routerApp = {
   customer: routerCustomer,
   staff: routerStaff,
   voucher: routerVoucher,
+  promotion: routerPromotion,
   order: routerOrder,
   templateEmail: routerTemplateEmail,
 };
