@@ -28,7 +28,12 @@ export interface ProductDetail {
   productName: string;
   productId: number;
   color?: Color;
+  colorId?: number;
+  colorName?: string;
   capacity?: Capacity;
+  capacityId?: number;
+  capacityName?: string;
+  colorImageUrl?: string;
   price: number;
   status: EStatusEnumString;
   promotionId?: number;

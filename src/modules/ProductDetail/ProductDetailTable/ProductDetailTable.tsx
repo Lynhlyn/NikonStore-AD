@@ -401,10 +401,10 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
             {productDetails.length > 0 ? (
               productDetails.map((detail) => {
                 const color = detail.color;
-                const colorName = color?.name || '-';
+                const colorName = color?.name || detail.colorName || '-';
                 const hexCode = color?.hexCode || '#000000';
                 const capacity = detail.capacity;
-                const capacityName = capacity?.name || '-';
+                const capacityName = capacity?.name || detail.capacityName || '-';
                 return (
                   <TableRow key={detail.id} className="hover:bg-gray-50">
                     <TableCell className="text-gray-900 text-sm py-4">
@@ -428,7 +428,34 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
                       </div>
                     </TableCell>
                     <TableCell className="text-gray-900 text-sm py-4">
-                      <div className="text-left">
+                      <div className="text-left flex items-center gap-2">
+                        <div className="relative">
+                          {detail.colorImageUrl ? (
+                            <img
+                              src={detail.colorImageUrl}
+                              alt={`${detail.productName} - ${colorName}`}
+                              className="w-16 h-16 object-cover rounded border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
+                              onClick={() => {
+                                setSelectedColorId(detail.colorId || null);
+                                setIsImageModalOpen(true);
+                              }}
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  const fallback = parent.querySelector('.image-placeholder') as HTMLElement;
+                                  if (fallback) fallback.style.display = 'flex';
+                                }
+                              }}
+                            />
+                          ) : null}
+                          <div 
+                            className={`image-placeholder w-16 h-16 items-center justify-center bg-gray-100 rounded border border-gray-200 ${detail.colorImageUrl ? 'hidden' : 'flex'}`}
+                          >
+                            <ImageIcon className="w-6 h-6 text-gray-400" />
+                          </div>
+                        </div>
                         <Button
                           variant="outline"
                           size="sm"
@@ -550,4 +577,5 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
 };
 
 export default ProductDetailTable;
+
 

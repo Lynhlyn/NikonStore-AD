@@ -91,6 +91,7 @@ const renderIcon = (icon: React.ReactNode) => {
     case 'CustomerManagement':
       return <UserCheck className="w-5 h-5" />;
     case 'OrderManagement':
+    case 'ShoppingCart':
       return <ShoppingCart className="w-5 h-5" />;
     case 'POS':
       return <Store className="w-5 h-5" />;
