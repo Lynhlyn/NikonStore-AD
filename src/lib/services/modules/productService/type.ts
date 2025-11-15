@@ -1,6 +1,6 @@
 import { EStatusEnumString } from '@/common/enums/status';
 import { IListQuery } from '@/common/types/query';
-import type { ProductImage } from '../productImageService/type';
+import type { ColorImage } from '../colorImageService/type';
 
 export interface Brand {
   id: number;
@@ -48,7 +48,7 @@ export interface Product {
   status: EStatusEnumString;
   tags?: Tag[];
   features?: Feature[];
-  images?: ProductImage[];
+  colorImages?: ColorImage[];
   createdAt?: string;
   updatedAt?: string;
 }

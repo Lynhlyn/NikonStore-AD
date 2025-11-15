@@ -18,7 +18,7 @@ import { parseAsInteger, parseAsString, useQueryStates } from 'nuqs';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmModal } from '@/common/components/ConfirmModal';
-import { ProductImageGalleryModal } from '@/common/components/ProductImageGalleryModal';
+import { ColorImageGalleryModal } from '@/common/components/ColorImageGalleryModal';
 
 interface ProductDetailTableProps {
   productId: number;
@@ -30,6 +30,7 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedDetailId, setSelectedDetailId] = useState<number | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
 
   if (!productId || isNaN(productId)) {
     return (
@@ -319,14 +320,6 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
         </div>
         <div className="flex gap-3">
           <Button
-            variant="outline"
-            className="border-blue-500 text-blue-500 hover:bg-blue-50"
-            onClick={() => setIsImageModalOpen(true)}
-          >
-            <ImageIcon className="w-4 h-4 mr-2" />
-            Quản lý ảnh sản phẩm
-          </Button>
-          <Button
             onClick={() => router.push(getRouteWithRole(`/products/${productId}/product-details/new`))}
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -363,6 +356,11 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
               <TableHead className="text-gray-700 font-semibold text-sm">
                 <div className="flex items-center text-left">
                   Màu sắc
+                </div>
+              </TableHead>
+              <TableHead className="text-gray-700 font-semibold text-sm">
+                <div className="flex items-center text-left">
+                  Ảnh
                 </div>
               </TableHead>
               <TableHead className="text-gray-700 font-semibold text-sm">
@@ -430,6 +428,21 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
                       </div>
                     </TableCell>
                     <TableCell className="text-gray-900 text-sm py-4">
+                      <div className="text-left">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedColorId(detail.colorId || null);
+                            setIsImageModalOpen(true);
+                          }}
+                          title="Quản lý ảnh"
+                        >
+                          <ImageIcon className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-gray-900 text-sm py-4">
                       <div className="text-left">{capacityName}</div>
                     </TableCell>
                     <TableCell className="text-gray-900 text-sm py-4">
@@ -467,7 +480,7 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={9} className="h-24 text-center text-gray-500">
+                <TableCell colSpan={10} className="h-24 text-center text-gray-500">
                   Không có dữ liệu sản phẩm chi tiết cho sản phẩm này.
                 </TableCell>
               </TableRow>
@@ -520,12 +533,18 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
         cancelText="Hủy"
       />
 
-      <ProductImageGalleryModal
-        isOpen={isImageModalOpen}
-        onClose={() => setIsImageModalOpen(false)}
-        productId={productId}
-        onSuccess={() => refetch()}
-      />
+      {selectedColorId && (
+        <ColorImageGalleryModal
+          isOpen={isImageModalOpen}
+          onClose={() => {
+            setIsImageModalOpen(false);
+            setSelectedColorId(null);
+          }}
+          productId={productId}
+          colorId={selectedColorId}
+          onSuccess={() => refetch()}
+        />
+      )}
     </div>
   );
 };
