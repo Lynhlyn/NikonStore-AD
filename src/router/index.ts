@@ -106,6 +106,10 @@ const routerTemplateEmail = {
   view: (params: { id: number | string }) => `/template-emails/${params.id}/view`,
 };
 
+const routerPos = {
+  page: '/pos',
+};
+
 const routerApp = {
   dashboard: routerDashboard,
   auth: routerAuth,
@@ -124,6 +128,7 @@ const routerApp = {
   promotion: routerPromotion,
   order: routerOrder,
   templateEmail: routerTemplateEmail,
+  pos: routerPos,
 };
 
 export { routerApp };

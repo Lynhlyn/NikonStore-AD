@@ -85,6 +85,19 @@ const ListRouteDashboard: IRouterItem[] = [
     ],
   },
   {
+    name: 'Bán tại quầy',
+    routerActive: [
+      routerApp.pos.page,
+    ],
+    icon: 'ShoppingCart',
+    route: routerApp.pos.page,
+    type: 'item',
+    visibleRoles: [
+      EUserRole.ADMIN,
+      EUserRole.STAFF,
+    ],
+  },
+  {
     name: 'Quản lý đơn hàng',
     routerActive: [
       routerApp.order.online,

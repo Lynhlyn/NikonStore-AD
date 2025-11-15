@@ -49,6 +49,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "html-to-react": "^1.7.0",
+    "html5-qrcode": "^2.3.8",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "lottie-react": "^2.4.0",
