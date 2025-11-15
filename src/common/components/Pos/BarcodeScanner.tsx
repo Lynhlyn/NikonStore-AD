@@ -5,8 +5,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/core/shadcn/
 import { Input } from "@/core/shadcn/components/ui/input"
 import { useSearchProductDetailBySlugQuery } from "@/lib/services/modules/posService"
 import type { ProductDetailPosResponse } from "@/lib/services/modules/posService/type"
+import {
+  Scanner,
+  useDevices,
+  centerText,
+} from "@yudiel/react-qr-scanner"
 import { Camera, Loader2, QrCode, X } from "lucide-react"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 
 interface BarcodeScannerProps {
@@ -18,9 +23,11 @@ interface BarcodeScannerProps {
 export function BarcodeScanner({ onScanSuccess, onScanError, disabled }: BarcodeScannerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [manualInput, setManualInput] = useState("")
-  const [isScanning, setIsScanning] = useState(false)
-  const scannerRef = useRef<HTMLDivElement>(null)
-  const scannerInstanceRef = useRef<any>(null)
+  const [deviceId, setDeviceId] = useState<string | undefined>(undefined)
+  const [pause, setPause] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const devices = useDevices()
 
   const {
     data: searchResult,
@@ -35,13 +42,52 @@ export function BarcodeScanner({ onScanSuccess, onScanError, disabled }: Barcode
   )
 
   useEffect(() => {
-    if (searchResult?.data && manualInput.trim()) {
+    if (searchResult?.data && manualInput.trim() && pause) {
       onScanSuccess(searchResult.data)
       setManualInput("")
       setIsOpen(false)
-      toast.success("Đã tìm thấy sản phẩm!")
+      toast.success(`Đã tìm thấy sản phẩm: ${searchResult.data.productName} (${searchResult.data.sku})`)
+      setPause(false)
     }
-  }, [searchResult, manualInput, onScanSuccess])
+  }, [searchResult, manualInput, pause, onScanSuccess])
+
+  const handleScan = useCallback(
+    async (scannedData: string) => {
+      if (!scannedData || !scannedData.trim() || pause) {
+        return
+      }
+
+      const scannedValue = scannedData.trim()
+      setPause(true)
+      setManualInput(scannedValue)
+
+      // Trigger the search query
+      try {
+        const result = await searchProduct()
+        if (result.data?.data) {
+          onScanSuccess(result.data.data)
+          setManualInput("")
+          setIsOpen(false)
+          toast.success(`Đã tìm thấy sản phẩm: ${result.data.data.productName} (${result.data.data.sku})`)
+          setPause(false)
+        } else {
+          toast.error("Không tìm thấy sản phẩm với SKU này")
+          if (onScanError) {
+            onScanError("Không tìm thấy sản phẩm")
+          }
+          setPause(false)
+        }
+      } catch (error: any) {
+        console.error("Error searching product:", error)
+        toast.error(error?.data?.message || "Không thể tìm kiếm sản phẩm")
+        if (onScanError) {
+          onScanError(error?.data?.message || "Không thể tìm kiếm sản phẩm")
+        }
+        setPause(false)
+      }
+    },
+    [searchProduct, onScanSuccess, onScanError, pause],
+  )
 
   const handleManualSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -51,6 +97,7 @@ export function BarcodeScanner({ onScanSuccess, onScanError, disabled }: Barcode
         return
       }
 
+      setPause(true)
       try {
         const result = await searchProduct()
         if (result.data?.data) {
@@ -58,17 +105,20 @@ export function BarcodeScanner({ onScanSuccess, onScanError, disabled }: Barcode
           setManualInput("")
           setIsOpen(false)
           toast.success("Đã tìm thấy sản phẩm!")
+          setPause(false)
         } else {
           toast.error("Không tìm thấy sản phẩm với SKU này")
           if (onScanError) {
             onScanError("Không tìm thấy sản phẩm")
           }
+          setPause(false)
         }
       } catch (error: any) {
         toast.error(error?.data?.message || "Không thể tìm kiếm sản phẩm")
         if (onScanError) {
           onScanError(error?.data?.message || "Không thể tìm kiếm sản phẩm")
         }
+        setPause(false)
       }
     },
     [manualInput, searchProduct, onScanSuccess, onScanError],
@@ -83,88 +133,54 @@ export function BarcodeScanner({ onScanSuccess, onScanError, disabled }: Barcode
     [manualInput, handleManualSubmit],
   )
 
-  const initializeScanner = useCallback(async () => {
-    if (!scannerRef.current || scannerInstanceRef.current) return
-
-    try {
-      const html5QrcodeModule = await import("html5-qrcode").catch(() => null)
-      if (!html5QrcodeModule) {
-        toast.error("Thư viện quét mã không khả dụng. Vui lòng nhập SKU thủ công.")
-        return
+  const handleScannerError = useCallback(
+    (error: Error) => {
+      console.error("Scanner error:", error)
+      setErrorMessage(error.message || "Lỗi khởi tạo scanner")
+      
+      if (error.message?.includes("NotAllowedError") || error.message?.includes("Permission")) {
+        setErrorMessage("Không có quyền truy cập camera. Vui lòng cho phép truy cập camera trong trình duyệt.")
+      } else if (error.message?.includes("NotFoundError")) {
+        setErrorMessage("Không tìm thấy camera trên thiết bị này.")
+      } else if (error.message?.includes("NotReadableError")) {
+        setErrorMessage("Camera đang được sử dụng bởi ứng dụng khác.")
       }
-
-      const Html5Qrcode = html5QrcodeModule.Html5Qrcode
-      const config = {
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0,
-      }
-
-      const scanner = new Html5Qrcode(scannerRef.current.id)
-      scannerInstanceRef.current = scanner
-
-      await scanner.start(
-        { facingMode: "environment" },
-        config,
-        (decodedText) => {
-          if (decodedText && decodedText.trim()) {
-            setManualInput(decodedText.trim())
-            setIsScanning(false)
-            scanner.stop().catch(() => {})
-          }
-        },
-        (errorMessage) => {},
-      )
-
-      setIsScanning(true)
-    } catch (error: any) {
-      console.error("Error initializing scanner:", error)
-      if (error?.message?.includes("NotAllowedError") || error?.message?.includes("Permission")) {
-        toast.error("Không có quyền truy cập camera. Vui lòng nhập SKU thủ công.")
-      } else {
-        toast.error("Không thể khởi tạo camera. Vui lòng nhập SKU thủ công.")
-      }
-    }
-  }, [])
-
-  const stopScanner = useCallback(async () => {
-    if (scannerInstanceRef.current) {
-      try {
-        await scannerInstanceRef.current.stop()
-        await scannerInstanceRef.current.clear()
-      } catch (error) {
-        console.error("Error stopping scanner:", error)
-      }
-      scannerInstanceRef.current = null
-    }
-    setIsScanning(false)
-  }, [])
-
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        initializeScanner()
-      }, 100)
-    } else {
-      stopScanner()
-      setManualInput("")
-    }
-
-    return () => {
-      stopScanner()
-    }
-  }, [isOpen, initializeScanner, stopScanner])
+    },
+    [],
+  )
 
   const handleClose = useCallback(() => {
-    stopScanner()
+    setPause(true)
     setIsOpen(false)
     setManualInput("")
-  }, [stopScanner])
+    setErrorMessage(null)
+  }, [])
+
+  // Auto-select back camera if available
+  useEffect(() => {
+    if (devices.length > 0 && !deviceId && isOpen) {
+      const backCamera = devices.find(
+        (device) =>
+          device.label.toLowerCase().includes("back") ||
+          device.label.toLowerCase().includes("rear") ||
+          device.label.toLowerCase().includes("environment")
+      )
+      if (backCamera) {
+        setDeviceId(backCamera.deviceId)
+      } else {
+        setDeviceId(devices[0].deviceId)
+      }
+    }
+  }, [devices, deviceId, isOpen])
 
   return (
     <>
       <Button
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+        setIsOpen(true)
+        setPause(false)
+        setErrorMessage(null)
+      }}
         disabled={disabled}
         variant="outline"
         size="sm"
@@ -175,7 +191,17 @@ export function BarcodeScanner({ onScanSuccess, onScanError, disabled }: Barcode
         Quét mã
       </Button>
 
-      <Dialog open={isOpen} onOpenChange={handleClose}>
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            handleClose()
+          } else {
+            setIsOpen(true)
+            setPause(false)
+          }
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -185,16 +211,99 @@ export function BarcodeScanner({ onScanSuccess, onScanError, disabled }: Barcode
           </DialogHeader>
 
           <div className="space-y-4">
+            {devices.length > 0 && (
+              <div>
+                <label className="text-sm font-medium mb-1 block">Chọn camera:</label>
+                <select
+                  value={deviceId || ""}
+                  onChange={(e) => setDeviceId(e.target.value || undefined)}
+                  className="w-full p-2 border rounded-md text-sm"
+                  disabled={pause}
+                >
+                  {devices.map((device, index) => (
+                    <option key={index} value={device.deviceId}>
+                      {device.label || `Camera ${index + 1}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div className="relative">
-              <div
-                id="barcode-scanner"
-                ref={scannerRef}
-                className="w-full h-64 bg-black rounded-lg overflow-hidden flex items-center justify-center"
-              >
-                {!isScanning && (
-                  <div className="text-white text-center p-4">
-                    <p className="text-sm mb-2">Camera đang khởi tạo...</p>
-                    <p className="text-xs text-gray-400">Hoặc nhập SKU thủ công bên dưới</p>
+              <div className="w-full bg-black rounded-lg overflow-hidden flex items-center justify-center min-h-[400px]">
+                {isOpen && !pause && (
+                  <Scanner
+                    formats={[
+                      "qr_code",
+                      "micro_qr_code",
+                      "data_matrix",
+                      "code_128",
+                      "code_39",
+                      "code_93",
+                      "ean_8",
+                      "ean_13",
+                      "upc_a",
+                      "upc_e",
+                      "itf",
+                      "codabar",
+                      "pdf417",
+                      "aztec",
+                    ]}
+                    constraints={{
+                      deviceId: deviceId ? { exact: deviceId } : undefined,
+                    }}
+                    onScan={(detectedCodes) => {
+                      if (detectedCodes && detectedCodes.length > 0 && !pause) {
+                        const scannedValue = detectedCodes[0].rawValue
+                        if (scannedValue && scannedValue.trim()) {
+                          handleScan(scannedValue.trim())
+                        }
+                      }
+                    }}
+                    onError={handleScannerError}
+                    styles={{
+                      container: {
+                        width: "100%",
+                        height: "400px",
+                      },
+                    }}
+                    components={{
+                      audio: false,
+                      onOff: true,
+                      torch: false,
+                      zoom: false,
+                      finder: true,
+                      tracker: centerText,
+                    }}
+                    allowMultiple={false}
+                    scanDelay={500}
+                    paused={pause}
+                  />
+                )}
+                
+                {pause && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-80 z-10 text-white text-center p-4">
+                    <div>
+                      <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
+                      <p className="text-sm">Đang xử lý...</p>
+                    </div>
+                  </div>
+                )}
+
+                {errorMessage && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-90 z-10 text-white text-center p-4">
+                    <div className="max-w-xs">
+                      <Camera className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm mb-2 text-red-300 font-medium">Không thể khởi tạo camera</p>
+                      <p className="text-xs text-red-200 mt-2 mb-3">{errorMessage}</p>
+                      <div className="text-xs text-gray-300 mb-2 space-y-1">
+                        <p className="font-medium">Hướng dẫn:</p>
+                        <p>1. Kiểm tra biểu tượng camera trên thanh địa chỉ</p>
+                        <p>2. Mở Cài đặt → Quyền riêng tư → Camera</p>
+                        <p>3. Cho phép truy cập camera cho trang web này</p>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-3">Hoặc nhập SKU thủ công bên dưới</p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -211,14 +320,14 @@ export function BarcodeScanner({ onScanSuccess, onScanError, disabled }: Barcode
                 value={manualInput}
                 onChange={(e) => setManualInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                disabled={isSearching}
+                disabled={isSearching || pause}
                 className="w-full"
                 aria-label="Nhập SKU hoặc quét mã"
                 autoFocus
               />
               <Button
                 type="submit"
-                disabled={!manualInput.trim() || isSearching}
+                disabled={!manualInput.trim() || isSearching || pause}
                 className="w-full"
                 aria-label="Tìm kiếm sản phẩm"
               >
@@ -234,7 +343,12 @@ export function BarcodeScanner({ onScanSuccess, onScanError, disabled }: Barcode
             </form>
 
             <div className="flex items-center gap-2 pt-2">
-              <Button variant="outline" onClick={handleClose} className="flex-1" aria-label="Đóng">
+              <Button
+                variant="outline"
+                onClick={handleClose}
+                className="flex-1"
+                aria-label="Đóng"
+              >
                 <X className="w-4 h-4 mr-2" />
                 Đóng
               </Button>
@@ -245,4 +359,6 @@ export function BarcodeScanner({ onScanSuccess, onScanError, disabled }: Barcode
     </>
   )
 }
+
+
 

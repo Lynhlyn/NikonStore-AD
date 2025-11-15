@@ -42,6 +42,7 @@
     "@tiptap/starter-kit": "^2.8.0",
     "@types/js-cookie": "^3.0.6",
     "@types/video.js": "^7.3.58",
+    "@yudiel/react-qr-scanner": "^2.4.1",
     "async-mutex": "^0.5.0",
     "axios": "^1.11.0",
     "class-variance-authority": "^0.7.1",
