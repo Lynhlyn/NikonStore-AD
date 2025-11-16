@@ -7,6 +7,7 @@ import {
   useCancelPendingOrderMutation,
   useCompletePosOrderMutation,
   useCreatePendingPosOrderMutation,
+  useCreateVnpayQrPaymentMutation,
   useGetPendingOrderByIdQuery,
   useGetPendingPosOrdersQuery,
   useGetPosProductsQuery,
@@ -98,6 +99,7 @@ export const usePosLogic = (staffId: number) => {
   const [completePosOrder] = useCompletePosOrderMutation();
   const [updatePendingOrder] = useUpdatePendingOrderMutation();
   const [cancelPendingOrder, { isLoading: isCancellingOrder }] = useCancelPendingOrderMutation();
+  const [createVnpayQrPayment] = useCreateVnpayQrPaymentMutation();
 
   const pendingOrders = pendingOrdersResponse?.data || [];
   const selectedOrder = selectedOrderResponse?.data;
@@ -422,6 +424,23 @@ export const usePosLogic = (staffId: number) => {
     [selectedOrderId, cancelPendingOrder, refreshAllData, resetOrderState, staffId],
   );
 
+  const handleCreateVnpayQr = useCallback(
+    async (orderId: number): Promise<string | null> => {
+      try {
+        const response = await createVnpayQrPayment(orderId).unwrap();
+        return response.data;
+      } catch (error: any) {
+        if (error?.data?.message) {
+          toast.error(error.data.message);
+        } else {
+          toast.error("Không thể tạo mã QR thanh toán");
+        }
+        return null;
+      }
+    },
+    [createVnpayQrPayment],
+  );
+
   return {
     selectedOrderId,
     selectedOrder,
@@ -443,5 +462,6 @@ export const usePosLogic = (staffId: number) => {
     calculateFinalAmount,
     refreshAllData,
     refreshData,
+    handleCreateVnpayQr,
   };
 };

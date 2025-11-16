@@ -10,6 +10,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: '*',
       },
+      {
+        protocol: 'https',
+        hostname: 'img.vietqr.io',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.qrserver.com',
+      },
     ],
   },
   webpack: (config, { isServer }) => {

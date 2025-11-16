@@ -3,7 +3,7 @@
 import { formatCurrencyDisplay } from "@/common/utils/inutFormat"
 import { Badge } from "@/core/shadcn/components/ui/badge"
 import { Button } from "@/core/shadcn/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/core/shadcn/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/core/shadcn/components/ui/dialog"
 import { Input } from "@/core/shadcn/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/core/shadcn/components/ui/table"
 import { useFetchVouchersQuery } from "@/lib/services/modules/voucherService"
@@ -146,6 +146,9 @@ export function VoucherSelector({ selectedVoucher, onVoucherSelect, orderTotal, 
           <DialogContent className="max-w-4xl max-h-[80vh]">
             <DialogHeader>
               <DialogTitle>Chọn voucher giảm giá</DialogTitle>
+              <DialogDescription>
+                Chọn voucher phù hợp để áp dụng giảm giá cho đơn hàng
+              </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4">

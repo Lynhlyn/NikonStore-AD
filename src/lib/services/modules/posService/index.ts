@@ -151,6 +151,16 @@ export const posApi = apiSlice.injectEndpoints({
       }),
       keepUnusedDataFor: 0,
     }),
+
+    createVnpayQrPayment: build.mutation<
+      { status: number; message: string; data: string },
+      number
+    >({
+      query: (orderId) => ({
+        url: `${posApiPath}/orders/pending/${orderId}/vnpay-qr`,
+        method: "POST",
+      }),
+    }),
   }),
 });
 
@@ -164,4 +174,5 @@ export const {
   useCompletePosOrderMutation,
   useCancelPendingOrderMutation,
   useSearchProductDetailBySlugQuery,
+  useCreateVnpayQrPaymentMutation,
 } = posApi;

@@ -1,6 +1,7 @@
 export const PAYMENT_METHODS = [
   { value: "cash", label: "Tiền mặt", icon: "💵" },
-] as const;
+  { value: "VNPAY-QR", label: "Chuyển khoản VNPAY-QR", icon: "📱" },
+];
 
 export const ORDER_STATUS = {
   PENDING: "Chờ xử lý",

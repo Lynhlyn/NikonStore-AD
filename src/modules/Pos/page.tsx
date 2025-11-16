@@ -20,12 +20,14 @@ import type { Customer } from "@/lib/services/modules/customerService/type"
 import type { Voucher } from "@/lib/services/modules/voucherService/type"
 import type { RootState } from "@/lib/services/store"
 import { AlertCircle, RefreshCw, User } from "lucide-react"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 
 export default function POSPage() {
   const userState = useAppSelector<RootState, IUserState>((state) => state.user)
   const user = userState.user
+  const searchParams = useSearchParams()
 
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null)
@@ -57,6 +59,7 @@ export default function POSPage() {
     calculateFinalAmount,
     refreshAllData,
     refreshData,
+    handleCreateVnpayQr,
   } = usePosLogic(user?.data?.id || 1)
 
   const { displayTime } = useRealTime(selectedOrder?.createdAt)
@@ -67,6 +70,55 @@ export default function POSPage() {
     setReceivedAmount(0)
     setPaymentMethod("cash")
   }, [])
+
+  useEffect(() => {
+    if (!searchParams) return
+    
+    const paymentStatus = searchParams.get("payment")
+    const orderIdParam = searchParams.get("orderId")
+    const errorCode = searchParams.get("errorCode")
+
+    if (paymentStatus && orderIdParam) {
+      if (paymentStatus === "success") {
+        toast.success(`Thanh toán thành công cho đơn hàng ${orderIdParam}!`)
+        setTimeout(async () => {
+          await refreshAllData({ resetState: false })
+          const completedOrder = pendingOrders.find(o => o.trackingNumber === orderIdParam)
+          if (completedOrder) {
+            await handleSelectOrder(completedOrder.id)
+          }
+        }, 1000)
+        window.history.replaceState({}, "", "/pos")
+      } else if (paymentStatus === "failed") {
+        toast.error(`Thanh toán thất bại cho đơn hàng ${orderIdParam}. ${errorCode ? `Mã lỗi: ${errorCode}` : ""}`)
+        window.history.replaceState({}, "", "/pos")
+      } else if (paymentStatus === "error") {
+        toast.error("Đã xảy ra lỗi khi xử lý thanh toán")
+        window.history.replaceState({}, "", "/pos")
+      }
+    }
+  }, [searchParams, refreshAllData, pendingOrders, handleSelectOrder])
+
+  useEffect(() => {
+    if (paymentMethod === "VNPAY-QR" && selectedOrderId && selectedOrder && selectedOrder.status === "PENDING_PAYMENT") {
+      const intervalId = setInterval(async () => {
+        try {
+          await refreshData()
+          const updatedOrder = pendingOrders.find(o => o.id === selectedOrderId)
+          if (updatedOrder && updatedOrder.status === "COMPLETED") {
+            toast.success(`Đơn hàng ${updatedOrder.trackingNumber} đã được thanh toán thành công!`)
+            clearInterval(intervalId)
+            await refreshAllData({ resetState: false })
+            resetPaymentState()
+          }
+        } catch (error) {
+          console.error("Error polling order status:", error)
+        }
+      }, 3000)
+
+      return () => clearInterval(intervalId)
+    }
+  }, [paymentMethod, selectedOrderId, selectedOrder?.status, refreshData, pendingOrders, refreshAllData, resetPaymentState])
 
   const handleRefreshAll = useCallback(async () => {
     try {
@@ -270,8 +322,17 @@ export default function POSPage() {
               !selectedOrderId ||
               !selectedOrder ||
               selectedOrder.orderDetails.length === 0 ||
-              receivedAmount < finalAmount
+              (paymentMethod === "cash" && receivedAmount < finalAmount)
             }
+            orderId={selectedOrderId}
+            hasOrderItems={selectedOrder?.orderDetails && selectedOrder.orderDetails.length > 0}
+            onVnpayQrGenerated={async () => {
+              if (selectedOrderId) {
+                const url = await handleCreateVnpayQr(selectedOrderId)
+                return url || ""
+              }
+              return ""
+            }}
           />
         </div>
       </div>
