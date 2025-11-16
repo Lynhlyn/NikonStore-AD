@@ -159,6 +159,18 @@ const ListRouteDashboard: IRouterItem[] = [
     ],
   },
   {
+    name: 'Quản lý liên hệ',
+    routerActive: [
+      routerApp.contact.list,
+    ],
+    icon: 'MessageSquare',
+    route: routerApp.contact.list,
+    type: 'item',
+    visibleRoles: [
+      EUserRole.ADMIN,
+    ],
+  },
+  {
     name: 'Quản lý thuộc tính',
     routerActive: [
       routerApp.brand.list,
