@@ -107,7 +107,8 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
           <Button
             onClick={handleConfirm}
             disabled={isConfirmDisabled || isLoading}
-            className="flex-1 bg-red-600 hover:bg-red-700"
+            variant="default"
+            className="flex-1"
           >
             {isLoading ? 'Đang xử lý...' : 'Xác nhận hủy'}
           </Button>

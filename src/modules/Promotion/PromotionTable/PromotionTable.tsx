@@ -64,7 +64,7 @@ const PromotionTable = () => {
       title: "Xác nhận xóa chương trình khuyến mãi",
       description: `Bạn có chắc chắn muốn xóa "${promotionName}"? Hành động này không thể hoàn tác.`,
       onSubmit: () => handleDelete(promotionId),
-      submitClassName: "w-[100px] bg-red-600 hover:bg-red-700",
+      submitClassName: "w-[100px]",
       dialogContentProps: {
         className: "max-w-md",
       }
@@ -259,7 +259,8 @@ const PromotionTable = () => {
 
                   <div className="flex gap-2 pt-4 border-t border-gray-200">
                     <Button
-                      className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200"
+                      variant="outline"
+                      className="flex-1"
                       size="sm"
                       onClick={() => router.push(getRouteWithRole(routerApp.promotion.formView({ id: promotion.id })))}
                     >

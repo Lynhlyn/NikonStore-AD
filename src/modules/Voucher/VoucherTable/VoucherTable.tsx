@@ -229,7 +229,6 @@ const VoucherTable = () => {
           <div className="flex gap-2 justify-end">
             {!isPublic && (
               <Button
-                className="bg-blue-600 hover:bg-blue-700"
                 onClick={() => handleCustomerModalOpen(id, code)}
                 title="Quản lý khách hàng"
               >

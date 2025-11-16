@@ -340,7 +340,7 @@ const Button = () => {
         type="button"
         onClick={handleSubmit(onSubmit)}
         disabled={isLoading}
-        className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-6 py-3 bg-bgPrimarySolidDefault text-white rounded-md hover:bg-bgPrimarySolidHover disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? 'Đang xử lý...' : 'Lưu'}
       </button>

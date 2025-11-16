@@ -45,7 +45,7 @@ const AppSideBarGroup: React.FC<IAppSideBarGroupProps> = (props) => {
         clsx(
             cn("relative px-4 py-3 flex items-center gap-3 bg-slate-800/50 text-slate-200 hover:text-white hover:bg-slate-700 cursor-pointer transition-all duration-200 rounded-lg group font-medium"),
             {
-                "bg-blue-600 text-white shadow-lg shadow-blue-500/40 font-semibold": isActived(route)
+                "bg-bgPrimarySolidDefault text-white shadow-lg shadow-bgPrimarySolidDefault/40 font-semibold": isActived(route)
             },
             {
                 "justify-center px-3": !isOpenSidebar
@@ -126,7 +126,7 @@ const AppSideBarGroup: React.FC<IAppSideBarGroupProps> = (props) => {
             <CollapsibleTrigger asChild>
                 <div className={appSideBarClassName}>
                     <div className={cn("flex-shrink-0 transition-all duration-200", {
-                        "text-blue-200": isActived(route),
+                        "text-white/80": isActived(route),
                         "text-slate-300 group-hover:text-white": !isActived(route)
                     })}>
                         {iconElement}
@@ -141,12 +141,12 @@ const AppSideBarGroup: React.FC<IAppSideBarGroupProps> = (props) => {
                     )}
                     <ChevronDown
                         className={cn("h-4 w-4 transform duration-200 shrink-0 transition-all", {
-                            "rotate-180 text-blue-200": isOpen,
+                            "rotate-180 text-white/80": isOpen,
                             "text-slate-300 group-hover:text-white": !isOpen
                         })}
                     />
                     {isActived(route) && (
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-blue-400 rounded-r-full shadow-lg shadow-blue-400/60"></div>
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-bgPrimarySolidHover rounded-r-full shadow-lg shadow-bgPrimarySolidHover/60"></div>
                     )}
                 </div>
             </CollapsibleTrigger>

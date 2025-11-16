@@ -47,7 +47,7 @@ const getConfirmButtonStyle = (type: string) => {
       return 'bg-green-500 hover:bg-green-600 text-white';
     case 'info':
     default:
-      return 'bg-blue-500 hover:bg-blue-600 text-white';
+      return 'bg-bgPrimarySolidDefault hover:bg-bgPrimarySolidHover text-white';
   }
 };
 

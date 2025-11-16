@@ -15,6 +15,19 @@ const ListRouteDashboard: IRouterItem[] = [
     ],
   },
   {
+    name: 'Bán tại quầy',
+    routerActive: [
+      routerApp.pos.page,
+    ],
+    icon: 'POS',
+    route: routerApp.pos.page,
+    type: 'item',
+    visibleRoles: [
+      EUserRole.ADMIN,
+      EUserRole.STAFF,
+    ],
+  },
+  {
     name: 'Quản lý sản phẩm',
     routerActive: [
       routerApp.product.list,
@@ -29,11 +42,57 @@ const ListRouteDashboard: IRouterItem[] = [
     ],
   },
   {
+    name: 'Quản lý đơn hàng',
+    routerActive: [
+      routerApp.order.online,
+      routerApp.order.offline,
+      routerApp.order.history,
+      routerApp.order.detail({ id: ':id' }),
+      routerApp.order.statusHistory,
+    ],
+    icon: 'OrderManagement',
+    type: 'group',
+    visibleRoles: [
+      EUserRole.ADMIN,
+    ],
+    subsRoute: [
+      {
+        name: 'Đơn hàng online',
+        route: routerApp.order.online,
+        routerActive: [
+          routerApp.order.online,
+          routerApp.order.detail({ id: ':id' }),
+        ],
+        type: 'item',
+        icon: 'Dot',
+      },
+      {
+        name: 'Đơn hàng offline',
+        route: routerApp.order.offline,
+        routerActive: [
+          routerApp.order.offline,
+          routerApp.order.detail({ id: ':id' }),
+        ],
+        type: 'item',
+        icon: 'Dot',
+      },
+      {
+        name: 'Lịch sử đơn hàng',
+        route: routerApp.order.history,
+        routerActive: [
+          routerApp.order.history,
+        ],
+        type: 'item',
+        icon: 'Dot',
+      },
+    ],
+  },
+  {
     name: 'Quản lý khách hàng',
     routerActive: [
       routerApp.customer.list,
     ],
-    icon: 'Users',
+    icon: 'CustomerManagement',
     route: routerApp.customer.list,
     type: 'item',
     visibleRoles: [
@@ -47,7 +106,7 @@ const ListRouteDashboard: IRouterItem[] = [
       routerApp.staff.form,
       routerApp.staff.formEdit({ id: ':id' }),
     ],
-    icon: 'Users',
+    icon: 'StaffManagement',
     route: routerApp.staff.list,
     type: 'item',
     visibleRoles: [
@@ -62,8 +121,23 @@ const ListRouteDashboard: IRouterItem[] = [
       routerApp.voucher.formEdit({ id: ':id' }),
       routerApp.voucher.formView({ id: ':id' }),
     ],
-    icon: 'Gift',
+    icon: 'VoucherManagement',
     route: routerApp.voucher.list,
+    type: 'item',
+    visibleRoles: [
+      EUserRole.ADMIN,
+    ],
+  },
+  {
+    name: 'Quản lý khuyến mãi',
+    routerActive: [
+      routerApp.promotion.list,
+      routerApp.promotion.form,
+      routerApp.promotion.formEdit({ id: ':id' }),
+      routerApp.promotion.formView({ id: ':id' }),
+    ],
+    icon: 'PromotionManagement',
+    route: routerApp.promotion.list,
     type: 'item',
     visibleRoles: [
       EUserRole.ADMIN,
@@ -77,70 +151,11 @@ const ListRouteDashboard: IRouterItem[] = [
       routerApp.templateEmail.edit({ id: ':id' }),
       routerApp.templateEmail.view({ id: ':id' }),
     ],
-    icon: 'Mail',
+    icon: 'TemplateEmailManagement',
     route: routerApp.templateEmail.list,
     type: 'item',
     visibleRoles: [
       EUserRole.ADMIN,
-    ],
-  },
-  {
-    name: 'Bán tại quầy',
-    routerActive: [
-      routerApp.pos.page,
-    ],
-    icon: 'ShoppingCart',
-    route: routerApp.pos.page,
-    type: 'item',
-    visibleRoles: [
-      EUserRole.ADMIN,
-      EUserRole.STAFF,
-    ],
-  },
-  {
-    name: 'Quản lý đơn hàng',
-    routerActive: [
-      routerApp.order.online,
-      routerApp.order.offline,
-      routerApp.order.history,
-      routerApp.order.detail({ id: ':id' }),
-      routerApp.order.statusHistory,
-    ],
-    icon: 'ShoppingCart',
-    type: 'group',
-    visibleRoles: [
-      EUserRole.ADMIN,
-    ],
-    subsRoute: [
-      {
-        name: 'Đơn hàng online',
-        route: routerApp.order.online,
-        routerActive: [
-          routerApp.order.online,
-          routerApp.order.detail({ id: ':id' }),
-        ],
-        type: 'item',
-        icon: 'Circle',
-      },
-      {
-        name: 'Đơn hàng offline',
-        route: routerApp.order.offline,
-        routerActive: [
-          routerApp.order.offline,
-          routerApp.order.detail({ id: ':id' }),
-        ],
-        type: 'item',
-        icon: 'Circle',
-      },
-      {
-        name: 'Lịch sử đơn hàng',
-        route: routerApp.order.history,
-        routerActive: [
-          routerApp.order.history,
-        ],
-        type: 'item',
-        icon: 'Circle',
-      },
     ],
   },
   {
@@ -186,7 +201,7 @@ const ListRouteDashboard: IRouterItem[] = [
           routerApp.brand.formEdit({ id: ':id' }),
         ],
         type: 'item',
-        icon: 'Circle',
+        icon: 'Dot',
       },
       {
         name: 'Quản lý màu sắc',
@@ -197,7 +212,7 @@ const ListRouteDashboard: IRouterItem[] = [
           routerApp.color.formEdit({ id: ':id' }),
         ],
         type: 'item',
-        icon: 'Circle',
+        icon: 'Dot',
       },
       {
         name: 'Quản lý dung tích',
@@ -208,7 +223,7 @@ const ListRouteDashboard: IRouterItem[] = [
           routerApp.capacity.formEdit({ id: ':id' }),
         ],
         type: 'item',
-        icon: 'Circle',
+        icon: 'Dot',
       },
       {
         name: 'Quản lý danh mục',
@@ -219,7 +234,7 @@ const ListRouteDashboard: IRouterItem[] = [
           routerApp.category.formEdit({ id: ':id' }),
         ],
         type: 'item',
-        icon: 'Circle',
+        icon: 'Dot',
       },
       {
         name: 'Quản lý tag',
@@ -230,7 +245,7 @@ const ListRouteDashboard: IRouterItem[] = [
           routerApp.tag.formEdit({ id: ':id' }),
         ],
         type: 'item',
-        icon: 'Circle',
+        icon: 'Dot',
       },
       {
         name: 'Quản lý tính năng',
@@ -241,7 +256,7 @@ const ListRouteDashboard: IRouterItem[] = [
           routerApp.feature.formEdit({ id: ':id' }),
         ],
         type: 'item',
-        icon: 'Circle',
+        icon: 'Dot',
       },
       {
         name: 'Quản lý chất liệu',
@@ -252,7 +267,7 @@ const ListRouteDashboard: IRouterItem[] = [
           routerApp.material.formEdit({ id: ':id' }),
         ],
         type: 'item',
-        icon: 'Circle',
+        icon: 'Dot',
       },
       {
         name: 'Quản lý loại dây đeo',
@@ -263,7 +278,7 @@ const ListRouteDashboard: IRouterItem[] = [
           routerApp.strapType.formEdit({ id: ':id' }),
         ],
         type: 'item',
-        icon: 'Circle',
+        icon: 'Dot',
       },
     ],
   },

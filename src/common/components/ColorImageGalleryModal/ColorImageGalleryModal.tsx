@@ -365,12 +365,11 @@ const ColorImageGalleryModal: React.FC<ColorImageGalleryModalProps> = ({
                                 </label>
                                 <Button
                                   size="sm"
-                                  variant="destructive"
+                                  variant="default"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleDeleteClick();
                                   }}
-                                  className="bg-red-500/90 hover:bg-red-600"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>

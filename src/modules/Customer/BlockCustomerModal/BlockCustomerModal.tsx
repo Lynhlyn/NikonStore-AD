@@ -156,8 +156,8 @@ export const BlockCustomerModal = ({ isOpen, onClose, customer, onSuccess }: Blo
               </Button>
               <Button 
                 type="submit" 
-                disabled={isLoading || !watchedReason} 
-                className="bg-orange-600 text-white hover:bg-orange-700"
+                disabled={isLoading || !watchedReason}
+                variant="default"
               >
                 {isLoading ? "Đang xử lý..." : "Khoá tài khoản"}
               </Button>

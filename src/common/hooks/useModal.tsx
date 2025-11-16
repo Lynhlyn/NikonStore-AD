@@ -77,7 +77,7 @@ export function useModal(): UseModalReturn & {
                             </DialogClose>
                             <Button
                                 type="button"
-                                className={modalProps.submitClassName || "w-[100px] bg-green-500 text-white"}
+                                className={modalProps.submitClassName || "w-[100px]"}
                                 onClick={handleSubmit}
                             >
                                 {modalProps.submitText || "Xác nhận"}

@@ -1,6 +1,5 @@
 "use client"
 
-import { BarcodeScanner } from "@/common/components/Pos/BarcodeScanner"
 import { CancelOrderModal } from "@/common/components/Pos/CancelOrderModal"
 import { OrderCart } from "@/common/components/Pos/OrderCart"
 import { OrderSelector } from "@/common/components/Pos/OrderSelector"
@@ -232,81 +231,84 @@ export default function POSPage() {
   const changeAmount = receivedAmount - finalAmount
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Badge variant="outline" className="px-3 py-1">
-              <User className="w-4 h-4 mr-2" aria-hidden="true" />
-              {user?.data?.name || "Admin"}
-            </Badge>
-            <Badge variant="secondary" className="px-3 py-1">
-              {displayTime}
-            </Badge>
+    <div className="h-screen flex flex-col bg-gray-50 p-2 sm:p-4 overflow-hidden">
+      <div className="mb-2 sm:mb-4 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 bg-white rounded-lg shadow-sm border border-gray-200 px-2 sm:px-4 py-2 sm:py-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 bg-gray-100 rounded-md">
+              <User className="w-4 h-4 text-gray-600" aria-hidden="true" />
+              <span className="text-xs sm:text-sm font-medium text-gray-700 truncate">{user?.data?.name || "Admin"}</span>
+            </div>
+            <div className="px-2 sm:px-3 py-1.5 bg-blue-50 rounded-md">
+              <span className="text-xs sm:text-sm font-medium text-blue-700">{displayTime}</span>
+            </div>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <OrderSelector
+              pendingOrders={pendingOrders}
+              selectedOrderId={selectedOrderId}
+              isLoading={isLoadingPending}
+              onSelectOrder={handleSelectOrder}
+              onCreateOrder={handleCreateOrder}
+              onCancelOrder={handleCancelOrderClick}
+            />
           </div>
 
           <Button
             onClick={handleRefreshAll}
             disabled={isRefreshing}
-            variant="outline"
+            variant="ghost"
             size="sm"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex-shrink-0 w-full sm:w-auto justify-center sm:justify-start"
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing ? 'Đang làm mới...' : 'Làm mới'}
+            <span className="text-xs sm:text-sm">{isRefreshing ? 'Đang làm mới...' : 'Làm mới'}</span>
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-7 space-y-6">
-          <div className="flex items-center justify-between">
-            <div></div>
-            <BarcodeScanner
-              onScanSuccess={(productDetail: ProductDetailPosResponse) => {
-                if (!selectedOrderId) {
-                  toast.error(MESSAGES.ERROR.SELECT_ORDER_FIRST)
-                  return
-                }
-                handleAddProductToOrder(productDetail, 1)
-              }}
-              disabled={!selectedOrderId}
-            />
-          </div>
-          <DialogProductTable onProductSelect={handleProductSelect} />
-          <OrderSelector
-            pendingOrders={pendingOrders}
-            selectedOrderId={selectedOrderId}
-            isLoading={isLoadingPending}
-            onSelectOrder={handleSelectOrder}
-            onCreateOrder={handleCreateOrder}
-            onCancelOrder={handleCancelOrderClick}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-4 flex-1 min-h-0 overflow-hidden">
+        <div className="lg:col-span-8 flex flex-col min-h-0 h-full">
+          <DialogProductTable 
+            onProductSelect={handleProductSelect}
+            onScanSuccess={(productDetail: ProductDetailPosResponse) => {
+              if (!selectedOrderId) {
+                toast.error(MESSAGES.ERROR.SELECT_ORDER_FIRST)
+                return
+              }
+              handleAddProductToOrder(productDetail, 1)
+            }}
+            scanDisabled={!selectedOrderId}
           />
         </div>
 
-        <div className="col-span-5 space-y-6">
+        <div className="lg:col-span-4 space-y-2 sm:space-y-4 flex flex-col min-h-0 overflow-y-auto">
           {!selectedOrderId && (
-            <Card className="border-orange-200 bg-orange-50">
-              <CardContent className="p-4">
+            <Card className="border-orange-200 bg-orange-50/50 shadow-sm flex-shrink-0">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center gap-2 text-orange-700" role="alert">
-                  <AlertCircle className="w-5 h-5" aria-hidden="true" />
-                  <span className="text-sm font-medium">{MESSAGES.WARNING.SELECT_ORDER_TO_START}</span>
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                  <span className="text-xs sm:text-sm font-medium">{MESSAGES.WARNING.SELECT_ORDER_TO_START}</span>
                 </div>
               </CardContent>
             </Card>
           )}
 
-          <OrderCart
-            selectedOrder={selectedOrder}
-            isLoading={isLoadingSelectedOrder}
-            onUpdateQuantity={handleUpdateQuantity}
-            onClearOrder={() => {
-              handleClearOrderLocal()
-              resetOrderState()
-            }}
-          />
+          <div className="flex-shrink-0">
+            <OrderCart
+              selectedOrder={selectedOrder}
+              isLoading={isLoadingSelectedOrder}
+              onUpdateQuantity={handleUpdateQuantity}
+              onClearOrder={() => {
+                handleClearOrderLocal()
+                resetOrderState()
+              }}
+            />
+          </div>
 
-          <PaymentSection
+          <div className="flex-shrink-0">
+            <PaymentSection
             selectedCustomer={selectedCustomer}
             onCustomerSelect={handleCustomerSelect}
             selectedVoucher={selectedVoucher}
@@ -325,6 +327,7 @@ export default function POSPage() {
               (paymentMethod === "cash" && receivedAmount < finalAmount)
             }
             orderId={selectedOrderId}
+            orderCode={selectedOrder?.trackingNumber || `#${selectedOrderId}`}
             hasOrderItems={selectedOrder?.orderDetails && selectedOrder.orderDetails.length > 0}
             onVnpayQrGenerated={async () => {
               if (selectedOrderId) {
@@ -334,6 +337,7 @@ export default function POSPage() {
               return ""
             }}
           />
+          </div>
         </div>
       </div>
 

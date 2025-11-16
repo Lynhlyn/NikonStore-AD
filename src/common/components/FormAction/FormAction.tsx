@@ -18,7 +18,7 @@ const FormAction: React.FC<IFormActionProps> = (props) => {
         <UIButton
           isLoading={isLoading}
           onClick={onSubmit}
-          className="text-sm rounded-lg leading-[170%] w-full h-11 bg-blue-600 hover:bg-blue-700 text-white"
+          className="text-sm rounded-lg leading-[170%] w-full h-11 bg-bgPrimarySolidDefault hover:bg-bgPrimarySolidHover text-white"
         >
           Lưu
         </UIButton>

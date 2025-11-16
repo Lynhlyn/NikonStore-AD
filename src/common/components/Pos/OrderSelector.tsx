@@ -3,10 +3,8 @@
 import { formatCurrencyDisplay } from "@/common/utils/inutFormat"
 import { Badge } from "@/core/shadcn/components/ui/badge"
 import { Button } from "@/core/shadcn/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/core/shadcn/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/core/shadcn/components/ui/table"
 import type { ListOrderPosResponse } from "@/lib/services/modules/posService/type"
-import { Trash2 } from "lucide-react"
+import { X } from "lucide-react"
 import { useMemo } from "react"
 
 interface OrderSelectorProps {
@@ -29,95 +27,69 @@ export function OrderSelector({
   const sortedOrders = useMemo(() => [...pendingOrders].sort((a, b) => b.id - a.id), [pendingOrders])
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Đơn hàng chờ xử lý</CardTitle>
-          <Button onClick={onCreateOrder} size="sm" aria-label="Tạo đơn hàng mới">
-            Tạo đơn mới
-          </Button>
+    <div className="flex items-center gap-2 h-14">
+      {isLoading ? (
+        <div className="flex items-center justify-center flex-1">
+          <div
+            className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-blue-600"
+            role="status"
+            aria-label="Đang tải đơn hàng"
+          ></div>
+          <p className="ml-2 text-sm text-gray-500">Đang tải...</p>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="max-h-64 overflow-y-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Mã đơn</TableHead>
-                <TableHead>Khách hàng</TableHead>
-                <TableHead>Tổng tiền</TableHead>
-                <TableHead>Trạng thái</TableHead>
-                <TableHead className="w-32">Thao tác</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4">
-                    <div
-                      className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"
-                      role="status"
-                      aria-label="Đang tải đơn hàng"
-                    ></div>
-                    <p className="mt-2 text-sm text-gray-500">Đang tải...</p>
-                  </TableCell>
-                </TableRow>
-              ) : sortedOrders.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4 text-gray-500">
-                    Không có đơn hàng chờ
-                  </TableCell>
-                </TableRow>
-              ) : (
-                sortedOrders.map((order) => (
-                  <TableRow
-                    key={order.id}
-                    className={`hover:bg-gray-50 ${selectedOrderId === order.id ? "bg-blue-50/50" : ""}`}
+      ) : (
+        <>
+          <div className="flex items-center gap-2 flex-1 overflow-x-auto scrollbar-hide pb-1">
+            {sortedOrders.length === 0 ? (
+              <div className="text-sm text-gray-400">Chưa có đơn hàng</div>
+            ) : (
+              sortedOrders.map((order) => (
+                <button
+                  key={order.id}
+                  type="button"
+                  className={`relative group flex items-center gap-2 px-3 py-2 rounded-full transition-all flex-shrink-0 h-10 ${
+                    selectedOrderId === order.id
+                      ? "bg-bgPrimarySolidDefault text-white shadow-md"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                  onClick={() => onSelectOrder(order.id)}
+                >
+                  <span className={`font-semibold text-sm ${selectedOrderId === order.id ? "text-white" : "text-gray-900"}`}>
+                    #{order.id}
+                  </span>
+                  <span className={`text-xs ${selectedOrderId === order.id ? "text-blue-100" : "text-gray-500"}`}>
+                    {formatCurrencyDisplay(order.totalAmount)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onCancelOrder(order.id)
+                    }}
+                    className={`ml-1 opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-0.5 ${
+                      selectedOrderId === order.id
+                        ? "hover:bg-white/20 text-white"
+                        : "hover:bg-red-100 text-red-600"
+                    }`}
+                    aria-label={`Hủy đơn hàng #${order.id}`}
                   >
-                    <TableCell>
-                      <Badge variant="outline">#{order.id}</Badge>
-                    </TableCell>
-                    <TableCell>{order.customer?.fullName || "Khách vãng lai"}</TableCell>
-                    <TableCell className="font-semibold">{formatCurrencyDisplay(order.totalAmount)}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">
-                        {order.paymentStatus === "pending" ? "Chờ thanh toán" : order.paymentStatus}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant={selectedOrderId === order.id ? "default" : "outline"}
-                          onClick={() => onSelectOrder(order.id)}
-                          className="flex-1"
-                          aria-label={
-                            selectedOrderId === order.id
-                              ? `Đơn hàng #${order.id} đã được chọn`
-                              : `Chọn đơn hàng #${order.id}`
-                          }
-                        >
-                          {selectedOrderId === order.id ? "Đã chọn" : "Chọn"}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => onCancelOrder(order.id)}
-                          className="px-2"
-                          aria-label={`Hủy đơn hàng #${order.id}`}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+                    <X className="w-3 h-3" />
+                  </button>
+                </button>
+              ))
+            )}
+          </div>
+          <Button 
+            onClick={onCreateOrder} 
+            size="sm" 
+            className="shadow-sm h-10 px-4 flex-shrink-0 font-medium"
+            aria-label="Tạo đơn hàng mới"
+          >
+            + Đơn mới
+          </Button>
+        </>
+      )}
+    </div>
   )
 }
 

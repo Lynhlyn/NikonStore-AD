@@ -70,7 +70,7 @@ const VoucherForm: FC<IVoucherProps> = ({ id, isViewMode }) => {
                     disabled={isVoucherInactive}
                     className={`px-4 py-2 rounded-md text-sm transition-colors ${isVoucherInactive
                       ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-bgPrimarySolidDefault text-white hover:bg-bgPrimarySolidHover'
                       }`}
                     title={isVoucherInactive ? 'Không thể gán khách hàng cho voucher không hoạt động' : 'Chọn khách hàng'}
                   >

@@ -34,7 +34,7 @@ const AppSideBarItem: React.FC<IAppSideBarItemProps> = (props) => {
                 "px-3 py-3": !isOpenSidebar,
             }),
             {
-                "bg-blue-600 text-white shadow-lg shadow-blue-500/40 border-l-[3px] border-blue-400 font-semibold": isActived(route)
+                "bg-bgPrimarySolidDefault text-white shadow-lg shadow-bgPrimarySolidDefault/40 border-l-[3px] border-bgPrimarySolidHover font-semibold": isActived(route)
             },
             {
                 "justify-center": !isOpenSidebar
@@ -48,7 +48,7 @@ const AppSideBarItem: React.FC<IAppSideBarItemProps> = (props) => {
         <Link href={route.route || "#"} className="block">
             <div className={appSideBarClassName}>
                 <div className={cn("flex-shrink-0 transition-all duration-200", {
-                    "text-blue-200": isActived(route),
+                    "text-white/80": isActived(route),
                     "text-slate-300 group-hover:text-white": !isActived(route),
                     "w-3 h-3": isSubItem && route.icon === 'Circle',
                 })}>
@@ -67,7 +67,7 @@ const AppSideBarItem: React.FC<IAppSideBarItemProps> = (props) => {
                     </>
                 )}
                 {isActived(route) && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-blue-400 rounded-r-full shadow-lg shadow-blue-400/60"></div>
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-bgPrimarySolidHover rounded-r-full shadow-lg shadow-bgPrimarySolidHover/60"></div>
                 )}
             </div>
         </Link>

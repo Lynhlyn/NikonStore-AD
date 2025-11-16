@@ -21,8 +21,12 @@ export const customerApi = apiSlice.injectEndpoints({
       createdFromDate?: string;
       createdToDate?: string;
     }>({
+      serializeQueryArgs: ({ endpointName, queryArgs }) => {
+        const { page, size, sort, direction, keyword, status, ...rest } = queryArgs;
+        return `${endpointName}(${JSON.stringify({ page, size, sort, direction, keyword, status, ...rest })})`;
+      },
       query: (queryParams) => {
-        const params: any = { ...queryParams };
+        const params = { ...queryParams };
         if (params.status !== undefined && params.status !== 'all') {
           if (params.status === 1 || params.status === '1') {
             params.status = 'ACTIVE';
@@ -33,12 +37,6 @@ export const customerApi = apiSlice.injectEndpoints({
           delete params.status;
         }
 
-        if (params.keyword) {
-          params.fullName = params.keyword;
-          params.email = params.keyword;
-          params.phoneNumber = params.keyword;
-        }
-
         Object.keys(params).forEach(key => {
           const value = (params as Record<string, unknown>)[key];
           if (value === '' || value === 'all' || value === undefined) {
@@ -46,16 +44,16 @@ export const customerApi = apiSlice.injectEndpoints({
           }
         });
 
-        const searchParams = new URLSearchParams();
-        searchParams.append('page', String(params.page || 0));
-        searchParams.append('size', String(params.size || 10));
-        searchParams.append('sort', params.sort || 'id');
-        searchParams.append('direction', params.direction || 'asc');
-
         return {
-          url: `${customerEndpoint}/filter?${searchParams.toString()}`,
+          url: `${customerEndpoint}/filter`,
           method: 'POST',
           body: params,
+          params: {
+            page: params.page || 0,
+            size: params.size || 10,
+            sort: params.sort || 'id',
+            direction: params.direction || 'asc'
+          },
         };
       },
       keepUnusedDataFor: 0,

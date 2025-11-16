@@ -107,7 +107,8 @@ const FailedDeliveryModal: React.FC<FailedDeliveryModalProps> = ({
           <Button
             onClick={handleConfirm}
             disabled={isConfirmDisabled || isLoading}
-            className="flex-1 bg-orange-600 hover:bg-orange-700"
+            variant="default"
+            className="flex-1"
           >
             {isLoading ? 'Đang xử lý...' : 'Xác nhận'}
           </Button>

@@ -129,18 +129,20 @@ export function VoucherSelector({ selectedVoucher, onVoucherSelect, orderTotal, 
   }, [])
 
   return (
-    <div className="space-y-2">
-      <label htmlFor="voucher-select" className="block text-sm font-medium">
+    <div className="space-y-1">
+      <label htmlFor="voucher-select" className="block text-xs font-medium text-gray-700">
         Voucher giảm giá
       </label>
       <div className="flex gap-2">
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button id="voucher-select" variant="outline" className="flex-1 justify-start bg-transparent">
-              <Ticket className="w-4 h-4 mr-2" aria-hidden="true" />
-              {selectedVoucher
-                ? `${selectedVoucher.code} (-${formatCurrencyDisplay(calculateDiscount(selectedVoucher))})`
-                : "Chọn voucher"}
+            <Button id="voucher-select" variant="outline" className="flex-1 justify-start bg-transparent h-9 text-sm">
+              <Ticket className="w-3.5 h-3.5 mr-2" aria-hidden="true" />
+              <span className="truncate">
+                {selectedVoucher
+                  ? `${selectedVoucher.code} (-${formatCurrencyDisplay(calculateDiscount(selectedVoucher))})`
+                  : "Chọn voucher"}
+              </span>
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[80vh]">
@@ -275,10 +277,10 @@ export function VoucherSelector({ selectedVoucher, onVoucherSelect, orderTotal, 
             variant="outline"
             size="icon"
             onClick={() => onVoucherSelect(null)}
-            className="flex-shrink-0"
+            className="flex-shrink-0 h-9 w-9"
             aria-label="Xóa voucher đã chọn"
           >
-            <X className="w-4 h-4" aria-hidden="true" />
+            <X className="w-3.5 h-3.5" aria-hidden="true" />
           </Button>
         )}
       </div>
