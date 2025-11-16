@@ -1,0 +1,2 @@
+export { ContactTable } from './ContactTable';
+

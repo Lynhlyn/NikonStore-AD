@@ -31,6 +31,7 @@ import {
   Circle,
   Gift,
   ShoppingBag,
+  MessageSquare,
 } from "lucide-react";
 
 const renderIcon = (icon: React.ReactNode) => {
@@ -97,6 +98,8 @@ const renderIcon = (icon: React.ReactNode) => {
       return <Store className="w-5 h-5" />;
     case 'TemplateEmailManagement':
       return <MailIcon className="w-5 h-5" />;
+    case 'MessageSquare':
+      return <MessageSquare className="w-5 h-5" />;
     case 'StatisticsManagement':
       return <BarChart className="w-5 h-5" />;
     case 'Circle':

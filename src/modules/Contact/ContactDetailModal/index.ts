@@ -1,0 +1,2 @@
+export { ContactDetailModal } from './ContactDetailModal';
+
