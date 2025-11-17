@@ -163,11 +163,6 @@ const StaffTable = () => {
       cell: ({ row }: any) => <div className="text-left">{getStatusEnumString().find(item => item.value === row.getValue("status"))?.label || row.getValue("status")}</div>,
     },
     {
-      accessorKey: "createdAt",
-      header: "Ngày tạo",
-      cell: ({ row }: any) => <div className="text-left text-sm text-gray-600">{formatDate(row.getValue("createdAt"))}</div>,
-    },
-    {
       accessorKey: "updatedAt",
       header: "Ngày cập nhật",
       cell: ({ row }: any) => <div className="text-left text-sm text-gray-600">{formatDate(row.getValue("updatedAt"))}</div>,
