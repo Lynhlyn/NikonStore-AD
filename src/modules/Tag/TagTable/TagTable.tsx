@@ -158,16 +158,16 @@ const TagTable = () => {
       cell: ({ row }: any) => <div className="text-left">{getStatusDisplay(row.getValue("status"))}</div>,
     },
     {
-      accessorKey: "createdAt",
+      accessorKey: "updatedAt",
       header: () => (
         <div
           className="cursor-pointer flex items-center text-left"
-          onClick={() => handleSortChange("createdAt")}
+          onClick={() => handleSortChange("updatedAt")}
         >
-          Ngày tạo {getSortIcon("createdAt")}
+          Ngày cập nhật {getSortIcon("updatedAt")}
         </div>
       ),
-      cell: ({ row }: any) => <div className="text-left text-sm text-gray-600">{formatDate(row.getValue("createdAt"))}</div>,
+      cell: ({ row }: any) => <div className="text-left text-sm text-gray-600">{formatDate(row.getValue("updatedAt"))}</div>,
     },
     {
       id: "actions",
