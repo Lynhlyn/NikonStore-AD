@@ -15,7 +15,7 @@ const Email = () => {
 
   return (
     <UIFormControl>
-      <UIFormControl.Label className='leading-[170%] text-[#333] dark:text-foreground'>Địa chỉ email</UIFormControl.Label>
+      <UIFormControl.Label className='leading-[170%] text-white font-bold'>Địa chỉ email</UIFormControl.Label>
       <Controller
         control={control}
         name="email"
@@ -46,14 +46,14 @@ const Button = () => {
       <UIButton
       isLoading={isLoading}
       onClick={handleSubmit(onSubmit)}
-      className="font-medium mt-10 h-[50px] w-full mx-auto rounded-[50px] text-[15px] leading-[170%]"
+      className="font-medium mt-10 h-[50px] w-full mx-auto rounded-[50px] text-[15px] leading-[170%] bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg"
     >
       Gửi email
     </UIButton>
     <UIButton
       isLoading={isLoading}
       onClick={() => window.history.back()}
-      className="font-medium mt-2 h-[50px] w-full mx-auto rounded-[50px] text-[15px] leading-[170%] text-[#333] dark:text-foreground bg-gray-500 hover:bg-gray-600"
+      className="font-medium mt-2 h-[50px] w-full mx-auto rounded-[50px] text-[15px] leading-[170%] text-white bg-white/10 hover:bg-white/20 border border-white/30 backdrop-blur-sm"
     >
       Quay lại
     </UIButton>

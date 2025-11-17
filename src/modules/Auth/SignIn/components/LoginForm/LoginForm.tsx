@@ -102,12 +102,12 @@ const LoginForm: React.FC<ILoginFormProps> = () => {
   };
 
   return (
-    <div className="bg-white rounded-[10px] shadow-global px-10 py-[50px] border border-solid border-[#CCC] dark:bg-card dark:border-border">
+    <div className="backdrop-blur-xl bg-white/10 rounded-2xl shadow-2xl px-10 py-[50px] border border-white/20">
       <div
         className="flex flex-1 flex-col gap-7 w-full xl:text-base lg:text-sm text-sm"
       >
         <UIFormControl>
-          <UIFormControl.Label className='font-bold text-[#333] dark:text-foreground leading-[170%]'>Email</UIFormControl.Label>
+          <UIFormControl.Label className='font-bold text-white leading-[170%]'>Email</UIFormControl.Label>
           <Controller
             control={control}
             name="email"
@@ -133,8 +133,8 @@ const LoginForm: React.FC<ILoginFormProps> = () => {
         </UIFormControl>
         <UIFormControl>
           <div className='flex justify-between items-center '>
-            <UIFormControl.Label className='font-bold text-[#333] dark:text-foreground leading-[170%]'>Password</UIFormControl.Label>
-            <Link className='text-[15px] leading-[170%] text-[#1F84F8] dark:text-primary' href={getRouteWithRole(routerApp.auth.forgotPassword)}>Quên mật khẩu?</Link>
+            <UIFormControl.Label className='font-bold text-white leading-[170%]'>Password</UIFormControl.Label>
+            <Link className='text-[15px] leading-[170%] text-blue-300 hover:text-blue-200 transition-colors' href={getRouteWithRole(routerApp.auth.forgotPassword)}>Quên mật khẩu?</Link>
           </div>
           <Controller
             control={control}
@@ -158,13 +158,13 @@ const LoginForm: React.FC<ILoginFormProps> = () => {
           {
             errors.password ? (<UIFormControl.ErrorMessage>
               {errors.password?.message}
-            </UIFormControl.ErrorMessage>) : (<span className='text-sm leading-[150%] text-[#757388] dark:text-muted-foreground'>Vui lòng nhập mật khẩu gồm từ 8 đến 32 ký tự chữ và số (có thể sử dụng ký hiệu).</span>)
+            </UIFormControl.ErrorMessage>) : (<span className='text-sm leading-[150%] text-slate-300'>Vui lòng nhập mật khẩu gồm từ 8 đến 32 ký tự chữ và số (có thể sử dụng ký hiệu).</span>)
           }
         </UIFormControl>
         <UIButton
           isLoading={isLoading}
           onClick={handleSubmit(onSubmit)}
-          className="font-medium h-[50px] mt-1 w-full mx-auto rounded-[50px] text-[15px] leading-[170%]"
+          className="font-medium h-[50px] mt-1 w-full mx-auto rounded-[50px] text-[15px] leading-[170%] bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg"
         >
           Đăng nhập
         </UIButton>

@@ -49,17 +49,18 @@ const ForgotPasswordForm: React.FC<IForgotPasswordFormProps> = (props) => {
         onSubmit,
       }}
     >
-      <div className="flex flex-col justify-center  w-full max-w-[530px]">
-        <div className="w-full mb-[35px]">
-          <h3 className="text-[28px] text-[#454A70] dark:text-foreground font-bold heading-[170%] text-center">
+      <div className="flex flex-col justify-center w-full max-w-md">
+        <div className="w-full mb-8 text-center">
+          <h1 className="text-4xl font-extrabold text-white mb-2 tracking-tight">
             Đặt lại mật khẩu
-          </h3>
+          </h1>
+          <p className="text-slate-300 text-sm">
+            Chúng tôi sẽ gửi email đặt lại mật khẩu tới địa chỉ email bạn đã đăng ký
+          </p>
         </div>
-        <div className="w-full bg-white border border-solid border-[#CCC] dark:bg-card dark:border-border py-[50px] px-10 rounded-md">
-          <div className="text-base heading[170%] text-[#333] dark:text-foreground text-center mb-10">
-            Chúng tôi sẽ gửi email đặt lại mật khẩu
-            <br />
-            tới địa chỉ email bạn đã đăng ký
+        <div className="w-full backdrop-blur-xl bg-white/10 border border-white/20 py-[50px] px-10 rounded-2xl shadow-2xl">
+          <div className="text-base leading-[170%] text-white text-center mb-10">
+            Vui lòng nhập địa chỉ email của bạn để nhận liên kết đặt lại mật khẩu
           </div>
           <div>
             <ForgotPasswordFormControl.Email />

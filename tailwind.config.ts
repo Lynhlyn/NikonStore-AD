@@ -176,6 +176,17 @@ const config: Config = {
   				'100%': {
   					transform: 'scale(1) translateX(0)'
   				}
+  			},
+  			blob: {
+  				'0%, 100%': {
+  					transform: 'translate(0, 0) scale(1)'
+  				},
+  				'33%': {
+  					transform: 'translate(30px, -50px) scale(1.1)'
+  				},
+  				'66%': {
+  					transform: 'translate(-20px, 20px) scale(0.9)'
+  				}
   			}
   		},
   		boxShadow: {
@@ -184,7 +195,8 @@ const config: Config = {
         global: '0px 0px 4px 0px rgba(0, 0, 0, 0.05)'
   		},
   		animation: {
-  			zoomInLeft: 'zoomInLeft 3s ease-in-out forwards'
+  			zoomInLeft: 'zoomInLeft 3s ease-in-out forwards',
+  			blob: 'blob 7s infinite'
   		},
   		colors: {
                 ...BaseColors,
