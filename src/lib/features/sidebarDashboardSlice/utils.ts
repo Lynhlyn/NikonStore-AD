@@ -294,6 +294,32 @@ const ListRouteDashboard: IRouterItem[] = [
       },
     ],
   },
+  {
+    name: 'Quản lý hệ thống',
+    routerActive: [
+      routerApp.banner.list,
+      routerApp.banner.form,
+      routerApp.banner.formEdit({ id: ':id' }),
+    ],
+    icon: 'Settings',
+    type: 'group',
+    visibleRoles: [
+      EUserRole.ADMIN,
+    ],
+    subsRoute: [
+      {
+        name: 'Quản lý banner',
+        route: routerApp.banner.list,
+        routerActive: [
+          routerApp.banner.list,
+          routerApp.banner.form,
+          routerApp.banner.formEdit({ id: ':id' }),
+        ],
+        type: 'item',
+        icon: 'Dot',
+      },
+    ],
+  },
 ];
 
 const ListRouteDashboardGroup: ISidebarDashboardGroup[] = [

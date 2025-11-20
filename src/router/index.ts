@@ -110,6 +110,12 @@ const routerContact = {
   list: '/contacts',
 };
 
+const routerBanner = {
+  list: '/banners',
+  form: '/banners/new',
+  formEdit: (params: { id: number | string }) => `/banners/${params.id}/edit`,
+};
+
 const routerPos = {
   page: '/pos',
 };
@@ -133,6 +139,7 @@ const routerApp = {
   order: routerOrder,
   templateEmail: routerTemplateEmail,
   contact: routerContact,
+  banner: routerBanner,
   pos: routerPos,
 };
 
