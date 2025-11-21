@@ -10,31 +10,7 @@ import { ArrowLeft, Edit, Mail, Code, Calendar, FileText } from 'lucide-react';
 import { useAppNavigation } from '@/common/hooks';
 import { routerApp } from '@/router';
 import { Loader2 } from 'lucide-react';
-
-const EMAIL_ACTION_OPTIONS = [
-  { value: 'REGISTER_SUCCESS', label: 'Đăng ký thành công' },
-  { value: 'FORGOT_PASSWORD', label: 'Quên mật khẩu' },
-  { value: 'RESET_PASSWORD', label: 'Đặt lại mật khẩu' },
-  { value: 'PASSWORD_CHANGED', label: 'Mật khẩu đã được thay đổi' },
-  { value: 'VERIFY_EMAIL', label: 'Xác thực email' },
-  { value: 'WELCOME', label: 'Chào mừng' },
-  { value: 'ORDER_PENDING_CONFIRMATION', label: 'Đơn hàng chờ xác nhận' },
-  { value: 'ORDER_CONFIRMED', label: 'Đơn hàng đã xác nhận' },
-  { value: 'ORDER_PREPARING', label: 'Đơn hàng đang chuẩn bị' },
-  { value: 'ORDER_SHIPPING', label: 'Đơn hàng đang giao' },
-  { value: 'ORDER_COMPLETED', label: 'Đơn hàng hoàn thành' },
-  { value: 'ORDER_CANCELLED', label: 'Đơn hàng đã hủy' },
-  { value: 'ORDER_PENDING_PAYMENT', label: 'Đơn hàng chờ thanh toán' },
-  { value: 'ORDER_FAILED_DELIVERY', label: 'Đơn hàng giao thất bại' },
-  { value: 'ACCOUNT_LOCKED', label: 'Tài khoản bị khóa' },
-  { value: 'ACCOUNT_UNLOCKED', label: 'Tài khoản được mở khóa' },
-  { value: 'VOUCHER_ASSIGNED', label: 'Voucher được gán' },
-];
-
-const getActionLabel = (action: string) => {
-  const option = EMAIL_ACTION_OPTIONS.find(opt => opt.value === action);
-  return option ? option.label : action;
-};
+import { getEmailActionLabel } from '@/modules/TemplateEmail/emailActions';
 
 const getActionColor = (action: string) => {
   if (action.includes('ORDER')) {
@@ -146,7 +122,7 @@ export default function TemplateEmailDetail({ templateId }: TemplateEmailDetailP
                 <label className="text-sm font-medium text-muted-foreground">Loại Email</label>
                 <div className="mt-2">
                   <Badge className={getActionColor(template.action)}>
-                    {getActionLabel(template.action)}
+                    {getEmailActionLabel(template.action)}
                   </Badge>
                 </div>
               </div>

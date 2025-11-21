@@ -2,7 +2,9 @@ import { IListQuery } from '@/common/types/query';
 
 export type EmailAction =
   | 'REGISTER_SUCCESS'
+  | 'CLIENT_FORGOT_PASSWORD'
   | 'FORGOT_PASSWORD'
+  | 'ADMIN_FORGOT_PASSWORD'
   | 'RESET_PASSWORD'
   | 'PASSWORD_RESET'
   | 'PASSWORD_CHANGED'
