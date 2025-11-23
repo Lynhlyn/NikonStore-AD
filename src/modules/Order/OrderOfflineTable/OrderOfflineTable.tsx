@@ -123,7 +123,10 @@ const OrderOfflineTable = () => {
     {
       accessorKey: "totalAmount",
       header: "Tổng tiền",
-      cell: ({ row }: any) => formatCurrency((row.original.totalAmount || 0) - (row.original.discount || 0) + (row.original.shippingFee || 0)),
+      cell: ({ row }: any) => {
+        const totalAmount = row.original.totalAmount
+        return formatCurrency(totalAmount);
+      },
     },
     {
       accessorKey: "orderStatus",

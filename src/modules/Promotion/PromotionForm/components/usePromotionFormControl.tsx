@@ -62,8 +62,8 @@ const promotionSchema: yup.ObjectSchema<TPromotionFormField> = yup.object({
   productDetailIds: yup
     .array()
     .of(yup.number().required())
-    .optional()
-    .default([]),
+    .min(1, 'Phải chọn ít nhất một sản phẩm chi tiết')
+    .required('Danh sách sản phẩm chi tiết là bắt buộc'),
 });
 
 export function usePromotionFormProvider(id?: number, isViewMode?: boolean) {

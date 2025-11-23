@@ -33,6 +33,16 @@ export const promotionApi = apiSlice.injectEndpoints({
           params,
         };
       },
+      transformResponse: (response: any): IPromotionListResponse => {
+        const pagination = response?.pagination || {};
+        return {
+          content: Array.isArray(response?.data) ? response.data : [],
+          currentPage: pagination.page ?? 0,
+          totalItems: pagination.totalElements ?? 0,
+          totalPages: pagination.totalPages ?? 1,
+          pageSize: pagination.size ?? 10,
+        };
+      },
       keepUnusedDataFor: 0,
       providesTags: ['Promotion'],
     }),
@@ -52,11 +62,15 @@ export const promotionApi = apiSlice.injectEndpoints({
         method: 'POST',
         body: queryParams,
       }),
-      transformResponse: (response: IPromotionListResponse | { data: IPromotionListResponse }) => {
-        if ('data' in response) {
-          return response.data;
-        }
-        return response;
+      transformResponse: (response: any): IPromotionListResponse => {
+        const pagination = response?.pagination || {};
+        return {
+          content: Array.isArray(response?.data) ? response.data : [],
+          currentPage: pagination.page ?? 0,
+          totalItems: pagination.totalElements ?? 0,
+          totalPages: pagination.totalPages ?? 1,
+          pageSize: pagination.size ?? 10,
+        };
       },
       keepUnusedDataFor: 0,
       providesTags: ['Promotion'],

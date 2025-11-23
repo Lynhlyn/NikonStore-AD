@@ -1,29 +1,55 @@
-'use client';
+"use client";
 
-import { Plus, Search, Filter, Calendar, Tag, DollarSign, Eye, SquarePen, Trash2, Power } from "lucide-react";
-import { EStatusEnumString } from "@/common/enums/status";
-import { useAppNavigation, useModal } from "@/common/hooks";
-import { getSimpleError } from "@/common/utils/handleForm";
-import { getStatusColor } from "@/common/utils/statusColor";
-import { getStatusEnumStringWithAll } from "@/common/utils/statusOption";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/core/shadcn/components/ui/table";
 import { Button } from "@/core/shadcn/components/ui/button";
-import { ESize } from "@/core/ui/Helpers/UIsize.enum";
+import {
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import { UIPagination, UIPaginationResuft } from "@/core/ui/UIPagination";
-import { UISingleSelect } from "@/core/ui/UISingleSelect";
-import { UITextField } from "@/core/ui/UITextField";
-import { useDeletePromotionMutation, useFetchPromotionsQuery, useTogglePromotionStatusMutation } from "@/lib/services/modules/promotionService";
-import { routerApp } from "@/router";
-import { useRouter } from "next/navigation";
+import {
+  SquarePen,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+  ToggleLeft,
+  ToggleRight,
+  Plus,
+} from "lucide-react";
+import { useAppNavigation } from "@/common/hooks";
+import {
+  useFetchPromotionsQuery,
+  useDeletePromotionMutation,
+  useTogglePromotionStatusMutation,
+} from "@/lib/services/modules/promotionService";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
-import { useState } from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { routerApp } from "@/router";
+import {
+  getStatusEnumString,
+  getStatusEnumStringWithAll,
+} from "@/common/utils/statusOption";
+import { useModal } from "@/common/hooks/useModal";
+import { UISingleSelect } from "@/core/ui/UISingleSelect";
+import { EStatusEnumString } from "@/common/enums/status";
+import { ESize } from "@/core/ui/Helpers/UIsize.enum";
+import { formatLocalDateTime } from "@/common/utils/formatDateToVN";
+import React from "react";
 
-const PromotionTable = () => {
+const PromotionTable: React.FC = () => {
   const router = useRouter();
   const { getRouteWithRole } = useAppNavigation();
   const { Modal, openModal } = useModal();
-  const [searchTerm, setSearchTerm] = useState("");
-
   const [queryStates, setQueryStates] = useQueryStates({
     page: parseAsInteger.withDefault(0),
     status: parseAsString.withDefault(""),
@@ -31,18 +57,24 @@ const PromotionTable = () => {
     sortDir: parseAsString.withDefault("desc"),
   });
 
-  const { data, refetch } = useFetchPromotionsQuery({
-    page: queryStates.page,
-    size: 10,
-    sortBy: queryStates.sortBy || "id",
-    sortDir: (queryStates.sortDir === "asc" || queryStates.sortDir === "desc") ? queryStates.sortDir : undefined,
-    status: queryStates.status || undefined,
-  }, {
-    refetchOnMountOrArgChange: true,
-  });
+  const { data, refetch } = useFetchPromotionsQuery(
+    {
+      page: queryStates.page,
+      size: 10,
+      sortBy: queryStates.sortBy || "id",
+      sortDir:
+        queryStates.sortDir === "asc" || queryStates.sortDir === "desc"
+          ? queryStates.sortDir
+          : undefined,
+      status: queryStates.status || undefined,
+    },
+    { refetchOnMountOrArgChange: true }
+  );
 
-  const [deletePromotion, { isLoading: isDeleting }] = useDeletePromotionMutation();
-  const [togglePromotionStatus, { isLoading: isToggling }] = useTogglePromotionStatusMutation();
+  const [deletePromotion, { isLoading: isDeleting }] =
+    useDeletePromotionMutation();
+  const [togglePromotionStatus, { isLoading: isToggling }] =
+    useTogglePromotionStatusMutation();
 
   const handlePageChange = (newPage: number) => {
     setQueryStates((prev) => ({
@@ -54,276 +86,428 @@ const PromotionTable = () => {
   const handleStatusChange = (status: { value: string; label: string }) => {
     setQueryStates((prev) => ({
       ...prev,
-      status: status.value as EStatusEnumString || "",
+      status: (status.value as EStatusEnumString) || "",
       page: 0,
     }));
   };
 
-  const handleDeleteClick = (promotionId: number, promotionName: string) => {
+  const handleSortChange = (column: string) => {
+    setQueryStates((prev) => ({
+      ...prev,
+      sortBy: column,
+      sortDir:
+        prev.sortBy === column && prev.sortDir === "asc" ? "desc" : "asc",
+    }));
+  };
+
+  const getSortIcon = (column: string) => {
+    if (queryStates.sortBy !== column) {
+      return null;
+    }
+    return queryStates.sortDir === "asc" ? (
+      <ArrowUp className="inline-block w-3 h-3 ml-1" />
+    ) : (
+      <ArrowDown className="inline-block w-3 h-3 ml-1" />
+    );
+  };
+
+  const handleDeleteClick = (promotionId: number) => {
     openModal({
-      title: "Xác nhận xóa chương trình khuyến mãi",
-      description: `Bạn có chắc chắn muốn xóa "${promotionName}"? Hành động này không thể hoàn tác.`,
+      title: "Bạn có chắc chắn muốn xóa chương trình khuyến mãi này không?",
+      description: "Hành động này không thể hoàn tác.",
       onSubmit: () => handleDelete(promotionId),
-      submitClassName: "w-[100px]",
+      submitClassName: "w-[100px] bg-[#4CD596]",
       dialogContentProps: {
         className: "max-w-md",
-      }
+      },
+    });
+  };
+
+  const handleToggleStatusClick = (
+    promotionId: number,
+    currentStatus: EStatusEnumString
+  ) => {
+    const newStatus =
+      currentStatus === EStatusEnumString.ACTIVE ? "vô hiệu hóa" : "kích hoạt";
+    openModal({
+      title: `Bạn có chắc chắn muốn ${newStatus} chương trình khuyến mãi này không?`,
+      description: "Bạn có thể thay đổi trạng thái này bất cứ lúc nào.",
+      onSubmit: () => handleToggleStatus(promotionId),
+      submitClassName: "w-[100px] bg-[#4CD596]",
+      dialogContentProps: {
+        className: "max-w-md",
+      },
     });
   };
 
   const handleDelete = async (id: number) => {
     try {
       await deletePromotion(id).unwrap();
-      toast.success('Đã xóa thành công chương trình khuyến mãi');
+      toast.success("Đã xóa thành công chương trình khuyến mãi");
       refetch();
     } catch (error: any) {
-      const errorMessage = getSimpleError(error);
-      toast.error(errorMessage);
+      toast.error(
+        "Đã xảy ra lỗi khi xóa chương trình khuyến mãi: " + error.message
+      );
     }
   };
 
   const handleToggleStatus = async (id: number) => {
     try {
       await togglePromotionStatus(id).unwrap();
-      toast.success('Đã cập nhật trạng thái chương trình khuyến mãi');
+      toast.success("Đã cập nhật trạng thái chương trình khuyến mãi");
       refetch();
     } catch (error: any) {
-      const errorMessage = getSimpleError(error);
-      toast.error(errorMessage);
+      toast.error("Đã xảy ra lỗi khi cập nhật trạng thái: " + error.message);
     }
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
     }).format(amount);
   };
 
-  const formatDateDisplay = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  const getStatusColor = (status: EStatusEnumString) => {
+    switch (status) {
+      case EStatusEnumString.ACTIVE:
+        return "text-green-600";
+      case EStatusEnumString.INACTIVE:
+        return "text-red-600";
+      default:
+        return "text-gray-600";
+    }
   };
 
-  const getStatusBadge = (status: EStatusEnumString) => {
-    const statusConfig: Record<string, { label: string; className: string }> = {
-      'ACTIVE': { label: 'Đang hoạt động', className: 'bg-green-100 text-green-800 border-green-200' },
-      'PENDING_START': { label: 'Chờ bắt đầu', className: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-      'INACTIVE': { label: 'Tạm dừng', className: 'bg-gray-100 text-gray-800 border-gray-200' },
-      'DELETED': { label: 'Đã xóa', className: 'bg-red-100 text-red-800 border-red-200' },
-    };
-
-    const config = statusConfig[status] || {
-      label: status,
-      className: 'bg-gray-100 text-gray-800 border-gray-200'
-    };
-
-    return (
-      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${config.className}`}>
-        {config.label}
-      </span>
-    );
-  };
-
-  const filteredPromotions = data?.content?.filter((promotion) => {
-    if (!searchTerm) return true;
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      promotion.name.toLowerCase().includes(searchLower) ||
-      promotion.title.toLowerCase().includes(searchLower) ||
-      (promotion.code && promotion.code.toLowerCase().includes(searchLower))
-    );
-  }) || [];
-
-  return (
-    <div className="pt-[50px] px-[50px] pb-[50px]">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Quản lý chương trình khuyến mãi</h1>
-        <p className="text-gray-600">Tạo và quản lý các chương trình khuyến mãi cho sản phẩm</p>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6">
-          <div className="flex-1 w-full md:w-auto">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <UITextField
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Tìm kiếm theo tên, tiêu đề hoặc mã khuyến mãi..."
-                className="pl-10 w-full"
-              />
-            </div>
-          </div>
-          <div className="flex gap-3 w-full md:w-auto">
-            <div className="w-[200px]">
-              <UISingleSelect
-                options={[
-                  { value: "", label: "Tất cả trạng thái" },
-                  ...getStatusEnumStringWithAll()
-                ]}
-                selected={
-                  queryStates.status
-                    ? { value: queryStates.status, label: getStatusEnumStringWithAll().find(item => item.value === queryStates.status)?.label || "" }
-                    : { value: "", label: "Tất cả trạng thái" }
-                }
-                onChange={handleStatusChange}
-                className="rounded-lg"
-                size={ESize.M}
-                renderSelected={(props) => <UISingleSelect.Selected {...props} />}
-                renderOption={(props) => <UISingleSelect.Option {...props} />}
-              />
-            </div>
-            <Button
-              className="h-[44px] bg-indigo-600 hover:bg-indigo-700"
-              onClick={() => refetch()}
-            >
-              <Filter className="w-5 h-5 text-white mr-2" />
-              Làm mới
-            </Button>
-            <Button
-              className="h-[44px]"
-              onClick={() => router.push(getRouteWithRole(routerApp.promotion.form))}
-            >
-              <Plus className="w-5 h-5 text-white mr-2" />
-              Tạo mới
-            </Button>
-          </div>
+  const columns = [
+    {
+      accessorKey: "id",
+      header: () => (
+        <div
+          className="cursor-pointer flex items-center"
+          onClick={() => handleSortChange("id")}
+        >
+          ID {getSortIcon("id")}
         </div>
-
-        {filteredPromotions.length === 0 ? (
-          <div className="text-center py-12">
-            <Tag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">Không tìm thấy chương trình khuyến mãi nào</p>
+      ),
+      meta: { width: "w-[80px]" },
+      cell: ({ row }: any) => <div>{row.getValue("id")}</div>,
+    },
+    {
+      accessorKey: "name",
+      header: () => (
+        <div
+          className="cursor-pointer flex items-center"
+          onClick={() => handleSortChange("name")}
+        >
+          Tên chương trình {getSortIcon("name")}
+        </div>
+      ),
+      meta: { width: "w-[200px]" },
+      cell: ({ row }: any) => (
+        <div className="font-medium text-blue-600 text-left">
+          {row.getValue("name")}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "title",
+      header: "Tiêu đề",
+      meta: { width: "w-[200px]" },
+      cell: ({ row }: any) => (
+        <div className="line-clamp-2 text-left">{row.getValue("title")}</div>
+      ),
+    },
+    {
+      accessorKey: "code",
+      header: () => (
+        <div
+          className="cursor-pointer flex items-center"
+          onClick={() => handleSortChange("code")}
+        >
+          Mã khuyến mãi {getSortIcon("code")}
+        </div>
+      ),
+      meta: { width: "w-[150px]" },
+      cell: ({ row }: any) => {
+        const code = row.getValue("code");
+        return (
+          <div className="font-medium text-purple-600">{code || "N/A"}</div>
+        );
+      },
+    },
+    {
+      accessorKey: "discountValue",
+      header: "Giá trị giảm",
+      meta: { width: "w-[120px]" },
+      cell: ({ row }: any) => {
+        const value = row.getValue("discountValue");
+        const type = row.original.discountType;
+        return (
+          <div className="font-medium">
+            {type === "percentage" ? `${value}%` : formatCurrency(value)}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPromotions.map((promotion) => {
-              const isActive = promotion.status === EStatusEnumString.ACTIVE;
-              const isPendingStart = promotion.status === EStatusEnumString.PENDING_START;
-              const isExpired = new Date(promotion.endDate) < new Date();
-
-              return (
-                <div
-                  key={promotion.id}
-                  className="bg-gradient-to-br from-white to-gray-50 rounded-lg border border-gray-200 hover:border-indigo-300 hover:shadow-lg transition-all duration-200 p-6"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-2">
-                        {promotion.name}
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-2">{promotion.title}</p>
-                      {promotion.code && (
-                        <div className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-50 text-indigo-700 rounded-md text-xs font-medium">
-                          <Tag className="w-3 h-3" />
-                          {promotion.code}
-                        </div>
-                      )}
-                    </div>
-                    {getStatusBadge(promotion.status)}
-                  </div>
-
-                  <div className="space-y-3 mb-4">
-                    <div className="flex items-center gap-2 text-sm">
-                      <DollarSign className="w-4 h-4 text-green-600" />
-                      <span className="text-gray-600">Giảm giá:</span>
-                      <span className="font-semibold text-green-700">
-                        {promotion.discountType === "percentage"
-                          ? `${promotion.discountValue}%`
-                          : formatCurrency(promotion.discountValue)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="w-4 h-4 text-blue-600" />
-                      <span className="text-gray-600">Bắt đầu:</span>
-                      <span className="font-medium">{formatDateDisplay(promotion.startDate)}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="w-4 h-4 text-red-600" />
-                      <span className="text-gray-600">Kết thúc:</span>
-                      <span className="font-medium">{formatDateDisplay(promotion.endDate)}</span>
-                    </div>
-                    {promotion.products && promotion.products.length > 0 && (
-                      <div className="text-xs text-gray-500">
-                        Áp dụng cho {promotion.products.length} sản phẩm
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex gap-2 pt-4 border-t border-gray-200">
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      size="sm"
-                      onClick={() => router.push(getRouteWithRole(routerApp.promotion.formView({ id: promotion.id })))}
-                    >
-                      <Eye className="w-4 h-4 mr-1" />
-                      Xem
-                    </Button>
-                    {!isExpired && (
-                      <Button
-                        className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200"
-                        size="sm"
-                        onClick={() => router.push(getRouteWithRole(routerApp.promotion.formEdit({ id: promotion.id })))}
-                      >
-                        <SquarePen className="w-4 h-4 mr-1" />
-                        Sửa
-                      </Button>
-                    )}
-                    {!isPendingStart && (
-                      <Button
-                        className={`${isActive ? "bg-red-50 hover:bg-red-100 text-red-700 border border-red-200" : "bg-green-50 hover:bg-green-100 text-green-700 border border-green-200"}`}
-                        size="sm"
-                        disabled={isToggling}
-                        onClick={() => handleToggleStatus(promotion.id)}
-                        title={isActive ? "Tạm dừng" : "Kích hoạt"}
-                      >
-                        <Power className="w-4 h-4" />
-                      </Button>
-                    )}
-                    <Button
-                      className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200"
-                      size="sm"
-                      disabled={isDeleting}
-                      onClick={() => handleDeleteClick(promotion.id, promotion.name)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              );
+        );
+      },
+    },
+    {
+      accessorKey: "startDate",
+      header: () => (
+        <div
+          className="cursor-pointer flex items-center"
+          onClick={() => handleSortChange("startDate")}
+        >
+          Ngày bắt đầu {getSortIcon("startDate")}
+        </div>
+      ),
+      meta: { width: "w-[120px]" },
+      cell: ({ row }: any) => {
+        const startDate = row.getValue("startDate");
+        if (!startDate) return <div></div>;
+        const date = new Date(startDate);
+        return (
+          <div>
+            {date.toLocaleDateString("vi-VN", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
             })}
           </div>
-        )}
-
-        {data && data.totalPages > 1 && (
-          <div className="mt-8">
-            <UIPaginationResuft
-              currentPage={queryStates.page + 1}
-              totalCount={data.totalItems || 0}
-              totalPage={data.totalPages || 1}
-            />
-            <UIPagination
-              currentPage={queryStates.page + 1}
-              totalPage={data.totalPages || 1}
-              onChange={handlePageChange}
-              displayPage={5}
-            />
+        );
+      },
+    },
+    {
+      accessorKey: "endDate",
+      header: () => (
+        <div
+          className="cursor-pointer flex items-center"
+          onClick={() => handleSortChange("endDate")}
+        >
+          Ngày kết thúc {getSortIcon("endDate")}
+        </div>
+      ),
+      meta: { width: "w-[120px]" },
+      cell: ({ row }: any) => {
+        const endDate = row.getValue("endDate");
+        if (!endDate) return <div></div>;
+        const date = new Date(endDate);
+        return (
+          <div>
+            {date.toLocaleDateString("vi-VN", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </div>
-        )}
+        );
+      },
+    },
+    {
+      accessorKey: "status",
+      header: () => (
+        <div
+          className="cursor-pointer flex items-center"
+          onClick={() => handleSortChange("status")}
+        >
+          Trạng thái {getSortIcon("status")}
+        </div>
+      ),
+      meta: { width: "w-[120px]" },
+      cell: ({ row }: any) => {
+        const status = row.getValue("status");
+        const statusLabel =
+          getStatusEnumStringWithAll().find((item) => item.value === status)
+            ?.label || "";
+        return (
+          <div className={`font-medium ${getStatusColor(status)}`}>
+            {statusLabel}
+          </div>
+        );
+      },
+    },
+    {
+      id: "actions",
+      header: () => <div className="text-center">Hành động</div>,
+      meta: { width: "w-[200px]" },
+      cell: ({ row }: any) => {
+        const id = row.getValue("id");
+        const status = row.original.status;
+        const isActive = status === EStatusEnumString.ACTIVE;
+        const isPendingStart = status === EStatusEnumString.PENDING_START;
+
+        return (
+          <div className="flex gap-2 justify-end">
+            <Button
+              className="bg-outline hover:bg-outline-hover"
+              size="sm"
+              onClick={() =>
+                router.push(
+                  getRouteWithRole(routerApp.promotion.formEdit({ id }))
+                )
+              }
+            >
+              <SquarePen className="w-4 h-4 text-black" />
+            </Button>
+            {!isPendingStart && (
+              <Button
+                className={`${isActive ? "bg-red-100 hover:bg-red-200" : "bg-green-100 hover:bg-green-200"}`}
+                size="sm"
+                disabled={isToggling}
+                onClick={() => handleToggleStatusClick(id, status)}
+                title={isActive ? "Vô hiệu hóa" : "Kích hoạt"}
+              >
+                {isActive ? (
+                  <ToggleRight className="w-4 h-4 text-red-600" />
+                ) : (
+                  <ToggleLeft className="w-4 h-4 text-green-600" />
+                )}
+              </Button>
+            )}
+            <Button
+              className="bg-red-100 hover:bg-red-200"
+              size="sm"
+              disabled={isDeleting}
+              onClick={() => handleDeleteClick(id)}
+            >
+              <Trash2 className="w-4 h-4 text-red-600" />
+            </Button>
+          </div>
+        );
+      },
+    },
+  ];
+
+  const table = useReactTable({
+    data: data?.content || [],
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
+
+  return (
+    <div className="pt-[50px] px-[50px]">
+      <div className="mb-[25px] text-2xl leading-[155%] font-normal">
+        <span>Quản lý chương trình khuyến mãi</span>
       </div>
 
+      <div className="flex justify-between items-end mb-5">
+        <div className="w-[200px]">
+          <UISingleSelect
+            options={[
+              { value: "", label: "Tất cả trạng thái" },
+              ...getStatusEnumString(),
+            ]}
+            selected={
+              queryStates.status
+                ? {
+                    value: queryStates.status,
+                    label:
+                      getStatusEnumString().find(
+                        (item) => item.value === queryStates.status
+                      )?.label || "",
+                  }
+                : { value: "", label: "Tất cả trạng thái" }
+            }
+            onChange={handleStatusChange}
+            className="rounded-sm"
+            size={ESize.M}
+            renderSelected={(props) => <UISingleSelect.Selected {...props} />}
+            renderOption={(props) => <UISingleSelect.Option {...props} />}
+          />
+        </div>
+        <Button
+          className="h-[44px]"
+          onClick={() =>
+            router.push(getRouteWithRole(routerApp.promotion.form))
+          }
+        >
+          <Plus className="w-[20px] h-[20px] text-white" />
+          <span className="ml-2">Thêm chương trình khuyến mãi</span>
+        </Button>
+      </div>
+
+      <div className="bg-white rounded-[10px] px-[33px] pt-[20px] pb-[67px] mt-5">
+        <Table className="table-auto mt-3">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  const widthClass =
+                    (header.column.columnDef.meta as any)?.width ?? "";
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className={`text-[#A5A5A5] font-normal leading-[130%] text-sm ${widthClass} text-left`}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => {
+                    const widthClass =
+                      (cell.column.columnDef.meta as any)?.width ?? "";
+                    const isActionsColumn = cell.column.id === "actions";
+                    return (
+                      <TableCell
+                        key={cell.id}
+                        className={`text-[#333333] font-normal leading-[130%] text-sm ${widthClass} ${isActionsColumn ? "text-center" : "text-left"} p-5`}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  Không có kết quả nào.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+
+        <div className="mt-[56px]">
+          <UIPaginationResuft
+            currentPage={queryStates.page + 1}
+            totalCount={data?.totalItems || 0}
+            totalPage={data?.totalPages || 1}
+          />
+          <UIPagination
+            currentPage={queryStates.page + 1}
+            totalPage={data?.totalPages || 1}
+            onChange={handlePageChange}
+            displayPage={5}
+          />
+        </div>
+      </div>
       <Modal />
     </div>
   );
 };
 
 export default PromotionTable;
-

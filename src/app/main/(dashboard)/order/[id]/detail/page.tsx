@@ -170,7 +170,9 @@ export default function OrderDetail({ params }: OrderDetailProps) {
   const totalAmount = orderDetail.totalAmount || 0;
   const discount = orderDetail.discount || 0;
   const shippingFee = orderDetail.shippingFee || 0;
-  const finalAmount = totalAmount - discount + shippingFee;
+  // Cap discount to not exceed totalAmount to prevent negative final amount
+  const cappedDiscount = Math.min(discount, totalAmount);
+  const finalAmount = Math.max(0, totalAmount - cappedDiscount + shippingFee);
 
   return (
     <div className="p-6">
@@ -283,7 +285,7 @@ export default function OrderDetail({ params }: OrderDetailProps) {
           )}
           <div className="flex justify-between text-lg font-bold border-t pt-2 mt-2">
             <span>Thành tiền:</span>
-            <span>{formatCurrency(finalAmount)}</span>
+            <span>{formatCurrency(totalAmount)}</span>
           </div>
         </div>
         {orderDetail.note && (

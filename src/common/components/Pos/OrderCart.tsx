@@ -15,6 +15,42 @@ interface OrderCartProps {
 }
 
 export function OrderCart({ selectedOrder, isLoading, onUpdateQuantity, onClearOrder }: OrderCartProps) {
+  const calculateDiscountedPrice = (price: number, promotion?: any) => {
+    if (!promotion || !promotion.isActive) {
+      return price
+    }
+
+    if (promotion.discountType === "percentage") {
+      const discountAmount = (price * promotion.discountValue) / 100
+      return Math.round(price - discountAmount)
+    } else if (promotion.discountType === "fixed_amount" || promotion.discountType === "amount") {
+      return Math.max(0, price - promotion.discountValue)
+    }
+
+    return price
+  }
+
+  const getUnitPrice = (item: any) => {
+    if (item.promotion && item.promotion.isActive) {
+      const discountedUnitPrice = item.totalAmount / item.quantity
+      return discountedUnitPrice
+    }
+    const unitPrice = item.price / item.quantity
+    return unitPrice
+  }
+
+  const getOriginalUnitPrice = (item: any) => {
+    if (item.promotion && item.promotion.isActive) {
+      const discountedUnitPrice = item.totalAmount / item.quantity
+      if (item.promotion.discountType === "percentage") {
+        return Math.round(discountedUnitPrice / (1 - item.promotion.discountValue / 100))
+      } else if (item.promotion.discountType === "fixed_amount" || item.promotion.discountType === "amount") {
+        return discountedUnitPrice + item.promotion.discountValue
+      }
+    }
+    return item.price / item.quantity
+  }
+
   return (
     <Card className="border-gray-200 shadow-sm">
       <CardHeader className="bg-white border-b border-gray-200 px-3 sm:px-4 py-2 sm:py-3">
@@ -48,20 +84,22 @@ export function OrderCart({ selectedOrder, isLoading, onUpdateQuantity, onClearO
               <div key={item.id} className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
                 <ProductImage src={item.thumbnailImage} alt={item.productName} className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-md border border-gray-200" />
 
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-xs sm:text-sm truncate text-gray-900">{item.productName}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">
+                <div className="flex-1 min-w-0 max-w-[200px] sm:max-w-[250px]">
+                  <div className="font-semibold text-xs sm:text-sm text-gray-900 line-clamp-2 break-words" title={item.productName}>
+                    {item.productName}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-0.5 truncate">
                     <span className="hidden sm:inline">SKU: {item.sku}</span>
                     <span className="sm:hidden">{item.sku}</span>
-                    {item.color && <span> • {item.color.name}</span>}
-                    {item.capacity && <span> • {item.capacity.name}</span>}
+                    {item.color && <span> • <span className="truncate inline-block max-w-[60px] sm:max-w-[80px]" title={item.color.name}>{item.color.name}</span></span>}
+                    {item.capacity && <span> • <span className="truncate inline-block max-w-[60px] sm:max-w-[80px]" title={item.capacity.name}>{item.capacity.name}</span></span>}
                   </div>
                   <div className="space-y-0.5 mt-1.5">
                     {item.promotion && item.promotion.isActive ? (
                       <>
                         <div className="flex items-center gap-2">
                           <span className="line-through text-gray-400 text-xs">
-                            {formatCurrencyDisplay(item.price)}
+                            {formatCurrencyDisplay(getOriginalUnitPrice(item))}
                           </span>
                           <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-medium">
                             {item.promotion.discountType === "percentage"
@@ -70,7 +108,7 @@ export function OrderCart({ selectedOrder, isLoading, onUpdateQuantity, onClearO
                           </span>
                         </div>
                         <div className="text-red-600 font-semibold text-sm">
-                          {formatCurrencyDisplay(item.price - (item.discount / item.quantity))} / sản phẩm
+                          {formatCurrencyDisplay(getUnitPrice(item))} / sản phẩm
                         </div>
                         <div className="text-xs text-gray-600 font-medium">
                           Tổng: {formatCurrencyDisplay(item.totalAmount)}
@@ -79,7 +117,7 @@ export function OrderCart({ selectedOrder, isLoading, onUpdateQuantity, onClearO
                     ) : (
                       <>
                         <div className="text-blue-600 font-semibold text-sm">
-                          {formatCurrencyDisplay(item.price)} / sản phẩm
+                          {formatCurrencyDisplay(item.price / item.quantity)} / sản phẩm
                         </div>
                         <div className="text-xs text-gray-600 font-medium">
                           Tổng: {formatCurrencyDisplay(item.totalAmount)}

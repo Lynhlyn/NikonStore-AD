@@ -146,10 +146,12 @@ export function DialogProductTable({ onProductSelect, onScanSuccess, scanDisable
                   {allProducts.map((product) => (
                     <TableRow key={product.id} className="hover:bg-gray-50 transition-colors">
                       <TableCell className="py-2 sm:py-3">
-                        <div className="min-w-0">
-                          <div className="font-semibold text-xs sm:text-sm text-gray-900 truncate">{product.name}</div>
+                        <div className="min-w-0 max-w-[200px] sm:max-w-[300px]">
+                          <div className="font-semibold text-xs sm:text-sm text-gray-900 line-clamp-2 break-words" title={product.name}>
+                            {product.name}
+                          </div>
                           {product.description && (
-                            <div className="text-xs text-gray-500 truncate max-w-xs hidden sm:block">{product.description}</div>
+                            <div className="text-xs text-gray-500 truncate max-w-xs hidden sm:block" title={product.description}>{product.description}</div>
                           )}
                           <div className="flex gap-1 sm:hidden mt-1">
                             {product.brand?.name && (

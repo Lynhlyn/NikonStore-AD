@@ -158,7 +158,9 @@ export function DialogProductDetailTable({ isOpen, onClose, productId, onAddToCa
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-7xl max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle>Chi tiết sản phẩm: {productName}</DialogTitle>
+          <DialogTitle className="truncate max-w-[600px]" title={`Chi tiết sản phẩm: ${productName}`}>
+            Chi tiết sản phẩm: {productName}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="mt-4">
@@ -216,7 +218,7 @@ export function DialogProductDetailTable({ isOpen, onClose, productId, onAddToCa
                           </Badge>
                         </TableCell>
                         <TableCell className="p-2">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 max-w-[120px]">
                             {detail.color.hexCode && (
                               <div
                                 className="w-4 h-4 rounded-full border border-gray-300 flex-shrink-0"
@@ -224,13 +226,15 @@ export function DialogProductDetailTable({ isOpen, onClose, productId, onAddToCa
                                 title={detail.color.name}
                               />
                             )}
-                            <span className="text-sm truncate" title={detail.color.name}>
+                            <span className="text-sm truncate max-w-[100px]" title={detail.color.name}>
                               {detail.color.name}
                             </span>
                           </div>
                         </TableCell>
                         <TableCell className="p-2">
-                          <span className="text-sm font-medium">{detail.capacity.name}</span>
+                          <span className="text-sm font-medium truncate inline-block max-w-[100px]" title={detail.capacity.name}>
+                            {detail.capacity.name}
+                          </span>
                         </TableCell>
                         <TableCell className="p-2">
                           <div className="space-y-1">

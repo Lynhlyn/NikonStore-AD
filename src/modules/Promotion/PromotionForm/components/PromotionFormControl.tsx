@@ -1,6 +1,7 @@
 'use client';
 
 import FormAction from '@/common/components/FormAction/FormAction';
+import { ProductDetailSelector } from '@/common/components/ProductDetailSelector';
 import { EStatusEnumString } from '@/common/enums/status';
 import { getStatusEnumStringWithAll } from '@/common/utils/statusOption';
 import { UIFormControl, UISingleSelect, UITextField, UITextArea } from '@/core/ui';
@@ -8,6 +9,14 @@ import { ESize } from '@/core/ui/Helpers/UIsize.enum';
 import { usePromotionFormContext } from '@/modules/Promotion/PromotionForm/components/usePromotionFormControl';
 import { routerApp } from '@/router';
 import { Controller } from 'react-hook-form';
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/core/shadcn/components/ui/dialog';
+import { Button as UIButton } from '@/core/shadcn/components/ui/button';
 
 const NameInput = () => {
   const { control, formState: { errors }, isViewMode } = usePromotionFormContext();
@@ -324,34 +333,75 @@ const ProductSelectionInput = () => {
     isViewMode,
   } = usePromotionFormContext();
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const selectedProductDetailIds = watch("productDetailIds") || [];
 
   const handleProductDetailSelectChange = (productDetailIds: number[]) => {
-    setValue("productDetailIds", productDetailIds);
+    setValue("productDetailIds", productDetailIds, { shouldValidate: true });
   };
+
+  if (isViewMode) {
+    return (
+      <div className="space-y-4">
+        <UIFormControl>
+          <UIFormControl.Label>Sản phẩm chi tiết áp dụng khuyến mãi</UIFormControl.Label>
+          <div className="border rounded-lg p-4 bg-gray-50">
+            <p className="text-sm text-gray-600">
+              {selectedProductDetailIds.length > 0
+                ? `Đã áp dụng cho ${selectedProductDetailIds.length} sản phẩm chi tiết`
+                : "Chưa áp dụng cho sản phẩm nào"}
+            </p>
+          </div>
+        </UIFormControl>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
       <UIFormControl>
-        <UIFormControl.Label>Sản phẩm chi tiết áp dụng khuyến mãi</UIFormControl.Label>
-        <div className="border rounded-lg p-4 bg-gray-50">
-          <p className="text-sm text-gray-600 mb-2">
-            {selectedProductDetailIds.length > 0
-              ? `Đã chọn ${selectedProductDetailIds.length} sản phẩm`
-              : "Chưa chọn sản phẩm nào"}
-          </p>
-          {!isViewMode && (
-            <p className="text-xs text-gray-500">
-              Tính năng chọn sản phẩm sẽ được tích hợp sau
-            </p>
+        <UIFormControl.Label isRequired>Sản phẩm chi tiết áp dụng khuyến mãi</UIFormControl.Label>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between border rounded-lg border-gray-200 p-4 bg-gray-50">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-700">
+                Đã chọn: <span className="text-indigo-600">{selectedProductDetailIds.length}</span> sản phẩm chi tiết
+              </p>
+              {selectedProductDetailIds.length === 0 && (
+                <p className="text-xs text-gray-500 mt-1">Chưa có sản phẩm nào được chọn</p>
+              )}
+            </div>
+            <UIButton
+              type="button"
+              onClick={() => setIsDialogOpen(true)}
+              variant="outline"
+              className="ml-4"
+            >
+              {selectedProductDetailIds.length > 0 ? 'Chỉnh sửa' : 'Chọn sản phẩm'}
+            </UIButton>
+          </div>
+          {errors.productDetailIds && (
+            <UIFormControl.ErrorMessage>
+              {errors.productDetailIds.message}
+            </UIFormControl.ErrorMessage>
           )}
         </div>
-        {errors.productDetailIds && (
-          <UIFormControl.ErrorMessage>
-            {errors.productDetailIds.message}
-          </UIFormControl.ErrorMessage>
-        )}
       </UIFormControl>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Chọn sản phẩm chi tiết áp dụng khuyến mãi</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto">
+            <ProductDetailSelector
+              selectedIds={selectedProductDetailIds}
+              onSelectChange={handleProductDetailSelectChange}
+              currentPromotionId={currentPromotionId}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

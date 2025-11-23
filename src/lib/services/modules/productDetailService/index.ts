@@ -18,6 +18,18 @@ export const productDetailApi = apiSlice.injectEndpoints({
         method: 'GET',
         params: queryParams,
       }),
+      transformResponse: (response: any): IProductDetailListResponse => {
+        const pagination = response?.pagination || {};
+        return {
+          data: Array.isArray(response?.data) ? response.data : [],
+          pagination: {
+            page: pagination.page ?? 0,
+            size: pagination.size ?? 10,
+            totalElements: pagination.totalElements ?? 0,
+            totalPages: pagination.totalPages ?? 1,
+          },
+        };
+      },
       keepUnusedDataFor: 0,
     }),
     fetchProductDetailById: build.query<ProductDetail, number>({

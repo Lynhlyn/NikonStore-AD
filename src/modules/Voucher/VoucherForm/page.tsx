@@ -1,6 +1,6 @@
 'use client';
 
-import { VoucherForm } from "./components/VoucherForm";
+import { VoucherForm } from "./components";
 
 export interface IVoucherProps {
     id?: number;

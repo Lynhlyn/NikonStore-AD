@@ -257,7 +257,14 @@ const OrderOnlineTable = () => {
     {
       accessorKey: "totalAmount",
       header: "Tổng tiền",
-      cell: ({ row }: any) => formatCurrency((row.original.totalAmount || 0) - (row.original.discount || 0) + (row.original.shippingFee || 0)),
+      cell: ({ row }: any) => {
+        const totalAmount = row.original.totalAmount || 0;
+        const discount = row.original.discount || 0;
+        const shippingFee = row.original.shippingFee || 0;
+        const cappedDiscount = Math.min(discount, totalAmount);
+        const finalAmount = Math.max(0, totalAmount - cappedDiscount + shippingFee);
+        return formatCurrency(finalAmount);
+      },
     },
     {
       accessorKey: "orderStatus",
