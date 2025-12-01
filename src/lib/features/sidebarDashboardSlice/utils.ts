@@ -300,6 +300,7 @@ const ListRouteDashboard: IRouterItem[] = [
       routerApp.banner.list,
       routerApp.banner.form,
       routerApp.banner.formEdit({ id: ':id' }),
+      routerApp.page.editor({ pageKey: ':pageKey' }),
     ],
     icon: 'Settings',
     type: 'group',
@@ -314,6 +315,33 @@ const ListRouteDashboard: IRouterItem[] = [
           routerApp.banner.list,
           routerApp.banner.form,
           routerApp.banner.formEdit({ id: ':id' }),
+        ],
+        type: 'item',
+        icon: 'Dot',
+      },
+      {
+        name: 'Về chúng tôi',
+        route: routerApp.page.editor({ pageKey: 'about-us' }),
+        routerActive: [
+          routerApp.page.editor({ pageKey: 'about-us' }),
+        ],
+        type: 'item',
+        icon: 'Dot',
+      },
+      {
+        name: 'Chính sách bảo mật',
+        route: routerApp.page.editor({ pageKey: 'privacy-policy' }),
+        routerActive: [
+          routerApp.page.editor({ pageKey: 'privacy-policy' }),
+        ],
+        type: 'item',
+        icon: 'Dot',
+      },
+      {
+        name: 'Điều khoản sử dụng',
+        route: routerApp.page.editor({ pageKey: 'terms-of-service' }),
+        routerActive: [
+          routerApp.page.editor({ pageKey: 'terms-of-service' }),
         ],
         type: 'item',
         icon: 'Dot',

@@ -120,6 +120,10 @@ const routerPos = {
   page: '/pos',
 };
 
+const routerPage = {
+  editor: (params: { pageKey: string }) => `/pages/${params.pageKey}`,
+};
+
 const routerApp = {
   dashboard: routerDashboard,
   auth: routerAuth,
@@ -141,6 +145,7 @@ const routerApp = {
   contact: routerContact,
   banner: routerBanner,
   pos: routerPos,
+  page: routerPage,
 };
 
 export { routerApp };
