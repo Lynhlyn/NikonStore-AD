@@ -15,6 +15,7 @@ export interface IOrder {
 
 export interface IOrderItem {
   orderDetailId: number;
+  productId?: number;
   sku: string;
   productName: string;
   quantity: number;
