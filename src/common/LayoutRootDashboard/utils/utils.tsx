@@ -53,6 +53,7 @@ const renderIcon = (icon: React.ReactNode) => {
     case 'LayoutMail':
       return <Mail className="w-5 h-5" />;
     case 'LayoutSettings':
+    case 'Settings':
       return <Settings className="w-5 h-5" />;
     case 'LayoutBook':
       return <BookText className="w-5 h-5" />;

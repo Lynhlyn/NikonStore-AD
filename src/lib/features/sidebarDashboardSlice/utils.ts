@@ -12,6 +12,7 @@ const ListRouteDashboard: IRouterItem[] = [
     type: 'item',
     visibleRoles: [
       EUserRole.ADMIN,
+      EUserRole.STAFF,
     ],
   },
   {
@@ -54,6 +55,7 @@ const ListRouteDashboard: IRouterItem[] = [
     type: 'group',
     visibleRoles: [
       EUserRole.ADMIN,
+      EUserRole.STAFF,
     ],
     subsRoute: [
       {
@@ -156,6 +158,7 @@ const ListRouteDashboard: IRouterItem[] = [
     type: 'item',
     visibleRoles: [
       EUserRole.ADMIN,
+      EUserRole.STAFF,
     ],
   },
   {
@@ -306,6 +309,7 @@ const ListRouteDashboard: IRouterItem[] = [
     type: 'group',
     visibleRoles: [
       EUserRole.ADMIN,
+      EUserRole.STAFF,
     ],
     subsRoute: [
       {
