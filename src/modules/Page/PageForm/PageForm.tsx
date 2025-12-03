@@ -39,12 +39,14 @@ interface PageFormProps {
   pageData?: PageResponse;
   onSubmit: (data: PageFormValues) => Promise<void>;
   isLoading: boolean;
+  slug?: string;
 }
 
 const tinymceApiKey = process.env.NEXT_PUBLIC_TINYMCE_PUBLIC_KEY;
 
-export default function PageForm({ pageData, onSubmit, isLoading }: PageFormProps) {
+export default function PageForm({ pageData, onSubmit, isLoading, slug }: PageFormProps) {
   const isEditMode = !!pageData?.id;
+  const isSlugFromProps = !!slug;
 
   const {
     register,
@@ -63,6 +65,12 @@ export default function PageForm({ pageData, onSubmit, isLoading }: PageFormProp
   });
 
   const watchedContent = watch('content');
+
+  useEffect(() => {
+    if (isSlugFromProps && slug) {
+      setValue('slug', slug);
+    }
+  }, [isSlugFromProps, slug, setValue]);
 
   useEffect(() => {
     if (pageData && pageData.id) {
@@ -106,14 +114,22 @@ export default function PageForm({ pageData, onSubmit, isLoading }: PageFormProp
             <Label htmlFor="slug">
               Slug <span className="text-red-500">*</span>
             </Label>
-            <Input
-              id="slug"
-              placeholder="nhap-slug-khong-dau"
-              {...register('slug')}
-              className={errors.slug ? 'border-red-500' : ''}
-            />
-            {errors.slug && (
-              <p className="text-sm text-red-500">{errors.slug.message}</p>
+            {isSlugFromProps ? (
+              <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-sm text-gray-700">
+                {slug}
+              </div>
+            ) : (
+              <>
+                <Input
+                  id="slug"
+                  placeholder="nhap-slug-khong-dau"
+                  {...register('slug')}
+                  className={errors.slug ? 'border-red-500' : ''}
+                />
+                {errors.slug && (
+                  <p className="text-sm text-red-500">{errors.slug.message}</p>
+                )}
+              </>
             )}
             <p className="text-xs text-muted-foreground">
               Slug được dùng để xác định trang khi gọi API.

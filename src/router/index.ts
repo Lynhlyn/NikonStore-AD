@@ -124,6 +124,36 @@ const routerPage = {
   editor: (params: { pageKey: string }) => `/pages/${params.pageKey}`,
 };
 
+const routerFAQ = {
+  list: '/faqs',
+  new: '/faqs/create',
+  edit: (params: { id: number | string }) => `/faqs/${params.id}/edit`,
+  view: (params: { id: number | string }) => `/faqs/${params.id}/view`,
+};
+
+const routerBlog = {
+  list: '/blogs',
+  new: '/blogs/create',
+  edit: (params: { id: number | string }) => `/blogs/${params.id}/edit`,
+  view: (params: { id: number | string }) => `/blogs/${params.id}/view`,
+};
+
+const routerComment = {
+  list: '/comments',
+};
+
+const routerContentTag = {
+  list: '/content-tags',
+  form: '/content-tags/new',
+  formEdit: (params: { id: number | string }) => `/content-tags/${params.id}/edit`,
+};
+
+const routerContentCategory = {
+  list: '/content-categories',
+  form: '/content-categories/new',
+  formEdit: (params: { id: number | string }) => `/content-categories/${params.id}/edit`,
+};
+
 const routerApp = {
   dashboard: routerDashboard,
   auth: routerAuth,
@@ -146,6 +176,11 @@ const routerApp = {
   banner: routerBanner,
   pos: routerPos,
   page: routerPage,
+  faq: routerFAQ,
+  blog: routerBlog,
+  comment: routerComment,
+  contentTag: routerContentTag,
+  contentCategory: routerContentCategory,
 };
 
 export { routerApp };

@@ -21,6 +21,9 @@ export default function PageEditor({ pageKey }: PageEditorProps) {
 
   const isEditMode = pageData && pageData.id;
   const isLoading = isCreating || isUpdating;
+  
+  const fixedSlugPages = ['about-us', 'privacy-policy', 'terms-of-service'];
+  const slugFromProps = fixedSlugPages.includes(pageKey) ? pageKey : undefined;
 
   const handleSubmit = async (formData: { title: string; slug: string; content: string }) => {
     try {
@@ -81,6 +84,7 @@ export default function PageEditor({ pageKey }: PageEditorProps) {
         pageData={isEditMode ? pageData : undefined}
         onSubmit={handleSubmit}
         isLoading={isLoading}
+        slug={slugFromProps}
       />
     </div>
   );
