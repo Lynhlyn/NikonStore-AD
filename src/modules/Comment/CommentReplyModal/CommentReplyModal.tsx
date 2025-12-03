@@ -65,6 +65,7 @@ export default function CommentReplyModal({
         blogId: comment.blogId,
         parentId: comment.id,
         content: data.content,
+        userComment: 'Chăm sóc khách hàng',
       }).unwrap();
       toast.success('Trả lời comment thành công');
       reset();

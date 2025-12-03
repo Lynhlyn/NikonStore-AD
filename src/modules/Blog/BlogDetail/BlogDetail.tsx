@@ -8,6 +8,7 @@ import { Badge } from '@/core/shadcn/components/ui/badge';
 import { ArrowLeft, Edit, FileText, Globe, Lock, Eye as EyeIcon } from 'lucide-react';
 import { useAppNavigation } from '@/common/hooks';
 import { routerApp } from '@/router';
+import BlogCommentSection from './BlogCommentSection';
 
 interface BlogDetailProps {
   blogId: number;
@@ -118,6 +119,8 @@ export default function BlogDetail({ blogId }: BlogDetailProps) {
           </div>
         </CardContent>
       </Card>
+
+      <BlogCommentSection blogId={blog.id} />
     </div>
   );
 }
