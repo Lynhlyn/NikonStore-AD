@@ -18,6 +18,7 @@ import {
 } from "@/lib/services/modules/customerService";
 import { Customer } from "@/lib/services/modules/customerService/type";
 import { ConfirmModal } from "@/common/components/ConfirmModal";
+import { genderMapper } from "@/lib/utils/genderMapper";
 
 interface CustomerFormModalProps {
   isOpen: boolean;
@@ -103,7 +104,7 @@ export const CustomerFormModal = ({ isOpen, onClose, customer, onSuccess }: Cust
       fullName: customer?.fullName || "",
       email: customer?.email || "",
       phoneNumber: customer?.phoneNumber || "",
-      gender: customer?.gender || (customer ? "" : "Nam"),
+      gender: customer?.gender ? genderMapper.toVietnamese(customer.gender) : (customer ? "" : "Nam"),
       dateOfBirth: customer?.dateOfBirth || "",
       status: customer?.status === 'ACTIVE' ? 1 : 
               customer?.status === 'INACTIVE' ? 0 : 
@@ -128,7 +129,7 @@ export const CustomerFormModal = ({ isOpen, onClose, customer, onSuccess }: Cust
         fullName: customer.fullName || "",
         email: customer.email || "",
         phoneNumber: customer.phoneNumber || "",
-        gender: customer.gender || "",
+        gender: customer.gender ? genderMapper.toVietnamese(customer.gender) : "",
         dateOfBirth: customer.dateOfBirth || "",
         status: statusValue,
         isGuest: customer.isGuest ?? false,
@@ -138,7 +139,7 @@ export const CustomerFormModal = ({ isOpen, onClose, customer, onSuccess }: Cust
       
       setTimeout(() => {
         setValue("status", statusValue);
-        setValue("gender", customer.gender || "");
+        setValue("gender", customer.gender ? genderMapper.toVietnamese(customer.gender) : "");
         setValue("isGuest", customer.isGuest ?? false);
       }, 0);
     } else {
@@ -200,7 +201,7 @@ export const CustomerFormModal = ({ isOpen, onClose, customer, onSuccess }: Cust
             fullName: data.fullName,
             email: data.email,
             phoneNumber: data.phoneNumber,
-            gender: data.gender,
+            gender: genderMapper.toEnglish(data.gender),
             dateOfBirth: data.dateOfBirth,
             status: data.status,
           },
@@ -212,7 +213,7 @@ export const CustomerFormModal = ({ isOpen, onClose, customer, onSuccess }: Cust
           fullName: data.fullName,
           email: data.email,
           phoneNumber: data.phoneNumber,
-          gender: data.gender,
+          gender: genderMapper.toEnglish(data.gender),
           dateOfBirth: data.dateOfBirth,
           isGuest: false,
           status: data.status,

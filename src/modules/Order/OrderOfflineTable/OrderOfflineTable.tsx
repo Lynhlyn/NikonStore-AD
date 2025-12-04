@@ -242,10 +242,14 @@ const OrderOfflineTable = () => {
                   <label className="text-sm font-medium">Trạng thái</label>
                   <UISingleSelect
                     options={statusOptions.map(opt => ({ value: opt.value, label: opt.label }))}
-                    value={status}
-                    onChange={(value: { value: string; label: string } | null) => setQuery({ status: value?.value || "", page: 0 })}
+                    selected={statusOptions.find(opt => opt.value === status) || null}
+                    onChange={(value) => setQuery({ status: value?.value || "", page: 0 })}
                     placeholder="Tất cả trạng thái"
-                    textFieldSize={ESize.M}
+                    size={ESize.M}
+                    bindLabel="label"
+                    bindValue="value"
+                    renderSelected={(props) => <UISingleSelect.Selected {...props} />}
+                    renderOption={(props) => <UISingleSelect.Option {...props} />}
                   />
                 </div>
               </div>

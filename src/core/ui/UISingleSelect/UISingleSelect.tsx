@@ -78,7 +78,7 @@ const UISingleSelect: UISingleSelectComponent = <T,>(props: IUISingleSelectProps
             onClick={() => !disabled && setIsCollapsed(!isCollapsed)}
             className={singleSelectStyleWrapper}>
             <div className={`flex items-center justify-between w-full ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
-                {renderSelected({ selected, bindLabel, bindValue, placeholder, isCollapsed })}
+                {renderSelected ? renderSelected({ selected, bindLabel, bindValue, placeholder, isCollapsed }) : <UISingleSelectSelected {...{ selected, bindLabel, bindValue, placeholder, isCollapsed }} />}
             </div>
             <div
                 className={clsx(

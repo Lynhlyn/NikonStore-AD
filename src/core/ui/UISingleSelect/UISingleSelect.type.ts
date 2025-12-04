@@ -16,7 +16,7 @@ export interface IUISingleSelectProps<T> {
   bindLabel?: keyof T;
   bindValue?: keyof T;
   renderOption: (option: IUISingleSelectOptionProps<T>) => React.ReactNode;
-  renderSelected: (option: IUISingleSelectSelectedProps<T>) => React.ReactNode;
+  renderSelected?: (option: IUISingleSelectSelectedProps<T>) => React.ReactNode;
   size?: IUISingleSelectSize;
   className?: React.ComponentProps<"div">["className"];
   disabled?: boolean;
