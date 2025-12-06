@@ -24,7 +24,7 @@ export const BannerFormContext = createContext({} as BannerFormContextData);
 const bannerSchema: yup.ObjectSchema<TBannerFormField> = yup.object({
   name: yup.string().required('Tên banner là bắt buộc').max(255, 'Tên banner không được vượt quá 255 ký tự'),
   description: yup.string().optional().max(500, 'Mô tả không được vượt quá 500 ký tự'),
-  url: yup.string().required('URL là bắt buộc').url('URL không hợp lệ'),
+  url: yup.string().required('URL là bắt buộc'),
   status: yup.mixed<EStatusEnumString>().required('Trạng thái là bắt buộc'),
   imageUrl: yup.string().required('URL hình ảnh là bắt buộc'),
   position: yup.number().required('Vị trí là bắt buộc').min(0, 'Vị trí phải từ 0-3').max(3, 'Vị trí phải từ 0-3'),
