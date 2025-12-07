@@ -10,8 +10,10 @@ function formatCurrency(amount: number) {
 }
 
 export function OrderSummary({ totalAmount, discount, shippingFee, note }: OrderSummaryProps) {
-  const cappedDiscount = Math.min(discount, totalAmount);
-  const finalAmount = Math.max(0, totalAmount - cappedDiscount + shippingFee);
+  const safeTotalAmount = Math.max(0, totalAmount || 0);
+  const safeDiscount = Math.max(0, discount || 0);
+  const cappedDiscount = Math.min(safeDiscount, safeTotalAmount);
+  const finalAmount = Math.max(0, safeTotalAmount - cappedDiscount + (shippingFee || 0));
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
@@ -19,12 +21,12 @@ export function OrderSummary({ totalAmount, discount, shippingFee, note }: Order
       <div className="space-y-2">
         <div className="flex justify-between">
           <span className="font-medium">Tổng tiền hàng:</span>
-          <span>{formatCurrency(totalAmount)}</span>
+          <span>{formatCurrency(safeTotalAmount)}</span>
         </div>
-        {discount > 0 && (
+        {cappedDiscount > 0 && (
           <div className="flex justify-between text-red-600">
             <span className="font-medium">Giảm giá:</span>
-            <span>-{formatCurrency(discount)}</span>
+            <span>-{formatCurrency(cappedDiscount)}</span>
           </div>
         )}
         {shippingFee > 0 && (

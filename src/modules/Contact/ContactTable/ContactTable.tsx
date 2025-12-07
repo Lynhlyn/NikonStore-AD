@@ -26,11 +26,13 @@ import {
   useUpdateContactMutation,
 } from "@/lib/services/modules/contactService";
 import { UIPagination, UIPaginationResuft } from "@/core/ui/UIPagination";
-import { ContactDetailModal } from "../ContactDetailModal/ContactDetailModal";
+import { useRouter } from "next/navigation";
+import { useAppNavigation } from "@/common/hooks";
+import { routerApp } from "@/router";
 
 export const ContactTable = () => {
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const router = useRouter();
+  const { getRouteWithRole } = useAppNavigation();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -77,26 +79,7 @@ export const ContactTable = () => {
   const hasActiveFilters = status !== "all";
 
   const handleViewDetails = (contact: Contact) => {
-    setSelectedContact(contact);
-    setIsDetailModalOpen(true);
-  };
-
-  const handleUpdateStatus = async (contact: Contact, newStatus: string) => {
-    try {
-      await updateContact({
-        id: contact.id,
-        data: {
-          name: contact.name,
-          phone: contact.phone,
-          content: contact.content,
-          status: newStatus,
-        },
-      }).unwrap();
-      toast.success('Cập nhật trạng thái thành công');
-      refetchContacts();
-    } catch (error: any) {
-      toast.error(error?.data?.message || 'Cập nhật trạng thái thất bại');
-    }
+    router.push(getRouteWithRole(routerApp.contact.detail({ id: contact.id })));
   };
 
   const handleDelete = async (contactId: number) => {
@@ -352,17 +335,6 @@ export const ContactTable = () => {
           />
         </div>
       </div>
-
-      <ContactDetailModal
-        isOpen={isDetailModalOpen}
-        onClose={() => {
-          setIsDetailModalOpen(false);
-          setSelectedContact(null);
-        }}
-        contact={selectedContact}
-        onContactDataChange={handleContactDataChange}
-        onUpdateStatus={handleUpdateStatus}
-      />
 
       <ConfirmModal
         isOpen={isConfirmModalOpen}

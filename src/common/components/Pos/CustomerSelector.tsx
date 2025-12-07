@@ -6,6 +6,7 @@ import { Input } from "@/core/shadcn/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/core/shadcn/components/ui/table"
 import { useFetchCustomersQuery } from "@/lib/services/modules/customerService"
 import type { Customer } from "@/lib/services/modules/customerService/type"
+import { useDebounce } from "@/common/hooks"
 import { Loader2, Search, User, UserPlus } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
@@ -17,6 +18,7 @@ interface CustomerSelectorProps {
 export function CustomerSelector({ selectedCustomer, onCustomerSelect }: CustomerSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
+  const debouncedSearchTerm = useDebounce(searchTerm, 500)
   const [currentPage, setCurrentPage] = useState(0)
   const [pageSize] = useState(20)
   const [hasMore, setHasMore] = useState(true)
@@ -31,7 +33,7 @@ export function CustomerSelector({ selectedCustomer, onCustomerSelect }: Custome
     {
       page: currentPage,
       size: pageSize,
-      keyword: searchTerm,
+      keyword: debouncedSearchTerm || undefined,
       status: "ACTIVE",
     },
     {
@@ -44,20 +46,18 @@ export function CustomerSelector({ selectedCustomer, onCustomerSelect }: Custome
       setCurrentPage(0)
       setHasMore(true)
       setSearchTerm("")
-      if (searchTerm) {
-        setAllCustomers([])
-      }
+      setAllCustomers([])
       refetch()
     }
-  }, [isOpen, refetch, searchTerm])
+  }, [isOpen, refetch])
 
   useEffect(() => {
-    if (searchTerm !== undefined) {
+    if (debouncedSearchTerm !== undefined) {
       setCurrentPage(0)
       setAllCustomers([])
       setHasMore(true)
     }
-  }, [searchTerm])
+  }, [debouncedSearchTerm])
 
   const customers = useMemo(() => customersResponse?.data || [], [customersResponse])
   const pagination = customersResponse?.pagination

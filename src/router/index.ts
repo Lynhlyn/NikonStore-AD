@@ -108,6 +108,7 @@ const routerTemplateEmail = {
 
 const routerContact = {
   list: '/contacts',
+  detail: (params: { id: number | string }) => `/contacts/${params.id}`,
 };
 
 const routerBanner = {

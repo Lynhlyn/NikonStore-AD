@@ -185,6 +185,7 @@ export function DialogProductDetailTable({ isOpen, onClose, productId, onAddToCa
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-20">Hình ảnh</TableHead>
+                      <TableHead className="w-24">ID sản phẩm</TableHead>
                       <TableHead className="w-32">SKU</TableHead>
                       <TableHead className="w-28">Màu sắc</TableHead>
                       <TableHead className="w-24">Dung tích</TableHead>
@@ -210,6 +211,11 @@ export function DialogProductDetailTable({ isOpen, onClose, productId, onAddToCa
                             ) : (
                               <ImageIcon className="w-6 h-6 text-gray-400" aria-hidden="true" />
                             )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="p-2">
+                          <div className="text-sm font-medium text-gray-900">
+                            {detail.id}
                           </div>
                         </TableCell>
                         <TableCell className="p-2">
@@ -334,7 +340,7 @@ export function DialogProductDetailTable({ isOpen, onClose, productId, onAddToCa
 
                     {hasMore && (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-4">
+                        <TableCell colSpan={9} className="text-center py-4">
                           <Button
                             onClick={loadMore}
                             disabled={isFetching}

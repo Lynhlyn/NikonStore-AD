@@ -48,6 +48,7 @@ export interface AddVoucherRequest {
   startDate: string;
   endDate: string;
   isPublic: boolean;
+  customerIds?: number[];
 }
 
 export interface UpdateVoucherRequest extends Partial<AddVoucherRequest> {

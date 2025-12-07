@@ -5,19 +5,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { UITextField } from '@/core/ui';
 import { UISingleSelect } from '@/core/ui/UISingleSelect';
 import { ESize } from '@/core/ui/Helpers/UIsize.enum';
-import { useFetchProductDetailsQuery, useDeleteProductDetailMutation } from '@/lib/services/modules/productDetailService';
+import { useFetchProductDetailsQuery } from '@/lib/services/modules/productDetailService';
 import { useFetchColorsQuery } from '@/lib/services/modules/colorService';
 import { useFetchCapacitiesQuery } from '@/lib/services/modules/capacityService';
 import { useAppNavigation, useDebounce } from '@/common/hooks';
 import { getStatusEnumString } from '@/common/utils/statusOption';
 import { getStatusDisplay } from '@/common/utils/statusColor';
 import { EStatusEnumString } from '@/common/enums/status';
-import { ArrowLeft, ArrowUp, ArrowDown, Plus, SquarePen, Trash2, ImageIcon } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, Plus, SquarePen, ImageIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { parseAsInteger, parseAsString, useQueryStates } from 'nuqs';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { ConfirmModal } from '@/common/components/ConfirmModal';
 import { ColorImageGalleryModal } from '@/common/components/ColorImageGalleryModal';
 
 interface ProductDetailTableProps {
@@ -27,8 +26,6 @@ interface ProductDetailTableProps {
 const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
   const router = useRouter();
   const { getRouteWithRole } = useAppNavigation();
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedDetailId, setSelectedDetailId] = useState<number | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
 
@@ -89,8 +86,6 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
     isAll: true,
   });
 
-  const [deleteProductDetail, { isLoading: isDeleting }] = useDeleteProductDetailMutation();
-
   const handlePageChange = (newPage: number) => {
     setQueryStates((prev) => ({
       ...prev,
@@ -145,24 +140,6 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
     return queryStates.direction === 'asc' ?
       <ArrowUp className="inline-block w-3 h-3 ml-1" /> :
       <ArrowDown className="inline-block w-3 h-3 ml-1" />;
-  };
-
-  const handleDeleteClick = (detailId: number) => {
-    setSelectedDetailId(detailId);
-    setDeleteModalOpen(true);
-  };
-
-  const handleDelete = async () => {
-    if (!selectedDetailId) return;
-    try {
-      await deleteProductDetail(selectedDetailId).unwrap();
-      toast.success('Đã xóa thành công sản phẩm chi tiết');
-      refetch();
-      setDeleteModalOpen(false);
-      setSelectedDetailId(null);
-    } catch (error: any) {
-      toast.error('Đã xảy ra lỗi khi xóa sản phẩm chi tiết: ' + error.message);
-    }
   };
 
   const formatPrice = (price: number) => {
@@ -491,15 +468,6 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
                         >
                           <SquarePen className="w-4 h-4" />
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteClick(detail.id)}
-                          className="text-red-600 hover:text-red-700 hover:border-red-300"
-                          title="Xóa"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -544,21 +512,6 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
           </div>
         )}
       </div>
-
-      <ConfirmModal
-        isOpen={deleteModalOpen}
-        onClose={() => {
-          setDeleteModalOpen(false);
-          setSelectedDetailId(null);
-        }}
-        onConfirm={handleDelete}
-        title="Xác nhận xóa sản phẩm chi tiết"
-        message="Bạn có chắc chắn muốn xóa sản phẩm chi tiết này không? Hành động này không thể hoàn tác."
-        type="danger"
-        isLoading={isDeleting}
-        confirmText="Xóa"
-        cancelText="Hủy"
-      />
 
       {selectedColorId && (
         <ColorImageGalleryModal

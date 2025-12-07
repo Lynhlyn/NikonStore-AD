@@ -5,7 +5,7 @@ import { Button } from "@/core/shadcn/components/ui/button";
 import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { SquarePen, ArrowUp, ArrowDown, Plus } from "lucide-react";
 import { useAppNavigation } from "@/common/hooks";
-import { useFetchColorsQuery, useDeleteColorMutation } from "@/lib/services/modules/colorService";
+import { useFetchColorsQuery } from "@/lib/services/modules/colorService";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -14,14 +14,10 @@ import { UISingleSelect } from "@/core/ui/UISingleSelect";
 import { EStatusEnumString } from "@/common/enums/status";
 import { ESize } from "@/core/ui/Helpers/UIsize.enum";
 import { getStatusDisplay } from "@/common/utils/statusColor";
-import { ConfirmModal } from "@/common/components/ConfirmModal";
-import { useState } from "react";
 
 const ColorTable = () => {
   const router = useRouter();
   const { getRouteWithRole } = useAppNavigation();
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
   
   const [queryStates, setQueryStates] = useQueryStates({
     page: parseAsInteger.withDefault(0),
@@ -38,8 +34,6 @@ const ColorTable = () => {
     direction: (queryStates.direction === "asc" || queryStates.direction === "desc") ? queryStates.direction : undefined,
     status: queryStates.status as EStatusEnumString || undefined,
   }, { refetchOnMountOrArgChange: true });
-
-  const [deleteColor, { isLoading: isDeleting }] = useDeleteColorMutation();
 
   const handlePageChange = (newPage: number) => {
     setQueryStates((prev) => ({
@@ -71,24 +65,6 @@ const ColorTable = () => {
     return queryStates.direction === "asc" ?
       <ArrowUp className="inline-block w-3 h-3 ml-1" /> :
       <ArrowDown className="inline-block w-3 h-3 ml-1" />;
-  };
-
-  const handleDeleteClick = (colorId: number) => {
-    setSelectedColorId(colorId);
-    setDeleteModalOpen(true);
-  };
-
-  const handleDelete = async () => {
-    if (!selectedColorId) return;
-    try {
-      await deleteColor(selectedColorId).unwrap();
-      toast.success('Đã xóa thành công màu');
-      refetch();
-      setDeleteModalOpen(false);
-      setSelectedColorId(null);
-    } catch (error: any) {
-      toast.error('Đã xảy ra lỗi khi xóa màu: ' + error.message);
-    }
   };
 
   const formatDate = (dateString?: string) => {
@@ -193,14 +169,6 @@ const ColorTable = () => {
               onClick={() => router.push(getRouteWithRole(`/colors/${id}/edit`))}
             >
               <SquarePen className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleDeleteClick(id)}
-              className="text-red-600 hover:text-red-700 hover:border-red-300"
-            >
-              Xóa
             </Button>
           </div>
         );
@@ -315,21 +283,6 @@ const ColorTable = () => {
           </div>
         )}
       </div>
-
-      <ConfirmModal
-        isOpen={deleteModalOpen}
-        onClose={() => {
-          setDeleteModalOpen(false);
-          setSelectedColorId(null);
-        }}
-        onConfirm={handleDelete}
-        title="Xác nhận xóa màu"
-        message="Bạn có chắc chắn muốn xóa màu này không? Hành động này không thể hoàn tác."
-        type="danger"
-        isLoading={isDeleting}
-        confirmText="Xóa"
-        cancelText="Hủy"
-      />
     </div>
   );
 };

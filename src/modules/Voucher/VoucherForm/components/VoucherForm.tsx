@@ -14,6 +14,7 @@ const VoucherForm: FC<IVoucherProps> = ({ id, isViewMode }) => {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [localIsPrivateVoucher, setLocalIsPrivateVoucher] = useState(false);
+  const [selectedCustomerIds, setSelectedCustomerIds] = useState<number[]>([]);
 
   const handleCustomerModalSuccess = useCallback(() => {
     setRefreshKey(prev => prev + 1);
@@ -103,7 +104,14 @@ const VoucherForm: FC<IVoucherProps> = ({ id, isViewMode }) => {
                 </>
               ) : (
                 <div className="text-center text-gray-500 py-8">
-                  Lưu voucher trước để quản lý khách hàng
+                  {selectedCustomerIds.length > 0 ? (
+                    <div>
+                      <p className="mb-2">Đã chọn {selectedCustomerIds.length} khách hàng</p>
+                      <p className="text-xs text-gray-400">Khách hàng sẽ được gán khi lưu voucher</p>
+                    </div>
+                  ) : (
+                    <p>Chọn khách hàng để gán khi tạo voucher</p>
+                  )}
                 </div>
               )}
             </div>
@@ -111,19 +119,21 @@ const VoucherForm: FC<IVoucherProps> = ({ id, isViewMode }) => {
         </div>
       </div>
 
-      {id && !isVoucherInactive && (
+      {!isVoucherInactive && (
         <CustomerSelectionModal
           isOpen={isCustomerModalOpen}
           onClose={() => setIsCustomerModalOpen(false)}
           voucherId={id}
           onSuccess={handleCustomerModalSuccess}
+          onCustomersSelected={setSelectedCustomerIds}
+          selectedCustomerIds={selectedCustomerIds}
         />
       )}
 
       <ConfirmModal
         isOpen={formProvider.isConfirmModalOpen}
         onClose={() => formProvider.setIsConfirmModalOpen(false)}
-        onConfirm={() => formProvider.handleConfirmSubmit(formProvider.getValues())}
+        onConfirm={() => formProvider.handleConfirmSubmit(formProvider.getValues(), selectedCustomerIds)}
         title={formProvider.confirmModalConfig.title}
         message={formProvider.confirmModalConfig.message}
         type={formProvider.confirmModalConfig.type}

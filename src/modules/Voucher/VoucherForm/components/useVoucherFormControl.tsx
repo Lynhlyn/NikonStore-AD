@@ -142,7 +142,7 @@ export function useVoucherFormProvider(id?: number, isViewMode?: boolean) {
 
   const isLoading = isAddLoading || isUpdateLoading || (id ? isFetching : false);
 
-  const handleConfirmSubmit = async (data: TVoucherFormField) => {
+  const handleConfirmSubmit = async (data: TVoucherFormField, customerIds?: number[]) => {
     setConfirmModalConfig(prev => ({ ...prev, isLoading: true }));
 
     try {
@@ -150,6 +150,7 @@ export function useVoucherFormProvider(id?: number, isViewMode?: boolean) {
         ...data,
         startDate: formatLocalDateTime(data.startDate as Date),
         endDate: formatLocalDateTime(data.endDate as Date),
+        ...(customerIds && customerIds.length > 0 ? { customerIds } : {}),
       };
 
       if (id) {

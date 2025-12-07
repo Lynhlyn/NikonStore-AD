@@ -11,8 +11,10 @@ import { toast } from 'sonner';
 interface CustomerSelectionModalProps {
     isOpen: boolean;
     onClose: () => void;
-    voucherId: number;
+    voucherId?: number;
     onSuccess?: () => void;
+    onCustomersSelected?: (customerIds: number[]) => void;
+    selectedCustomerIds?: number[];
 }
 
 interface Customer {
@@ -28,19 +30,23 @@ export const CustomerSelectionModal: React.FC<CustomerSelectionModalProps> = ({
     onClose,
     voucherId,
     onSuccess,
+    onCustomersSelected,
+    selectedCustomerIds: initialSelectedCustomerIds = [],
 }) => {
-    const [selectedCustomers, setSelectedCustomers] = useState<number[]>([]);
+    const [selectedCustomers, setSelectedCustomers] = useState<number[]>(initialSelectedCustomerIds);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(0);
     const [pageSize, setPageSize] = useState(10);
 
     const [assignVoucherToCustomers, { isLoading: isAssigning }] = useAssignVoucherToCustomersMutation();
 
-    // Lấy danh sách khách hàng đã được gán voucher
+    // Lấy danh sách khách hàng đã được gán voucher (chỉ khi có voucherId)
     const { data: assignedCustomersData, refetch: refetchAssignedCustomers } = useGetCustomersByVoucherQuery({
-        voucherId,
+        voucherId: voucherId!,
         page: 0,
-        size: 1000, // Lấy tất cả để lọc
+        size: 1000,
+    }, {
+        skip: !voucherId,
     });
 
     const queryParams: IListQuery = {
@@ -59,11 +65,14 @@ export const CustomerSelectionModal: React.FC<CustomerSelectionModalProps> = ({
     const totalPages = customersData?.pagination?.totalPages || 0;
     const currentPageFromAPI = customersData?.pagination?.currentPage || 0;
 
-    // Lọc ra các khách hàng chưa được gán voucher
+    // Lọc ra các khách hàng chưa được gán voucher (chỉ khi có voucherId)
     const availableCustomers = useMemo(() => {
-        const assignedCustomerIds = assignedCustomers.map(customer => customer.customerId);
-        return customers.filter(customer => !assignedCustomerIds.includes(customer.id));
-    }, [customers, assignedCustomers]);
+        if (voucherId) {
+            const assignedCustomerIds = assignedCustomers.map(customer => customer.customerId);
+            return customers.filter(customer => !assignedCustomerIds.includes(customer.id));
+        }
+        return customers;
+    }, [customers, assignedCustomers, voucherId]);
 
     const handleCustomerToggle = (customerId: number) => {
         setSelectedCustomers(prev =>
@@ -87,28 +96,30 @@ export const CustomerSelectionModal: React.FC<CustomerSelectionModalProps> = ({
             return;
         }
 
-        try {
-            await assignVoucherToCustomers({
-                voucherId,
-                customerIds: selectedCustomers,
-            }).unwrap();
+        if (voucherId) {
+            try {
+                await assignVoucherToCustomers({
+                    voucherId,
+                    customerIds: selectedCustomers,
+                }).unwrap();
 
-            toast.success(`Đã gán voucher cho ${selectedCustomers.length} khách hàng thành công`);
-            setSelectedCustomers([]);
+                toast.success(`Đã gán voucher cho ${selectedCustomers.length} khách hàng thành công`);
+                setSelectedCustomers([]);
 
-            // Làm mới dữ liệu sau khi gán thành công
-            await refetchAssignedCustomers();
+                await refetchAssignedCustomers();
+                onSuccess?.();
 
-            // Gọi callback success trước khi đóng modal
-            onSuccess?.();
-
-            // Đóng modal sau một chút để đảm bảo UI được cập nhật
-            setTimeout(() => {
-                onClose();
-            }, 100);
-        } catch (error: any) {
-            const errorMessage = getSimpleError(error);
-            toast.error(errorMessage);
+                setTimeout(() => {
+                    onClose();
+                }, 100);
+            } catch (error: any) {
+                const errorMessage = getSimpleError(error);
+                toast.error(errorMessage);
+            }
+        } else {
+            onCustomersSelected?.(selectedCustomers);
+            toast.success(`Đã chọn ${selectedCustomers.length} khách hàng`);
+            onClose();
         }
     };
 
@@ -128,11 +139,11 @@ export const CustomerSelectionModal: React.FC<CustomerSelectionModalProps> = ({
 
     useEffect(() => {
         if (isOpen) {
-            setSelectedCustomers([]);
+            setSelectedCustomers(initialSelectedCustomerIds);
             setSearchTerm('');
             setCurrentPage(0);
         }
-    }, [isOpen]);
+    }, [isOpen, initialSelectedCustomerIds]);
 
     if (!isOpen) return null;
 
@@ -145,10 +156,15 @@ export const CustomerSelectionModal: React.FC<CustomerSelectionModalProps> = ({
                             <UserPlus className="w-6 h-6 text-blue-600" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-semibold text-gray-900">Gán voucher cho khách hàng</h2>
-                            <p className="text-sm text-gray-600 mt-1">Voucher ID: {voucherId}</p>
+                            <h2 className="text-xl font-semibold text-gray-900">
+                                {voucherId ? 'Gán voucher cho khách hàng' : 'Chọn khách hàng cho voucher'}
+                            </h2>
+                            {voucherId && <p className="text-sm text-gray-600 mt-1">Voucher ID: {voucherId}</p>}
                             <p className="text-xs text-gray-500 mt-1">
-                                Hiển thị {availableCustomers.length} khách hàng có thể gán (đã loại bỏ {assignedCustomers.length} khách hàng đã được gán)
+                                {voucherId 
+                                    ? `Hiển thị ${availableCustomers.length} khách hàng có thể gán (đã loại bỏ ${assignedCustomers.length} khách hàng đã được gán)`
+                                    : `Hiển thị ${availableCustomers.length} khách hàng có thể chọn`
+                                }
                             </p>
                         </div>
                     </div>
@@ -192,7 +208,7 @@ export const CustomerSelectionModal: React.FC<CustomerSelectionModalProps> = ({
                             ) : (
                                 <>
                                     <Users className="w-4 h-4" />
-                                    Gán voucher ({selectedCustomers.length})
+                                    {voucherId ? `Gán voucher (${selectedCustomers.length})` : `Chọn (${selectedCustomers.length})`}
                                 </>
                             )}
                         </button>

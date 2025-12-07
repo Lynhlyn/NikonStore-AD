@@ -10,6 +10,8 @@ import {
 import { Mutex } from "async-mutex";
 import { REHYDRATE } from "redux-persist";
 import type { RootState } from "./store";
+import { getRoleFromPathName } from "@/common/utils/pathname";
+import { routerApp } from "@/router";
 
 interface DecodedToken {
   exp?: number;
@@ -118,6 +120,10 @@ const baseQueryWithInterceptor: BaseQueryFn<string | FetchArgs, unknown, FetchBa
             
             if (!refreshToken) {
               api.dispatch({ type: "auth/setLogout" });
+              if (typeof window !== 'undefined') {
+                const role = getRoleFromPathName();
+                window.location.href = `/${role}${routerApp.auth.signIn}`;
+              }
               return { error: { status: 401, data: "No refresh token" } } as { error: FetchBaseQueryError };
             }
             
@@ -147,10 +153,18 @@ const baseQueryWithInterceptor: BaseQueryFn<string | FetchArgs, unknown, FetchBa
               });
             } else {
               api.dispatch({ type: "auth/setLogout" });
+              if (typeof window !== 'undefined') {
+                const role = getRoleFromPathName();
+                window.location.href = `/${role}${routerApp.auth.signIn}`;
+              }
               return { error: { status: 401, data: "Token expired" } } as { error: FetchBaseQueryError };
             }
           } catch (_e) {
             api.dispatch({ type: "auth/setLogout" });
+            if (typeof window !== 'undefined') {
+              const role = getRoleFromPathName();
+              window.location.href = `/${role}${routerApp.auth.signIn}`;
+            }
             return { error: { status: 401, data: "Refresh failed" } } as { error: FetchBaseQueryError };
           } finally {
             release();
@@ -179,6 +193,10 @@ const baseQueryWithInterceptor: BaseQueryFn<string | FetchArgs, unknown, FetchBa
         
         if (!refreshToken) {
           api.dispatch({ type: "auth/setLogout" });
+          if (typeof window !== 'undefined') {
+            const role = getRoleFromPathName();
+            window.location.href = `/${role}${routerApp.auth.signIn}`;
+          }
           return result;
         }
         
@@ -210,9 +228,17 @@ const baseQueryWithInterceptor: BaseQueryFn<string | FetchArgs, unknown, FetchBa
           result = await queryFn(args, api, extraOptions);
         } else {
           api.dispatch({ type: "auth/setLogout" });
+          if (typeof window !== 'undefined') {
+            const role = getRoleFromPathName();
+            window.location.href = `/${role}${routerApp.auth.signIn}`;
+          }
         }
       } catch (_e) {
         api.dispatch({ type: "auth/setLogout" });
+        if (typeof window !== 'undefined') {
+          const role = getRoleFromPathName();
+          window.location.href = `/${role}${routerApp.auth.signIn}`;
+        }
       } finally {
         release();
       }

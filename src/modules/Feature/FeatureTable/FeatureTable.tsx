@@ -5,18 +5,14 @@ import { Button } from "@/core/shadcn/components/ui/button";
 import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { SquarePen, ArrowUp, ArrowDown, Plus } from "lucide-react";
 import { useAppNavigation } from "@/common/hooks";
-import { useFetchFeaturesQuery, useDeleteFeatureMutation } from "@/lib/services/modules/featureService";
+import { useFetchFeaturesQuery } from "@/lib/services/modules/featureService";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { ConfirmModal } from "@/common/components/ConfirmModal";
-import { useState } from "react";
 
 const FeatureTable = () => {
   const router = useRouter();
   const { getRouteWithRole } = useAppNavigation();
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedFeatureId, setSelectedFeatureId] = useState<number | null>(null);
   
   const [queryStates, setQueryStates] = useQueryStates({
     page: parseAsInteger.withDefault(0),
@@ -31,8 +27,6 @@ const FeatureTable = () => {
     sort: queryStates.sort,
     direction: (queryStates.direction === "asc" || queryStates.direction === "desc") ? queryStates.direction : undefined,
   }, { refetchOnMountOrArgChange: true });
-
-  const [deleteFeature, { isLoading: isDeleting }] = useDeleteFeatureMutation();
 
   const handlePageChange = (newPage: number) => {
     setQueryStates((prev) => ({
@@ -56,24 +50,6 @@ const FeatureTable = () => {
     return queryStates.direction === "asc" ?
       <ArrowUp className="inline-block w-3 h-3 ml-1" /> :
       <ArrowDown className="inline-block w-3 h-3 ml-1" />;
-  };
-
-  const handleDeleteClick = (featureId: number) => {
-    setSelectedFeatureId(featureId);
-    setDeleteModalOpen(true);
-  };
-
-  const handleDelete = async () => {
-    if (!selectedFeatureId) return;
-    try {
-      await deleteFeature(selectedFeatureId).unwrap();
-      toast.success('Đã xóa thành công tính năng');
-      refetch();
-      setDeleteModalOpen(false);
-      setSelectedFeatureId(null);
-    } catch (error: any) {
-      toast.error('Đã xảy ra lỗi khi xóa tính năng: ' + error.message);
-    }
   };
 
   const formatDate = (dateString?: string) => {
@@ -155,14 +131,6 @@ const FeatureTable = () => {
               onClick={() => router.push(getRouteWithRole(`/features/${id}/edit`))}
             >
               <SquarePen className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleDeleteClick(id)}
-              className="text-red-600 hover:text-red-700 hover:border-red-300"
-            >
-              Xóa
             </Button>
           </div>
         );
@@ -259,21 +227,6 @@ const FeatureTable = () => {
           </div>
         )}
       </div>
-
-      <ConfirmModal
-        isOpen={deleteModalOpen}
-        onClose={() => {
-          setDeleteModalOpen(false);
-          setSelectedFeatureId(null);
-        }}
-        onConfirm={handleDelete}
-        title="Xác nhận xóa tính năng"
-        message="Bạn có chắc chắn muốn xóa tính năng này không? Hành động này không thể hoàn tác."
-        type="danger"
-        isLoading={isDeleting}
-        confirmText="Xóa"
-        cancelText="Hủy"
-      />
     </div>
   );
 };
