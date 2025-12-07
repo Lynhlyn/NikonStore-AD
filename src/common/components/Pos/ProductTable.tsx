@@ -117,6 +117,7 @@ export function DialogProductTable({ onProductSelect, onScanSuccess, scanDisable
           <Table className="min-w-full">
             <TableHeader className="sticky top-0 bg-gray-50 z-10">
               <TableRow className="bg-gray-50">
+                <TableHead className="text-xs sm:text-sm text-gray-700 font-semibold w-16 sm:w-20">ID</TableHead>
                 <TableHead className="text-xs sm:text-sm text-gray-700 font-semibold">Tên sản phẩm</TableHead>
                 <TableHead className="text-xs sm:text-sm text-gray-700 font-semibold hidden sm:table-cell">Thương hiệu</TableHead>
                 <TableHead className="text-xs sm:text-sm text-gray-700 font-semibold hidden md:table-cell">Danh mục</TableHead>
@@ -126,7 +127,7 @@ export function DialogProductTable({ onProductSelect, onScanSuccess, scanDisable
             <TableBody>
               {isLoading && currentPage === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8">
+                  <TableCell colSpan={5} className="text-center py-8">
                     <div
                       className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600 mx-auto"
                       role="status"
@@ -137,7 +138,7 @@ export function DialogProductTable({ onProductSelect, onScanSuccess, scanDisable
                 </TableRow>
               ) : allProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-gray-400 text-xs sm:text-sm">
+                  <TableCell colSpan={5} className="text-center py-8 text-gray-400 text-xs sm:text-sm">
                     Không tìm thấy sản phẩm
                   </TableCell>
                 </TableRow>
@@ -145,6 +146,9 @@ export function DialogProductTable({ onProductSelect, onScanSuccess, scanDisable
                 <>
                   {allProducts.map((product) => (
                     <TableRow key={product.id} className="hover:bg-gray-50 transition-colors">
+                      <TableCell className="py-2 sm:py-3 text-xs sm:text-sm text-gray-600 font-medium">
+                        #{product.id}
+                      </TableCell>
                       <TableCell className="py-2 sm:py-3">
                         <div className="min-w-0 max-w-[200px] sm:max-w-[300px]">
                           <div className="font-semibold text-xs sm:text-sm text-gray-900 line-clamp-2 break-words" title={product.name}>
@@ -185,7 +189,7 @@ export function DialogProductTable({ onProductSelect, onScanSuccess, scanDisable
 
                   {hasMore && (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center py-3 sm:py-4">
+                      <TableCell colSpan={5} className="text-center py-3 sm:py-4">
                         <Button
                           onClick={loadMore}
                           disabled={isFetching}

@@ -9,6 +9,13 @@ function formatCurrency(amount: number) {
   }).format(amount);
 }
 
+function formatNote(note: string | null | undefined): string {
+  if (!note || note.trim() === "" || note.trim().toLowerCase() === "null") {
+    return "Không có";
+  }
+  return note.trim();
+}
+
 export function OrderSummary({ totalAmount, discount, shippingFee, note }: OrderSummaryProps) {
   const safeTotalAmount = Math.max(0, totalAmount || 0);
   const safeDiscount = Math.max(0, discount || 0);
@@ -40,11 +47,9 @@ export function OrderSummary({ totalAmount, discount, shippingFee, note }: Order
           <span>{formatCurrency(finalAmount)}</span>
         </div>
       </div>
-      {note && (
-        <div className="mt-4 pt-4 border-t">
-          <p><span className="font-medium">Ghi chú:</span> {note}</p>
-        </div>
-      )}
+      <div className="mt-4 pt-4 border-t">
+        <p><span className="font-medium">Ghi chú:</span> {formatNote(note)}</p>
+      </div>
     </div>
   );
 }

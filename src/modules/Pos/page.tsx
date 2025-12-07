@@ -82,7 +82,7 @@ export default function POSPage() {
         toast.success(`Thanh toán thành công cho đơn hàng ${orderIdParam}!`)
         setTimeout(async () => {
           await refreshAllData({ resetState: false })
-          const completedOrder = pendingOrders.find(o => o.trackingNumber === orderIdParam)
+          const completedOrder = pendingOrders.find(o => o.orderCode === orderIdParam)
           if (completedOrder) {
             await handleSelectOrder(completedOrder.id)
           }
@@ -105,7 +105,7 @@ export default function POSPage() {
           await refreshData()
           const updatedOrder = pendingOrders.find(o => o.id === selectedOrderId)
           if (updatedOrder && updatedOrder.status === "COMPLETED") {
-            toast.success(`Đơn hàng ${updatedOrder.trackingNumber} đã được thanh toán thành công!`)
+            toast.success(`Đơn hàng ${updatedOrder.orderCode || `#${updatedOrder.id}`} đã được thanh toán thành công!`)
             clearInterval(intervalId)
             await refreshAllData({ resetState: false })
             resetPaymentState()
@@ -198,7 +198,7 @@ export default function POSPage() {
   const handleCancelOrderClick = useCallback((orderId: number) => {
     const order = pendingOrders.find(o => o.id === orderId)
     if (order) {
-      setOrderToCancel({ id: orderId, code: `#${orderId}` })
+      setOrderToCancel({ id: orderId, code: order.orderCode || `#${orderId}` })
       setShowCancelModal(true)
     }
   }, [pendingOrders])
@@ -327,7 +327,7 @@ export default function POSPage() {
               (paymentMethod === "cash" && receivedAmount < finalAmount)
             }
             orderId={selectedOrderId}
-            orderCode={selectedOrder?.trackingNumber || `#${selectedOrderId}`}
+            orderCode={selectedOrder?.code || `#${selectedOrderId}`}
             hasOrderItems={selectedOrder?.orderDetails && selectedOrder.orderDetails.length > 0}
             onVnpayQrGenerated={async () => {
               if (selectedOrderId) {

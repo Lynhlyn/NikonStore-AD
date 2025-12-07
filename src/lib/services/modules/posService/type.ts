@@ -178,6 +178,7 @@ export interface PosOrderResponse {
 
 export interface ListOrderPosResponse {
   id: number;
+  orderCode: string;
   customer?: Customer;
   totalAmount: number;
   discount: number;
