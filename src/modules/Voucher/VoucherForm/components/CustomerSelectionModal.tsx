@@ -4,8 +4,7 @@ import { IListQuery } from '@/common/types/query';
 import { getSimpleError } from '@/common/utils/handleForm';
 import { useFetchCustomersQuery } from '@/lib/services/modules/customerService';
 import { useAssignVoucherToCustomersMutation, useGetCustomersByVoucherQuery } from '@/lib/services/modules/customerVoucherService';
-import { AlertCircle, Check, Search, UserPlus, Users, X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 interface CustomerSelectionModalProps {
@@ -49,15 +48,17 @@ export const CustomerSelectionModal: React.FC<CustomerSelectionModalProps> = ({
         skip: !voucherId,
     });
 
-    const queryParams: IListQuery = {
+    const queryParams: IListQuery = useMemo(() => ({
         page: currentPage,
         size: pageSize,
         sort: 'id',
         direction: 'asc',
-        keyword: searchTerm || undefined,
-    };
+        keyword: searchTerm.trim() || undefined,
+    }), [currentPage, pageSize, searchTerm]);
 
-    const { data: customersData, isLoading: isLoadingCustomers, refetch } = useFetchCustomersQuery(queryParams);
+    const { data: customersData, isLoading: isLoadingCustomers, refetch } = useFetchCustomersQuery(queryParams, {
+        refetchOnMountOrArgChange: true,
+    });
 
     const customers = customersData?.data || [];
     const assignedCustomers = assignedCustomersData?.data || [];
@@ -65,13 +66,15 @@ export const CustomerSelectionModal: React.FC<CustomerSelectionModalProps> = ({
     const totalPages = customersData?.pagination?.totalPages || 0;
     const currentPageFromAPI = customersData?.pagination?.currentPage || 0;
 
-    // Lọc ra các khách hàng chưa được gán voucher (chỉ khi có voucherId)
     const availableCustomers = useMemo(() => {
+        let filtered = customers.filter(customer => customer.id !== 1);
+        
         if (voucherId) {
             const assignedCustomerIds = assignedCustomers.map(customer => customer.customerId);
-            return customers.filter(customer => !assignedCustomerIds.includes(customer.id));
+            filtered = filtered.filter(customer => !assignedCustomerIds.includes(customer.id));
         }
-        return customers;
+        
+        return filtered;
     }, [customers, assignedCustomers, voucherId]);
 
     const handleCustomerToggle = (customerId: number) => {
@@ -123,10 +126,10 @@ export const CustomerSelectionModal: React.FC<CustomerSelectionModalProps> = ({
         }
     };
 
-    const handleSearch = (value: string) => {
+    const handleSearch = useCallback((value: string) => {
         setSearchTerm(value);
         setCurrentPage(0);
-    };
+    }, []);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -148,68 +151,60 @@ export const CustomerSelectionModal: React.FC<CustomerSelectionModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-                <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                            <UserPlus className="w-6 h-6 text-blue-600" />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-semibold text-gray-900">
-                                {voucherId ? 'Gán voucher cho khách hàng' : 'Chọn khách hàng cho voucher'}
-                            </h2>
-                            {voucherId && <p className="text-sm text-gray-600 mt-1">Voucher ID: {voucherId}</p>}
-                            <p className="text-xs text-gray-500 mt-1">
-                                {voucherId 
-                                    ? `Hiển thị ${availableCustomers.length} khách hàng có thể gán (đã loại bỏ ${assignedCustomers.length} khách hàng đã được gán)`
-                                    : `Hiển thị ${availableCustomers.length} khách hàng có thể chọn`
-                                }
-                            </p>
-                        </div>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col shadow-lg">
+                <div className="flex justify-between items-start mb-6 pb-4 border-b border-gray-200">
+                    <div>
+                        <h2 className="text-lg font-medium text-gray-900 mb-1">
+                            {voucherId ? 'Gán voucher cho khách hàng' : 'Chọn khách hàng'}
+                        </h2>
+                        <p className="text-sm text-gray-600">
+                            {voucherId 
+                                ? `${availableCustomers.length} khách hàng có thể gán`
+                                : `${availableCustomers.length} khách hàng có thể chọn`
+                            }
+                        </p>
                     </div>
                     <button
                         onClick={onClose}
                         className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                         title="Đóng"
                     >
-                        <X className="w-5 h-5" />
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                     </button>
                 </div>
 
-                <div className="mb-6 flex gap-4 items-center">
+                <div className="mb-6 flex flex-col sm:flex-row gap-3">
                     <div className="flex-1 relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Tìm kiếm khách hàng theo tên, email, số điện thoại..."
+                            placeholder="Tìm kiếm theo tên, email, số điện thoại..."
                             value={searchTerm}
                             onChange={(e) => handleSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400 text-sm"
                         />
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex gap-2">
                         <button
                             onClick={handleSelectAll}
-                            className="px-4 py-3 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                            className="px-4 py-2.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium whitespace-nowrap"
                         >
                             {selectedCustomers.length === availableCustomers.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
                         </button>
                         <button
                             onClick={handleAssignVouchers}
                             disabled={isAssigning || selectedCustomers.length === 0}
-                            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium shadow-sm hover:shadow-md flex items-center gap-2"
+                            className="px-6 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium text-sm whitespace-nowrap"
                         >
                             {isAssigning ? (
                                 <>
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                    Đang gán...
+                                    <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                                    Đang xử lý...
                                 </>
                             ) : (
-                                <>
-                                    <Users className="w-4 h-4" />
-                                    {voucherId ? `Gán voucher (${selectedCustomers.length})` : `Chọn (${selectedCustomers.length})`}
-                                </>
+                                voucherId ? `Gán (${selectedCustomers.length})` : `Chọn (${selectedCustomers.length})`
                             )}
                         </button>
                     </div>
@@ -225,11 +220,10 @@ export const CustomerSelectionModal: React.FC<CustomerSelectionModalProps> = ({
                         </div>
                     ) : availableCustomers.length === 0 ? (
                         <div className="text-center text-gray-500 py-12 bg-gray-50 rounded-lg border border-gray-200">
-                            <AlertCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">
-                                {searchTerm ? 'Không tìm thấy khách hàng nào' : 'Không có khách hàng nào có thể gán'}
+                            <h3 className="text-base font-medium text-gray-900 mb-2">
+                                {searchTerm ? 'Không tìm thấy khách hàng' : 'Không có khách hàng có thể gán'}
                             </h3>
-                            <p className="text-gray-600">
+                            <p className="text-sm text-gray-600">
                                 {searchTerm
                                     ? 'Không có khách hàng nào phù hợp với từ khóa tìm kiếm'
                                     : assignedCustomers.length > 0
@@ -239,14 +233,15 @@ export const CustomerSelectionModal: React.FC<CustomerSelectionModalProps> = ({
                             </p>
                         </div>
                     ) : (
-                        <div className="space-y-3">
+                        <div className="space-y-2">
                             {availableCustomers.map((customer) => (
                                 <div
                                     key={customer.id}
-                                    className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all duration-200 ${selectedCustomers.includes(customer.id)
-                                        ? 'border-blue-500 bg-blue-50 shadow-sm'
-                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                                        }`}
+                                    className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
+                                        selectedCustomers.includes(customer.id)
+                                            ? 'border-gray-400 bg-gray-50'
+                                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                    }`}
                                     onClick={() => handleCustomerToggle(customer.id)}
                                 >
                                     <div className="flex items-center justify-center w-5 h-5 mr-4">
@@ -254,40 +249,34 @@ export const CustomerSelectionModal: React.FC<CustomerSelectionModalProps> = ({
                                             type="checkbox"
                                             checked={selectedCustomers.includes(customer.id)}
                                             onChange={() => handleCustomerToggle(customer.id)}
-                                            className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                            className="w-4 h-4 text-gray-900 focus:ring-gray-400 border-gray-300 rounded"
                                         />
                                     </div>
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="font-medium text-gray-900 text-lg">{customer.fullName}</div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-1.5">
+                                            <div className="font-medium text-gray-900 truncate">
+                                                {customer.fullName}
+                                            </div>
                                             <span
-                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${customer.status === 'ACTIVE'
-                                                    ? 'bg-green-100 text-green-800 border border-green-200'
-                                                    : 'bg-red-100 text-red-800 border border-red-200'
-                                                    }`}
+                                                className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${
+                                                    customer.status === 'ACTIVE'
+                                                        ? 'bg-gray-100 text-gray-700'
+                                                        : 'bg-gray-200 text-gray-600'
+                                                }`}
                                             >
                                                 {customer.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
                                             </span>
                                         </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                                            <div className="flex items-center gap-2">
-                                                <span className="w-20 text-gray-500">Email:</span>
-                                                <span className="font-medium">{customer.email || 'Không có'}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="w-20 text-gray-500">SĐT:</span>
-                                                <span className="font-medium">{customer.phoneNumber}</span>
-                                            </div>
+                                        <div className="flex flex-col sm:flex-row sm:gap-4 text-xs text-gray-600">
+                                            <span className="truncate">
+                                                <span className="text-gray-500">Email: </span>
+                                                {customer.email || 'Không có'}
+                                            </span>
+                                            <span className="truncate">
+                                                <span className="text-gray-500">SĐT: </span>
+                                                {customer.phoneNumber}
+                                            </span>
                                         </div>
-                                    </div>
-                                    <div className="ml-4">
-                                        {selectedCustomers.includes(customer.id) ? (
-                                            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                                                <Check className="w-5 h-5 text-white" />
-                                            </div>
-                                        ) : (
-                                            <div className="w-8 h-8 border-2 border-gray-300 rounded-full"></div>
-                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -296,15 +285,15 @@ export const CustomerSelectionModal: React.FC<CustomerSelectionModalProps> = ({
                 </div>
 
                 {totalPages > 1 && (
-                    <div className="mt-6 flex items-center justify-between pt-4 border-t border-gray-200">
-                        <div className="text-sm text-gray-700">
-                            Hiển thị {availableCustomers.length} trong tổng số {totalCustomers} khách hàng
+                    <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-gray-200">
+                        <div className="text-sm text-gray-600">
+                            Hiển thị {availableCustomers.length} / {totalCustomers} khách hàng
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                             <select
                                 value={pageSize}
                                 onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
                             >
                                 <option value={10}>10</option>
                                 <option value={20}>20</option>

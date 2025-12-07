@@ -38,84 +38,132 @@ const VoucherForm: FC<IVoucherProps> = ({ id, isViewMode }) => {
 
   return (
     <VoucherFormContext.Provider value={formProvider}>
-      <div className="flex w-full gap-[30px]">
-        <div className="flex flex-1 flex-col bg-white rounded-[10px] px-[30px] pt-[33px] pb-[60px]">
-          <span className="text-base font-medium leading-[130%]">Thông tin voucher</span>
-          <div className="mt-[19px] flex flex-col gap-[14px] text-[#333333]">
-            <VoucherFormControl.CodeInput />
-            <VoucherFormControl.DescriptionInput />
-            <VoucherFormControl.QuantityInput />
-            <VoucherFormControl.DiscountTypeInput />
-            <VoucherFormControl.DiscountValueInput />
-            <VoucherFormControl.MinOrderValueInput />
-            <VoucherFormControl.MaxDiscountInput />
-            <VoucherFormControl.StartDateInput />
-            <VoucherFormControl.EndDateInput />
-            <VoucherFormControl.IsPublicInput />
-            <VoucherFormControl.StatusInput />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-[30px]">
-          <div className="w-[250px]">
-            <VoucherFormControl.Button />
-          </div>
-
-          {localIsPrivateVoucher && (
-            <div className="bg-white rounded-[10px] px-[30px] pt-[33px] pb-[60px] min-w-[400px]">
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-base font-medium leading-[130%]">Danh sách khách hàng cấp quyền dùng voucher này</span>
-                {!isViewMode && (
-                  <button
-                    onClick={() => setIsCustomerModalOpen(true)}
-                    disabled={isVoucherInactive}
-                    className={`px-4 py-2 rounded-md text-sm transition-colors ${isVoucherInactive
-                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                      : 'bg-bgPrimarySolidDefault text-white hover:bg-bgPrimarySolidHover'
-                      }`}
-                    title={isVoucherInactive ? 'Không thể gán khách hàng cho voucher không hoạt động' : 'Chọn khách hàng'}
-                  >
-                    Chọn khách hàng
-                  </button>
-                )}
+      <div className="w-full space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h2 className="text-lg font-medium text-gray-900 mb-6 pb-4 border-b border-gray-200">
+                Thông tin voucher
+              </h2>
+              <div className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <VoucherFormControl.CodeInput />
+                  <VoucherFormControl.QuantityInput />
+                </div>
+                <VoucherFormControl.DescriptionInput />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <VoucherFormControl.DiscountTypeInput />
+                  <VoucherFormControl.DiscountValueInput />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <VoucherFormControl.MinOrderValueInput />
+                  <VoucherFormControl.MaxDiscountInput />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <VoucherFormControl.StartDateInput />
+                  <VoucherFormControl.EndDateInput />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <VoucherFormControl.IsPublicInput />
+                  <VoucherFormControl.StatusInput />
+                </div>
               </div>
+            </div>
+          </div>
 
-              {id ? (
-                <>
-                  {isVoucherInactive && (
-                    <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
-                      <div className="w-4 h-4 bg-red-100 rounded-full flex items-center justify-center">
-                        <span className="text-red-600 text-xs">!</span>
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-red-800 font-medium text-sm">Voucher không hoạt động</p>
-                        <p className="text-red-600 text-xs mt-1">
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <VoucherFormControl.Button />
+            </div>
+
+            {localIsPrivateVoucher && (
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="mb-5 pb-4 border-b border-gray-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <h3 className="text-base font-medium text-gray-900">
+                      Khách hàng được cấp quyền
+                    </h3>
+                    {!isViewMode && (
+                      <button
+                        onClick={() => setIsCustomerModalOpen(true)}
+                        disabled={isVoucherInactive}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                          isVoucherInactive
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'bg-gray-900 text-white hover:bg-gray-800'
+                        }`}
+                        title={
+                          isVoucherInactive
+                            ? 'Không thể gán khách hàng cho voucher không hoạt động'
+                            : 'Chọn khách hàng'
+                        }
+                      >
+                        Chọn khách hàng
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {id ? (
+                  <>
+                    {isVoucherInactive && (
+                      <div className="mb-4 bg-gray-50 border border-gray-300 rounded-lg p-3">
+                        <p className="text-sm font-medium text-gray-900 mb-1">
+                          Voucher không hoạt động
+                        </p>
+                        <p className="text-xs text-gray-600">
                           Không thể gán hoặc gỡ khách hàng cho voucher đã hết hạn hoặc bị vô hiệu hóa.
                         </p>
                       </div>
-                    </div>
-                  )}
-                  <AssignedCustomersList
-                    voucherId={id}
-                    onRefresh={handleCustomerListRefresh}
-                    key={`customer-list-${refreshKey}`}
-                    isVoucherInactive={isVoucherInactive}
-                  />
-                </>
-              ) : (
-                <div className="text-center text-gray-500 py-8">
-                  {selectedCustomerIds.length > 0 ? (
-                    <div>
-                      <p className="mb-2">Đã chọn {selectedCustomerIds.length} khách hàng</p>
-                      <p className="text-xs text-gray-400">Khách hàng sẽ được gán khi lưu voucher</p>
-                    </div>
-                  ) : (
-                    <p>Chọn khách hàng để gán khi tạo voucher</p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+                    )}
+                    <AssignedCustomersList
+                      voucherId={id}
+                      onRefresh={handleCustomerListRefresh}
+                      key={`customer-list-${refreshKey}`}
+                      isVoucherInactive={isVoucherInactive}
+                    />
+                  </>
+                ) : (
+                  <div className="py-8">
+                    {selectedCustomerIds.length > 0 ? (
+                      <div className="space-y-3">
+                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium text-gray-900">
+                              Đã chọn {selectedCustomerIds.length} khách hàng
+                            </span>
+                            <button
+                              onClick={() => setIsCustomerModalOpen(true)}
+                              className="text-xs text-gray-600 hover:text-gray-900 underline"
+                            >
+                              Chỉnh sửa
+                            </button>
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            Khách hàng sẽ được gán khi lưu voucher
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-6">
+                        <p className="text-sm text-gray-500 mb-3">
+                          Chưa chọn khách hàng
+                        </p>
+                        {!isViewMode && (
+                          <button
+                            onClick={() => setIsCustomerModalOpen(true)}
+                            className="text-sm text-gray-700 hover:text-gray-900 underline"
+                          >
+                            Chọn khách hàng
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

@@ -29,5 +29,6 @@ export interface StatusActionsProps {
   orderId: number;
   currentStatus: number;
   onStatusChange?: () => void;
+  orderNumber?: string;
 }
 

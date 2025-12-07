@@ -21,6 +21,8 @@ export interface Review {
   comment: string | null;
   status: number;
   reviewImages: ReviewImage[];
+  orderDetailId?: number;
+  orderId?: number;
   createdAt: string;
   updatedAt: string;
 }

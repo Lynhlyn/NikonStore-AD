@@ -1,10 +1,8 @@
 'use client';
 
 import { getSimpleError } from '@/common/utils/handleForm';
-import { getStatusEnumStringWithAll } from '@/common/utils/statusOption';
 import { useGetCustomersByVoucherQuery, useRemoveVoucherFromCustomerMutation } from '@/lib/services/modules/customerVoucherService';
 import { useFetchVoucherByIdQuery } from '@/lib/services/modules/voucherService';
-import { AlertTriangle, CheckCircle, Trash2, UserCheck, Users } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -103,83 +101,43 @@ export const AssignedCustomersList: React.FC<AssignedCustomersListProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse"></div>
-          <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
-        </div>
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={`loading-${i}`} className="h-20 bg-gray-200 rounded-lg animate-pulse"></div>
-          ))}
-        </div>
+      <div className="space-y-3">
+        {[...Array(3)].map((_, i) => (
+          <div key={`loading-${i}`} className="h-16 bg-gray-100 rounded-lg animate-pulse"></div>
+        ))}
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <div className="text-center py-12">
-          <div className="text-red-500 mb-4">
-            <AlertTriangle className="w-16 h-16 mx-auto" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Lỗi khi tải dữ liệu</h3>
-          <p className="text-gray-600 mb-4">
-            Không thể tải danh sách khách hàng. Vui lòng thử lại.
-          </p>
-          <button
-            onClick={() => refetch()}
-            className="px-4 py-2 bg-bgPrimarySolidDefault text-white rounded-lg hover:bg-bgPrimarySolidHover transition-colors"
-          >
-            Thử lại
-          </button>
-        </div>
+      <div className="text-center py-8">
+        <h3 className="text-sm font-medium text-gray-900 mb-2">Lỗi khi tải dữ liệu</h3>
+        <p className="text-xs text-gray-600 mb-4">
+          Không thể tải danh sách khách hàng. Vui lòng thử lại.
+        </p>
+        <button
+          onClick={() => refetch()}
+          className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm"
+        >
+          Thử lại
+        </button>
       </div>
     );
   }
 
   return (
     <>
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Users className="w-6 h-6 text-green-600" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Khách hàng đã được gán voucher
-              </h3>
-              <p className="text-sm text-gray-600">
-                Tổng cộng {filteredCustomers.length} khách hàng
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={handleManualRefresh}
-            className="px-3 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-2"
-            title="Làm mới danh sách"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Làm mới
-          </button>
-        </div>
-
+      <div>
         {!customers || filteredCustomers.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-            <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có khách hàng nào</h3>
-            <p className="text-gray-600">
+          <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+            <h3 className="text-sm font-medium text-gray-900 mb-2">Chưa có khách hàng</h3>
+            <p className="text-xs text-gray-600">
               Voucher này chưa được gán cho khách hàng nào.
-              <br />
-              Hãy sử dụng nút "Chọn khách hàng dùng voucher" ở trên để gán voucher.
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {filteredCustomers.map((customerVoucher: CustomerVoucher, index: number) => {
               if (!customerVoucher || !customerVoucher.customerId) {
                 console.warn('Invalid customer voucher data:', customerVoucher);
@@ -192,64 +150,53 @@ export const AssignedCustomersList: React.FC<AssignedCustomersListProps> = ({
               return (
                 <div
                   key={`customer-${customerVoucher.customerId}-${index}`}
-                  className={`p-4 border rounded-lg transition-colors ${isVoucherUsed
-                      ? 'border-green-200 bg-green-50/50'
-                      : 'border-gray-200 hover:border-gray-300 bg-gray-50/50'
-                    }`}
+                  className={`p-3 border rounded-lg transition-colors ${
+                    isVoucherUsed
+                      ? 'border-gray-300 bg-gray-50'
+                      : 'border-gray-200 hover:border-gray-300 bg-white'
+                  }`}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 space-y-3">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isVoucherUsed ? 'bg-green-100' : 'bg-blue-100'
-                          }`}>
-                          {isVoucherUsed ? (
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                          ) : (
-                            <UserCheck className="w-5 h-5 text-blue-600" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-medium text-gray-900">{customerVoucher.customerName || 'Không có tên'}</h4>
-                            {isVoucherUsed && (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
-                                Đã sử dụng
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-4 text-sm text-gray-600">
-                            {isVoucherUsed && customerVoucher.usedAt && (
-                              <div className="flex items-center gap-1">
-                                <CheckCircle className="w-3 h-3" />
-                                Sử dụng lúc: {new Date(customerVoucher.usedAt).toLocaleString('vi-VN')}
-                              </div>
-                            )}
-                          </div>
-                        </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-medium text-gray-900 text-sm truncate">
+                          {customerVoucher.customerName || 'Không có tên'}
+                        </h4>
+                        {isVoucherUsed && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 whitespace-nowrap">
+                            Đã sử dụng
+                          </span>
+                        )}
                       </div>
+                      {isVoucherUsed && customerVoucher.usedAt && (
+                        <p className="text-xs text-gray-500">
+                          Sử dụng: {new Date(customerVoucher.usedAt).toLocaleString('vi-VN')}
+                        </p>
+                      )}
                     </div>
 
-                    <div className="flex flex-col gap-2 ml-4">
-                      <button
-                        onClick={() => handleRemoveCustomerClick(customerVoucher)}
-                        disabled={!canRemove}
-                        className={`p-2 rounded-lg transition-colors disabled:opacity-50 ${!canRemove
-                            ? 'text-gray-400 cursor-not-allowed'
-                            : 'text-red-600 hover:text-red-700 hover:bg-red-50'
-                          }`}
-                        title={
-                          isVoucherInactive
-                            ? "Không thể gỡ voucher không hoạt động"
-                            : isVoucherExpired
-                              ? "Không thể gỡ voucher đã hết hạn"
-                              : isVoucherUsed
-                                ? "Không thể gỡ voucher đã được sử dụng"
-                                : "Gỡ voucher khỏi khách hàng"
-                        }
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleRemoveCustomerClick(customerVoucher)}
+                      disabled={!canRemove}
+                      className={`p-2 rounded-lg transition-colors disabled:opacity-30 ${
+                        !canRemove
+                          ? 'text-gray-300 cursor-not-allowed'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                      }`}
+                      title={
+                        isVoucherInactive
+                          ? "Không thể gỡ voucher không hoạt động"
+                          : isVoucherExpired
+                            ? "Không thể gỡ voucher đã hết hạn"
+                            : isVoucherUsed
+                              ? "Không thể gỡ voucher đã được sử dụng"
+                              : "Gỡ voucher"
+                      }
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               );
@@ -257,64 +204,44 @@ export const AssignedCustomersList: React.FC<AssignedCustomersListProps> = ({
           </div>
         )}
 
-        <div className="mt-6 flex items-center justify-between pt-4 border-t border-gray-200">
-          <div className="text-sm text-gray-700">
-            Hiển thị {filteredCustomers.length} trong tổng số {totalCustomers} khách hàng
+        {filteredCustomers.length > 0 && (
+          <div className="mt-4 pt-3 border-t border-gray-200">
+            <div className="text-xs text-gray-600">
+              Tổng cộng {filteredCustomers.length} khách hàng
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {showConfirmDialog && customerToRemove && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <AlertTriangle className="w-6 h-6 text-red-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Xác nhận gỡ voucher</h3>
-                <p className="text-sm text-gray-600">Hành động này không thể hoàn tác</p>
-              </div>
-            </div>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-lg">
+            <h3 className="text-base font-medium text-gray-900 mb-2">Xác nhận gỡ voucher</h3>
+            <p className="text-sm text-gray-600 mb-4">Hành động này không thể hoàn tác</p>
 
             <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-gray-700 mb-2">
                 Bạn có chắc chắn muốn gỡ voucher khỏi khách hàng{' '}
                 <span className="font-medium text-gray-900">{customerToRemove.customerName}</span>?
               </p>
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-gray-500">
                 Khách hàng sẽ không thể sử dụng voucher này nữa.
               </p>
-              {customerToRemove.used && customerToRemove.usedAt && (
-                <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <p className="text-sm text-yellow-800">
-                    <strong>Lưu ý:</strong> Voucher này đã được sử dụng lúc{' '}
-                    {new Date(customerToRemove.usedAt).toLocaleString('vi-VN')}
-                  </p>
-                </div>
-              )}
             </div>
 
             <div className="flex gap-3 justify-end">
               <button
                 onClick={handleCancelRemove}
-                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm"
               >
                 Hủy
               </button>
               <button
                 onClick={handleRemoveCustomer}
                 disabled={isRemoving}
-                className="px-4 py-2 bg-bgPrimarySolidDefault text-white hover:bg-bgPrimarySolidHover disabled:opacity-50 rounded-lg transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50 rounded-lg transition-colors text-sm"
               >
-                {isRemoving ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Đang xử lý...
-                  </>
-                ) : (
-                  'Gỡ voucher'
-                )}
+                {isRemoving ? 'Đang xử lý...' : 'Gỡ voucher'}
               </button>
             </div>
           </div>

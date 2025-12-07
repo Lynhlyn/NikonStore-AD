@@ -143,6 +143,7 @@ export function OrderDetail({ orderId, source = 'online' }: OrderDetailProps) {
             orderId={orderId}
             currentStatus={orderDetail.orderStatus}
             onStatusChange={handleStatusChange}
+            orderNumber={orderDetail.trackingNumber}
           />
           <Button
             onClick={handleExportExcel}

@@ -4,83 +4,184 @@ import { useState } from 'react';
 import { Button } from '@/core/shadcn/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { useUpdateStatusOrderMutation } from '@/lib/services/modules/orderService';
+import { useUpdateStatusOrderMutation, useCancelOrderMutation } from '@/lib/services/modules/orderService';
 import { OrderStatus } from '@/common/utils/orderStatusMapper';
 import { StatusActionsProps } from './types';
+import CancelOrderModal from '@/common/components/CancelOrderModal';
+import FailedDeliveryModal from '@/common/components/FailedDeliveryModal';
 
-export function StatusActions({ orderId, currentStatus, onStatusChange }: StatusActionsProps) {
+export function StatusActions({ orderId, currentStatus, onStatusChange, orderNumber }: StatusActionsProps) {
   const [updateStatus, { isLoading }] = useUpdateStatusOrderMutation();
+  const [cancelOrder, { isLoading: isCancelling }] = useCancelOrderMutation();
   const [showFailedModal, setShowFailedModal] = useState(false);
-  const [failedReason, setFailedReason] = useState('');
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
 
-  const handleFailedDelivery = async () => {
-    if (!failedReason.trim()) {
-      toast.error('Vui lòng nhập lý do giao hàng thất bại');
-      return;
-    }
-
+  const handleUpdateStatus = async (afterStatus: number, reason?: string) => {
     try {
       await updateStatus({
         orderId,
-        afterStatus: OrderStatus.FAILED_DELIVERY,
-        reason: failedReason,
+        afterStatus,
+        reason: reason,
       }).unwrap();
       toast.success('Cập nhật trạng thái thành công');
       setShowFailedModal(false);
-      setFailedReason('');
       onStatusChange?.();
-    } catch {
-      toast.error('Có lỗi xảy ra khi cập nhật trạng thái');
+    } catch (error: any) {
+      toast.error(error?.data?.message || 'Có lỗi xảy ra khi cập nhật trạng thái');
     }
   };
 
-  if (currentStatus === OrderStatus.SHIPPING) {
-    return (
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          onClick={() => setShowFailedModal(true)}
-          disabled={isLoading}
-          className="flex items-center gap-2"
-        >
-          {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-          Giao hàng thất bại
-        </Button>
-        {showFailedModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-              <h3 className="text-lg font-semibold mb-4">Giao hàng thất bại</h3>
-              <textarea
-                value={failedReason}
-                onChange={(e) => setFailedReason(e.target.value)}
-                placeholder="Nhập lý do giao hàng thất bại..."
-                className="w-full p-2 border rounded mb-4 min-h-[100px]"
-              />
-              <div className="flex gap-2 justify-end">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowFailedModal(false);
-                    setFailedReason('');
-                  }}
-                >
-                  Hủy
-                </Button>
-                <Button
-                  onClick={handleFailedDelivery}
-                  disabled={isLoading}
-                >
-                  {isLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                  Xác nhận
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+  const handleConfirmCancel = async (reason: string) => {
+    try {
+      await cancelOrder({
+        orderId,
+        status: OrderStatus.CANCELLED,
+        reason: reason,
+      }).unwrap();
+      toast.success('Hủy đơn hàng thành công');
+      setCancelModalOpen(false);
+      onStatusChange?.();
+    } catch (error: any) {
+      toast.error(error?.data?.message || 'Có lỗi xảy ra khi hủy đơn hàng');
+    }
+  };
+
+  const handleFailedDelivery = async (reason: string) => {
+    await handleUpdateStatus(OrderStatus.FAILED_DELIVERY, reason);
+  };
+
+  const handleOpenCancelModal = () => {
+    setCancelModalOpen(true);
+  };
+
+  const actions: JSX.Element[] = [];
+
+  if (currentStatus === OrderStatus.PENDING_CONFIRMATION) {
+    actions.push(
+      <Button
+        key="confirm"
+        onClick={() => handleUpdateStatus(OrderStatus.CONFIRMED)}
+        disabled={isLoading}
+        className="flex items-center gap-2"
+      >
+        {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+        Xác nhận đơn hàng
+      </Button>
+    );
+    actions.push(
+      <Button
+        key="cancel"
+        variant="destructive"
+        onClick={handleOpenCancelModal}
+        className="flex items-center gap-2"
+      >
+        Hủy đơn hàng
+      </Button>
     );
   }
 
-  return null;
+  if (currentStatus === OrderStatus.CONFIRMED) {
+    actions.push(
+      <Button
+        key="preparing"
+        onClick={() => handleUpdateStatus(OrderStatus.PREPARING)}
+        disabled={isLoading}
+        className="flex items-center gap-2"
+      >
+        {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+        Chuẩn bị hàng
+      </Button>
+    );
+    actions.push(
+      <Button
+        key="cancel"
+        variant="destructive"
+        onClick={handleOpenCancelModal}
+        className="flex items-center gap-2"
+      >
+        Hủy đơn hàng
+      </Button>
+    );
+  }
+
+  if (currentStatus === OrderStatus.PREPARING) {
+    actions.push(
+      <Button
+        key="shipping"
+        onClick={() => handleUpdateStatus(OrderStatus.SHIPPING)}
+        disabled={isLoading}
+        className="flex items-center gap-2"
+      >
+        {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+        Giao hàng
+      </Button>
+    );
+  }
+
+  if (currentStatus === OrderStatus.SHIPPING) {
+    actions.push(
+      <Button
+        key="completed"
+        onClick={() => handleUpdateStatus(OrderStatus.COMPLETED)}
+        disabled={isLoading}
+        className="flex items-center gap-2"
+      >
+        {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+        Hoàn thành
+      </Button>
+    );
+    actions.push(
+      <Button
+        key="failed"
+        variant="outline"
+        onClick={() => setShowFailedModal(true)}
+        disabled={isLoading}
+        className="flex items-center gap-2"
+      >
+        Giao hàng thất bại
+      </Button>
+    );
+  }
+
+  if (currentStatus === OrderStatus.PENDING_PAYMENT) {
+    actions.push(
+      <Button
+        key="cancel"
+        variant="destructive"
+        onClick={handleOpenCancelModal}
+        className="flex items-center gap-2"
+      >
+        Hủy đơn hàng
+      </Button>
+    );
+  }
+
+  if (actions.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <div className="flex items-center gap-2 flex-wrap">
+        {actions}
+      </div>
+      <CancelOrderModal
+        open={cancelModalOpen}
+        onOpenChange={setCancelModalOpen}
+        onConfirm={handleConfirmCancel}
+        isLoading={isCancelling}
+        orderNumber={orderNumber}
+      />
+      {showFailedModal && (
+        <FailedDeliveryModal
+          open={showFailedModal}
+          onOpenChange={setShowFailedModal}
+          onConfirm={handleFailedDelivery}
+          isLoading={isLoading}
+          orderNumber={orderNumber}
+        />
+      )}
+    </>
+  );
 }
 

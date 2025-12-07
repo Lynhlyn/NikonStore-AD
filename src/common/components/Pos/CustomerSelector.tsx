@@ -24,37 +24,36 @@ export function CustomerSelector({ selectedCustomer, onCustomerSelect }: Custome
   const [hasMore, setHasMore] = useState(true)
   const [allCustomers, setAllCustomers] = useState<Customer[]>([])
 
+  const queryParams = useMemo(
+    () => ({
+      page: currentPage,
+      size: pageSize,
+      keyword: debouncedSearchTerm.trim() || undefined,
+      status: "ACTIVE" as const,
+    }),
+    [currentPage, pageSize, debouncedSearchTerm]
+  )
+
   const {
     data: customersResponse,
     isLoading,
     isFetching,
     refetch,
-  } = useFetchCustomersQuery(
-    {
-      page: currentPage,
-      size: pageSize,
-      keyword: debouncedSearchTerm || undefined,
-      status: "ACTIVE",
-    },
-    {
-      refetchOnMountOrArgChange: true,
-    },
-  )
+  } = useFetchCustomersQuery(queryParams, {
+    refetchOnMountOrArgChange: true,
+  })
 
   useEffect(() => {
     if (isOpen) {
       setCurrentPage(0)
       setHasMore(true)
       setSearchTerm("")
-      setAllCustomers([])
-      refetch()
     }
-  }, [isOpen, refetch])
+  }, [isOpen])
 
   useEffect(() => {
     if (debouncedSearchTerm !== undefined) {
       setCurrentPage(0)
-      setAllCustomers([])
       setHasMore(true)
     }
   }, [debouncedSearchTerm])
@@ -79,11 +78,11 @@ export function CustomerSelector({ selectedCustomer, onCustomerSelect }: Custome
       } else {
         setHasMore(customers.length === pageSize)
       }
-    } else if (currentPage === 0) {
+    } else if (currentPage === 0 && !isLoading && !isFetching) {
       setAllCustomers([])
       setHasMore(false)
     }
-  }, [customers, currentPage, pagination, pageSize])
+  }, [customers, currentPage, pagination, pageSize, isLoading, isFetching])
 
   const loadMore = useCallback(() => {
     if (hasMore && !isFetching) {

@@ -42,15 +42,14 @@ export function OrderReviews({ orderId, orderDetails = [] }: OrderReviewsProps) 
 
   const reviews = reviewsResponse?.data || [];
 
-  // Create a map of productId to product name from orderDetails
-  const productMap = new Map<number, { name: string; image: string }>();
+  const orderDetailMap = new Map<number, { name: string; image: string; productId: number }>();
   orderDetails.forEach((detail: any) => {
-    // Try to get productId from different possible fields
-    const productId = detail.productId || (detail as any).product_id;
-    if (productId) {
-      productMap.set(productId, {
-        name: detail.productName || `Sản phẩm #${productId}`,
+    const orderDetailId = detail.orderDetailId || (detail as any).id;
+    if (orderDetailId) {
+      orderDetailMap.set(orderDetailId, {
+        name: detail.productName || `Sản phẩm #${detail.productId || orderDetailId}`,
         image: detail.imageUrl || '/placeholder.svg',
+        productId: detail.productId || 0,
       });
     }
   });
@@ -99,12 +98,13 @@ export function OrderReviews({ orderId, orderDetails = [] }: OrderReviewsProps) 
     );
   }
 
-  // Group reviews by productId
-  const reviewsByProduct = reviews.reduce((acc, review) => {
-    if (!acc[review.productId]) {
-      acc[review.productId] = [];
+  const reviewsByOrderDetail = reviews.reduce((acc, review) => {
+    const orderDetailId = review.orderDetailId;
+    if (!orderDetailId) return acc;
+    if (!acc[orderDetailId]) {
+      acc[orderDetailId] = [];
     }
-    acc[review.productId].push(review);
+    acc[orderDetailId].push(review);
     return acc;
   }, {} as Record<number, typeof reviews>);
 
@@ -133,32 +133,33 @@ export function OrderReviews({ orderId, orderDetails = [] }: OrderReviewsProps) 
       </div>
 
       <div className="space-y-6">
-        {Object.entries(reviewsByProduct).map(([productId, productReviews]) => {
-          const productInfo = productMap.get(Number(productId)) || {
-            name: `Sản phẩm #${productId}`,
+        {Object.entries(reviewsByOrderDetail).map(([orderDetailId, orderDetailReviews]) => {
+          const orderDetailInfo = orderDetailMap.get(Number(orderDetailId)) || {
+            name: `Chi tiết đơn hàng #${orderDetailId}`,
             image: '/placeholder.svg',
+            productId: 0,
           };
           return (
-            <div key={productId} className="border-b last:border-b-0 pb-6 last:pb-0">
+            <div key={orderDetailId} className="border-b last:border-b-0 pb-6 last:pb-0">
               <div className="flex items-start gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
                 <Image
-                  src={productInfo.image}
-                  alt={productInfo.name}
+                  src={orderDetailInfo.image}
+                  alt={orderDetailInfo.name}
                   width={60}
                   height={60}
                   className="rounded-lg object-cover border border-gray-200 flex-shrink-0"
                 />
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900 mb-1">{productInfo.name}</h4>
+                  <h4 className="font-semibold text-gray-900 mb-1">{orderDetailInfo.name}</h4>
                   <p className="text-sm text-gray-500">
-                    {productReviews.length}{' '}
-                    {productReviews.length === 1 ? 'đánh giá' : 'đánh giá'}
+                    OrderDetail ID: {orderDetailId} | {orderDetailReviews.length}{' '}
+                    {orderDetailReviews.length === 1 ? 'đánh giá' : 'đánh giá'}
                   </p>
                 </div>
               </div>
 
             <div className="space-y-4">
-              {productReviews.map((review) => (
+              {orderDetailReviews.map((review) => (
                 <div
                   key={review.id}
                   className="bg-gray-50 rounded-lg p-4 border border-gray-200"
@@ -202,14 +203,14 @@ export function OrderReviews({ orderId, orderDetails = [] }: OrderReviewsProps) 
                       {review.reviewImages && review.reviewImages.length > 0 && (
                         <div className="flex gap-2 flex-wrap mt-3">
                           {review.reviewImages.map((img) => (
-                            <Image
-                              key={img.id}
-                              src={img.imageUrl}
-                              alt="Review image"
-                              width={80}
-                              height={80}
-                              className="rounded-lg object-cover border border-gray-200"
-                            />
+                            <div key={img.id} className="relative w-20 h-20">
+                              <Image
+                                src={img.imageUrl}
+                                alt="Review image"
+                                fill
+                                className="rounded-lg object-cover border border-gray-200"
+                              />
+                            </div>
                           ))}
                         </div>
                       )}
