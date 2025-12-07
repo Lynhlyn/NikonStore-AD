@@ -270,6 +270,16 @@ const ListRouteDashboard: IRouterItem[] = [
     ],
   },
   {
+    name: 'Thống kê',
+    routerActive: [routerApp.statistics.list],
+    icon: 'StatisticsManagement',
+    route: routerApp.statistics.list,
+    type: 'item',
+    visibleRoles: [
+      EUserRole.ADMIN,
+    ],
+  },
+  {
     name: 'Quản lý hệ thống',
     routerActive: [
       routerApp.banner.list,

@@ -155,6 +155,10 @@ const routerContentCategory = {
   formEdit: (params: { id: number | string }) => `/content-categories/${params.id}/edit`,
 };
 
+const routerStatistics = {
+  list: '/statistics',
+};
+
 const routerApp = {
   dashboard: routerDashboard,
   auth: routerAuth,
@@ -182,6 +186,7 @@ const routerApp = {
   comment: routerComment,
   contentTag: routerContentTag,
   contentCategory: routerContentCategory,
+  statistics: routerStatistics,
 };
 
 export { routerApp };
