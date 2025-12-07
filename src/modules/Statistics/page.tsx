@@ -6,6 +6,7 @@ import { type StatisticsFilterRequest, useGetGeneralStatisticsQuery } from "@/li
 import {
     BarChart3,
     DollarSign,
+    Download,
     Package,
     RefreshCw,
     ShoppingCart,
@@ -23,6 +24,7 @@ import {
     ReviewRatingChart,
     SalesChannelChart
 } from "./components"
+import { exportStatisticsToExcel } from "./utils/exportExcel"
 
 interface StatisticsCardProps {
     title: string
@@ -131,12 +133,32 @@ const StatisticsPage: React.FC = () => {
         ]
     }
 
+    const handleExportExcel = () => {
+        if (!statistics?.data) return
+        exportStatisticsToExcel(
+            statistics.data,
+            searchParams.fromDate,
+            searchParams.toDate
+        )
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             <div className="w-full max-w-none mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-                <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Thống kê tổng quan</h1>
-                    <p className="text-gray-600">Theo dõi và phân tích hiệu suất kinh doanh của bạn</p>
+                <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Thống kê tổng quan</h1>
+                        <p className="text-gray-600">Theo dõi và phân tích hiệu suất kinh doanh của bạn</p>
+                    </div>
+                    {statistics?.data && (
+                        <Button
+                            onClick={handleExportExcel}
+                            className="bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+                        >
+                            <Download className="w-4 h-4 mr-2" />
+                            Xuất Excel
+                        </Button>
+                    )}
                 </div>
 
                 <FilterPanel onFilterChange={handleFilterChange} onReset={handleResetFilters} />
