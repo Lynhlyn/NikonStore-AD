@@ -62,7 +62,7 @@ export function StatusActions({ orderId, currentStatus, onStatusChange, orderNum
         key="confirm"
         onClick={() => handleUpdateStatus(OrderStatus.CONFIRMED)}
         disabled={isLoading}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium shadow-sm"
       >
         {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
         Xác nhận đơn hàng
@@ -86,7 +86,7 @@ export function StatusActions({ orderId, currentStatus, onStatusChange, orderNum
         key="preparing"
         onClick={() => handleUpdateStatus(OrderStatus.PREPARING)}
         disabled={isLoading}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-medium shadow-sm"
       >
         {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
         Chuẩn bị hàng
@@ -110,7 +110,7 @@ export function StatusActions({ orderId, currentStatus, onStatusChange, orderNum
         key="shipping"
         onClick={() => handleUpdateStatus(OrderStatus.SHIPPING)}
         disabled={isLoading}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-medium shadow-sm"
       >
         {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
         Giao hàng
@@ -124,7 +124,7 @@ export function StatusActions({ orderId, currentStatus, onStatusChange, orderNum
         key="completed"
         onClick={() => handleUpdateStatus(OrderStatus.COMPLETED)}
         disabled={isLoading}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm"
       >
         {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
         Hoàn thành
@@ -136,7 +136,7 @@ export function StatusActions({ orderId, currentStatus, onStatusChange, orderNum
         variant="outline"
         onClick={() => setShowFailedModal(true)}
         disabled={isLoading}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 border-orange-300 text-orange-700 hover:bg-orange-50 font-medium"
       >
         Giao hàng thất bại
       </Button>
@@ -163,7 +163,9 @@ export function StatusActions({ orderId, currentStatus, onStatusChange, orderNum
   return (
     <>
       <div className="flex items-center gap-2 flex-wrap">
-        {actions}
+        {actions.map((action, index) => (
+          <div key={index}>{action}</div>
+        ))}
       </div>
       <CancelOrderModal
         open={cancelModalOpen}

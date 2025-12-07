@@ -331,18 +331,20 @@ export default function FAQTable() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Quản lý FAQ</h1>
-          <p className="text-muted-foreground mt-2">
-            Quản lý các câu hỏi thường gặp
-          </p>
+    <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen space-y-6">
+      <div className="bg-gradient-to-r from-teal-600 to-teal-700 rounded-xl shadow-lg p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Quản lý FAQ</h1>
+            <p className="text-teal-100 mt-1 text-sm">
+              Quản lý các câu hỏi thường gặp
+            </p>
+          </div>
+          <Button onClick={handleCreate} className="gap-2 bg-white hover:bg-gray-100 text-teal-700 font-medium shadow-sm">
+            <Plus className="h-5 w-5" />
+            Tạo FAQ Mới
+          </Button>
         </div>
-        <Button onClick={handleCreate} size="lg" className="gap-2">
-          <Plus className="h-5 w-5" />
-          Tạo FAQ Mới
-        </Button>
       </div>
 
       <Card>
@@ -392,41 +394,57 @@ export default function FAQTable() {
         </Card>
       ) : (
         <>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <Table>
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id} className="bg-gray-50">
-                    {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id} className="text-gray-700 font-semibold text-sm">
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow key={row.id} className="hover:bg-gray-50">
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="text-gray-900 text-sm py-4">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+            <div className="border-t border-gray-200 overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id} className="border-b border-gray-200 hover:bg-transparent">
+                      {headerGroup.headers.map((header) => (
+                        <TableHead
+                          key={header.id}
+                          className="bg-gradient-to-b from-gray-100 to-gray-50 font-semibold text-gray-700 py-4 px-4 border-r last:border-r-0"
+                        >
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(header.column.columnDef.header, header.getContext())}
+                        </TableHead>
                       ))}
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
-                      Không có dữ liệu
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {table.getRowModel().rows?.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow 
+                        key={row.id} 
+                        className="border-b border-gray-100 hover:bg-gradient-to-r hover:from-teal-50 hover:to-transparent transition-all duration-200"
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell
+                            key={cell.id}
+                            className="py-4 px-4 border-r last:border-r-0"
+                          >
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={columns.length} className="h-48 text-center">
+                        <div className="flex flex-col items-center justify-center space-y-3 py-8">
+                          <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+                            <FileText className="h-8 w-8 text-gray-400" />
+                          </div>
+                          <p className="text-sm font-medium text-gray-500">Không có dữ liệu</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
 
           {totalPages > 1 && (

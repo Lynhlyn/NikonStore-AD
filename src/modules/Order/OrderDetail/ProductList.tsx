@@ -48,11 +48,11 @@ export function ProductList({ items, orderId }: ProductListProps) {
   }, {} as Record<number, Array<typeof reviews[number]>>);
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-lg font-semibold mb-4">Danh sách sản phẩm</h3>
+    <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+      <h3 className="text-xl font-bold mb-6 text-gray-800 pb-3 border-b border-gray-200">Danh sách sản phẩm</h3>
       {items && items.length > 0 ? (
         <div>
-          <div className="grid grid-cols-12 gap-4 items-center mb-4 pb-3 border-b-2 border-gray-200 font-semibold text-sm text-gray-700">
+          <div className="grid grid-cols-12 gap-4 items-center mb-4 pb-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg px-4 py-3 border-b-2 border-gray-200 font-semibold text-sm text-gray-700">
             <div className="col-span-1">STT</div>
             <div className="col-span-2">SKU</div>
             <div className="col-span-4">Tên sản phẩm</div>
@@ -66,7 +66,7 @@ export function ProductList({ items, orderId }: ProductListProps) {
               const productReviews = productId ? reviewsByProductId[productId] || [] : [];
 
               return (
-              <div key={item.orderDetailId || index} className="border-b last:border-b-0 pb-6 last:pb-0">
+              <div key={item.orderDetailId || index} className="border-b border-gray-200 last:border-b-0 pb-6 last:pb-0 hover:bg-gray-50 rounded-lg px-4 py-3 transition-colors duration-200">
                 <div className="grid grid-cols-12 gap-4 items-center mb-4">
                   <div className="col-span-1 text-sm text-gray-600">{index + 1}</div>
                   <div className="col-span-2 text-sm text-gray-600">{item.sku || '-'}</div>
@@ -76,17 +76,17 @@ export function ProductList({ items, orderId }: ProductListProps) {
                         <Image
                           src={item.imageUrl}
                           alt={item.productName || 'Product'}
-                          width={60}
-                          height={60}
-                          className="rounded-lg object-cover border border-gray-200 flex-shrink-0"
+                          width={70}
+                          height={70}
+                          className="rounded-lg object-cover border-2 border-gray-200 shadow-sm flex-shrink-0 hover:shadow-md transition-shadow"
                           unoptimized
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = '/placeholder.svg';
                           }}
                         />
                       ) : (
-                        <div className="w-[60px] h-[60px] rounded-lg border border-gray-200 bg-gray-100 flex items-center justify-center flex-shrink-0">
-                          <span className="text-xs text-gray-400">No Image</span>
+                        <div className="w-[70px] h-[70px] rounded-lg border-2 border-gray-200 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center flex-shrink-0 shadow-sm">
+                          <span className="text-xs text-gray-500 font-medium">No Image</span>
                         </div>
                       )}
                       <span className="font-medium">{item.productName || '-'}</span>
@@ -100,15 +100,16 @@ export function ProductList({ items, orderId }: ProductListProps) {
                 </div>
 
                 {productReviews.length > 0 && (
-                  <div className="mt-4 pt-4 border-t bg-gray-50 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-800 mb-3">
+                  <div className="mt-4 pt-4 border-t border-gray-200 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 shadow-sm">
+                    <h4 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                      <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                       Đánh giá ({productReviews.length})
                     </h4>
                     <div className="space-y-3">
                       {productReviews.map((review) => (
                         <div
                           key={review.id}
-                          className="bg-white rounded-lg p-4 border border-gray-200"
+                          className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
                         >
                           <div className="flex items-start gap-4">
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-medium text-sm flex-shrink-0">

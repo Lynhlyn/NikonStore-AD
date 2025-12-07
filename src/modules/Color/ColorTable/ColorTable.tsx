@@ -3,7 +3,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/core/shadcn/components/ui/table";
 import { Button } from "@/core/shadcn/components/ui/button";
 import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
-import { SquarePen, ArrowUp, ArrowDown, Plus } from "lucide-react";
+import { SquarePen, ArrowUp, ArrowDown, Plus, Loader2, Search } from "lucide-react";
 import { useAppNavigation } from "@/common/hooks";
 import { useFetchColorsQuery } from "@/lib/services/modules/colorService";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
@@ -183,17 +183,23 @@ const ColorTable = () => {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
+  const isLoading = !data;
+
   return (
-    <div className="py-8 px-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">Quản lý màu sắc</h1>
-        <Button
-          onClick={() => router.push(getRouteWithRole('/colors/new'))}
-          className="flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Thêm màu</span>
-        </Button>
+    <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+      <div className="mb-6">
+        <div className="bg-gradient-to-r from-rose-600 to-rose-700 rounded-xl shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-white">Quản lý màu sắc</h1>
+            <Button
+              onClick={() => router.push(getRouteWithRole('/colors/new'))}
+              className="flex items-center gap-2 bg-white hover:bg-gray-100 text-rose-700 font-medium shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Thêm màu</span>
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className="mb-5 flex items-center gap-4">
@@ -214,75 +220,97 @@ const ColorTable = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="bg-gray-50">
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className="text-gray-700 font-semibold text-sm"
-                  >
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-gray-50">
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className="text-gray-900 text-sm py-4"
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
-                  Không có dữ liệu
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-
-        {data?.pagination && data.pagination.totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-            <div className="text-sm text-gray-600">
-              Hiển thị {data.pagination.page * data.pagination.size + 1} - {Math.min((data.pagination.page + 1) * data.pagination.size, data.pagination.totalElements)} của {data.pagination.totalElements} kết quả
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(data.pagination.page)}
-                disabled={data.pagination.page === 0}
-              >
-                Trước
-              </Button>
-              <span className="px-3 py-1 text-sm text-gray-700">
-                Trang {data.pagination.page + 1} / {data.pagination.totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(data.pagination.page + 2)}
-                disabled={data.pagination.page + 1 >= data.pagination.totalPages}
-              >
-                Sau
-              </Button>
-            </div>
+      {isLoading ? (
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-12">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-rose-600" />
+            <p className="text-sm text-muted-foreground">Đang tải dữ liệu...</p>
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+          <div className="border-t border-gray-200 overflow-x-auto">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id} className="border-b border-gray-200 hover:bg-transparent">
+                    {headerGroup.headers.map((header) => (
+                      <TableHead
+                        key={header.id}
+                        className="bg-gradient-to-b from-gray-100 to-gray-50 font-semibold text-gray-700 py-4 px-4 border-r last:border-r-0"
+                      >
+                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow 
+                      key={row.id} 
+                      className="border-b border-gray-100 hover:bg-gradient-to-r hover:from-rose-50 hover:to-transparent transition-all duration-200"
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          className="py-4 px-4 border-r last:border-r-0"
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-48 text-center">
+                      <div className="flex flex-col items-center justify-center space-y-3 py-8">
+                        <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+                          <Search className="h-8 w-8 text-gray-400" />
+                        </div>
+                        <p className="text-gray-500 font-medium">Không tìm thấy dữ liệu</p>
+                        <p className="text-sm text-gray-400">Thử điều chỉnh bộ lọc để xem kết quả khác</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {data?.pagination && data.pagination.totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between p-6 border-t border-gray-200 bg-gray-50 gap-4">
+              <div className="text-sm text-gray-600">
+                Hiển thị {data.pagination.page * data.pagination.size + 1} - {Math.min((data.pagination.page + 1) * data.pagination.size, data.pagination.totalElements)} của {data.pagination.totalElements} kết quả
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(data.pagination.page)}
+                  disabled={data.pagination.page === 0}
+                  className="border-gray-300"
+                >
+                  Trước
+                </Button>
+                <span className="px-3 py-1 text-sm text-gray-700 font-medium">
+                  Trang {data.pagination.page + 1} / {data.pagination.totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(data.pagination.page + 2)}
+                  disabled={data.pagination.page + 1 >= data.pagination.totalPages}
+                  className="border-gray-300"
+                >
+                  Sau
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

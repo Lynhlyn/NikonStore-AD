@@ -247,16 +247,20 @@ const ContentCategoryTable = () => {
   });
 
   return (
-    <div className="py-8 px-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">Quản lý content category</h1>
-        <Button
-          onClick={() => router.push(getRouteWithRole('/content-categories/new'))}
-          className="flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Thêm content category</span>
-        </Button>
+    <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+      <div className="mb-6">
+        <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-xl shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-white">Quản lý content category</h1>
+            <Button
+              onClick={() => router.push(getRouteWithRole('/content-categories/new'))}
+              className="flex items-center gap-2 bg-white hover:bg-gray-100 text-emerald-700 font-medium shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Thêm content category</span>
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className="mb-5 flex items-center gap-4">
@@ -279,51 +283,62 @@ const ContentCategoryTable = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="bg-gray-50">
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="text-gray-700 font-semibold text-sm">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-gray-50">
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="text-gray-900 text-sm py-4">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+        <div className="border-t border-gray-200 overflow-x-auto">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id} className="border-b border-gray-200 hover:bg-transparent">
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      key={header.id}
+                      className="bg-gradient-to-b from-gray-100 to-gray-50 font-semibold text-gray-700 py-4 px-4 border-r last:border-r-0"
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
-                  Không có dữ liệu
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow 
+                    key={row.id} 
+                    className="border-b border-gray-100 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-transparent transition-all duration-200"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        className="py-4 px-4 border-r last:border-r-0"
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-48 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-3 py-8">
+                      <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+                        <ArrowUp className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-500">Không có dữ liệu</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
         {data?.pagination && data.pagination.totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-            <div className="text-sm text-gray-600">
-              Hiển thị {data.pagination.page * data.pagination.size + 1} -{' '}
-              {Math.min(
-                (data.pagination.page + 1) * data.pagination.size,
-                data.pagination.totalElements
-              )}{' '}
-              của {data.pagination.totalElements} kết quả
+          <div className="px-6 py-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-white flex items-center justify-between">
+            <div className="text-sm text-gray-600 font-medium">
+              Hiển thị <span className="font-semibold text-gray-900">{data.pagination.page * data.pagination.size + 1}</span> - <span className="font-semibold text-gray-900">{Math.min((data.pagination.page + 1) * data.pagination.size, data.pagination.totalElements)}</span> của <span className="font-semibold text-gray-900">{data.pagination.totalElements}</span> kết quả
             </div>
             <div className="flex gap-2">
               <Button
@@ -331,10 +346,11 @@ const ContentCategoryTable = () => {
                 size="sm"
                 onClick={() => handlePageChange(data.pagination.page)}
                 disabled={data.pagination.page === 0}
+                className="border-gray-300 hover:bg-gray-50"
               >
                 Trước
               </Button>
-              <span className="px-3 py-1 text-sm text-gray-700">
+              <span className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-md border border-gray-200">
                 Trang {data.pagination.page + 1} / {data.pagination.totalPages}
               </span>
               <Button
@@ -342,6 +358,7 @@ const ContentCategoryTable = () => {
                 size="sm"
                 onClick={() => handlePageChange(data.pagination.page + 2)}
                 disabled={data.pagination.page + 1 >= data.pagination.totalPages}
+                className="border-gray-300 hover:bg-gray-50"
               >
                 Sau
               </Button>

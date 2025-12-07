@@ -3,7 +3,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/core/shadcn/components/ui/table";
 import { Button } from "@/core/shadcn/components/ui/button";
 import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
-import { Eye, Filter, MapPin, MoreHorizontal, RotateCcw, Slash, UserCheck, UserPlus, UserX } from "lucide-react";
+import { Eye, Filter, MapPin, MoreHorizontal, RotateCcw, Slash, UserCheck, UserPlus, UserX, Loader2, Search, Users } from "lucide-react";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/common/components/ConfirmModal";
@@ -236,13 +236,13 @@ export const CustomerTable = () => {
 
   const getStatusColor = (status: number | string) => {
     if (status === 1 || status === "ACTIVE") {
-      return "bg-green-100 text-green-800";
+      return "bg-green-50 text-green-700 border-green-200";
     } else if (status === 0 || status === "INACTIVE") {
-      return "bg-red-100 text-red-800";
+      return "bg-red-50 text-red-700 border-red-200";
     } else if (status === 11 || status === "BLOCKED") {
-      return "bg-orange-100 text-orange-800";
+      return "bg-orange-50 text-orange-700 border-orange-200";
     } else {
-      return "bg-gray-100 text-gray-800";
+      return "bg-gray-50 text-gray-700 border-gray-200";
     }
   };
 
@@ -295,11 +295,11 @@ export const CustomerTable = () => {
       cell: ({ row }: any) => (
         <div className="w-full flex justify-center">
           <Badge
-            className={
+            className={`${
               row.original.isGuest
-                ? "bg-amber-100 text-amber-800 pointer-events-none"
-                : "bg-indigo-200 text-indigo-800 pointer-events-none"
-            }
+                ? "bg-amber-50 text-amber-700 border-amber-200"
+                : "bg-indigo-50 text-indigo-700 border-indigo-200"
+            } border font-medium px-2.5 py-0.5 rounded-full pointer-events-none`}
           >
             {row.original.isGuest ? "Vãng lai" : "Thành viên"}
           </Badge>
@@ -311,7 +311,7 @@ export const CustomerTable = () => {
       header: () => <div className="text-center w-full">Trạng thái</div>,
       cell: ({ row }: any) => (
         <div className="flex justify-center">
-          <Badge className={getStatusColor(row.original.status) + " pointer-events-none"}>
+          <Badge className={`${getStatusColor(row.original.status)} border font-medium px-2.5 py-0.5 rounded-full pointer-events-none`}>
             {getStatusText(row.original.status)}
           </Badge>
         </div>
@@ -349,10 +349,13 @@ export const CustomerTable = () => {
                 </button>
               </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleEdit(row.original)}>
-                <Eye className="h-4 w-4 mr-2" />
-                Thông tin khách hàng
+            <DropdownMenuContent align="end" className="w-56 border border-gray-200 shadow-lg">
+              <DropdownMenuItem 
+                onClick={() => handleEdit(row.original)}
+                className="cursor-pointer hover:bg-slate-50"
+              >
+                <Eye className="h-4 w-4 mr-2 text-slate-600" />
+                <span className="font-medium">Thông tin khách hàng</span>
               </DropdownMenuItem>
               {(row.original.status === 0 || row.original.status === "INACTIVE") && (
                 <DropdownMenuItem onClick={() => handleToggleStatus(row.original, 1)}>
@@ -393,40 +396,50 @@ export const CustomerTable = () => {
   });
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-64">Đang tải</div>;
+    return (
+      <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+        <div className="flex flex-col items-center justify-center h-96 space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Đang tải dữ liệu...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="py-8 px-6 space-y-6">
-      <div className="bg-white rounded-lg border">
+    <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen space-y-6">
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
         <Collapsible open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-          <div className="p-6 border-b">
+          <div className="bg-gradient-to-r from-slate-600 to-slate-700 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold">Danh sách khách hàng</h2>
-                <p className="text-sm text-muted-foreground mt-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <Users className="h-6 w-6 text-white" />
+                  <h2 className="text-2xl font-bold text-white">Danh sách khách hàng</h2>
+                </div>
+                <p className="text-sm text-slate-100">
                   {hasActiveFilters && (
-                    <span className="text-blue-600">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-500 text-white">
                       Đang áp dụng {Object.values({ keyword, status: status !== "all" ? status : "", email, phoneNumber, gender: gender !== "all" ? gender : "", provider: provider !== "all" ? provider : "", isGuest: isGuest !== "all" ? isGuest : "", createdFromDate, createdToDate }).filter(Boolean).length} bộ lọc
                     </span>
                   )}
-                  {!hasActiveFilters && "Hiển thị tất cả khách hàng"}
+                  {!hasActiveFilters && <span className="text-slate-100">Hiển thị tất cả khách hàng trong hệ thống</span>}
                 </p>
               </div>
               <div className="flex items-center space-x-2">
                 <CollapsibleTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button variant="secondary" size="sm" className="bg-white hover:bg-gray-100 text-slate-700 font-medium shadow-sm">
                     <Filter className="h-4 w-4 mr-2" />
                     {isFilterOpen ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
                   </Button>
                 </CollapsibleTrigger>
                 {hasActiveFilters && (
-                  <Button variant="outline" size="sm" onClick={clearAllFilters}>
+                  <Button variant="secondary" size="sm" onClick={clearAllFilters} className="bg-white hover:bg-gray-100 text-slate-700 font-medium shadow-sm">
                     <RotateCcw className="h-4 w-4 mr-2" />
                     Làm mới
                   </Button>
                 )}
-                <Button onClick={() => setIsCreateModalOpen(true)} size="sm" className="bg-black text-white hover:bg-gray-800">
+                <Button onClick={() => setIsCreateModalOpen(true)} size="sm" className="bg-white hover:bg-gray-100 text-slate-700 font-medium shadow-sm">
                   <UserPlus className="h-4 w-4 mr-2" />
                   Thêm khách hàng
                 </Button>
@@ -435,7 +448,7 @@ export const CustomerTable = () => {
           </div>
 
           <CollapsibleContent>
-            <div className="p-6 bg-gray-50 border-b">
+            <div className="p-6 bg-gradient-to-br from-gray-50 to-slate-50 border-b border-gray-200">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label>Tìm kiếm tổng hợp</Label>
@@ -550,13 +563,13 @@ export const CustomerTable = () => {
           </CollapsibleContent>
         </Collapsible>
 
-        <div className="border-t w-full overflow-auto">
+        <div className="border-t border-gray-200 overflow-x-auto">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id} className="border-b">
+                <TableRow key={headerGroup.id} className="border-b border-gray-200 hover:bg-transparent">
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} className="border-r last:border-r-0 bg-gray-50 font-medium">
+                    <TableHead key={header.id} className="bg-gradient-to-b from-gray-100 to-gray-50 font-semibold text-gray-700 py-4 px-4 border-r last:border-r-0">
                       {header.isPlaceholder
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}
@@ -568,9 +581,13 @@ export const CustomerTable = () => {
             <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className="border-b hover:bg-gray-50">
+                  <TableRow 
+                    key={row.id} 
+                    data-state={row.getIsSelected() && "selected"} 
+                    className="border-b border-gray-100 hover:bg-gradient-to-r hover:from-slate-50 hover:to-transparent transition-all duration-200 cursor-pointer"
+                  >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="border-r last:border-r-0">
+                      <TableCell key={cell.id} className="py-4 px-4 border-r last:border-r-0">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -578,8 +595,14 @@ export const CustomerTable = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    Không có dữ liệu
+                  <TableCell colSpan={columns.length} className="h-48 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-3 py-8">
+                      <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+                        <Search className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <p className="text-gray-500 font-medium">Không tìm thấy dữ liệu</p>
+                      <p className="text-sm text-gray-400">Thử điều chỉnh bộ lọc để xem kết quả khác</p>
+                    </div>
                   </TableCell>
                 </TableRow>
               )}
@@ -587,7 +610,7 @@ export const CustomerTable = () => {
           </Table>
         </div>
 
-        <div className="flex items-center justify-between p-6 border-t">
+        <div className="flex flex-col sm:flex-row items-center justify-between p-6 border-t border-gray-200 bg-gray-50 gap-4">
           <UIPaginationResuft
             currentPage={page}
             totalPage={totalPages}

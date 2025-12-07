@@ -265,12 +265,35 @@ const VoucherTable = () => {
   });
 
   return (
-    <div className="pt-[50px] px-[50px]">
-      <div className="mb-[25px] text-2xl leading-[155%] font-normal">
-        <span>Quản lý voucher</span>
+    <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+      <div className="mb-6">
+        <div className="bg-gradient-to-r from-orange-600 to-orange-700 rounded-xl shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-white">Quản lý voucher</h1>
+            <div className="flex gap-3">
+              <Button
+                className="bg-gray-600 hover:bg-gray-700 text-white"
+                onClick={() => refetch()}
+                title="Làm mới dữ liệu"
+              >
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span className="ml-2">Làm mới</span>
+              </Button>
+              <Button
+                onClick={() => router.push(getRouteWithRole(routerApp.voucher.form))}
+                className="flex items-center gap-2 bg-white hover:bg-gray-100 text-orange-700 font-medium shadow-sm"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Thêm voucher</span>
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="flex justify-between items-end mb-5">
+      <div className="mb-5 flex items-center gap-4">
         <div className="w-[200px]">
           <UISingleSelect
             options={[
@@ -283,94 +306,87 @@ const VoucherTable = () => {
                 : { value: "", label: "Tất cả trạng thái" }
             }
             onChange={handleStatusChange}
-            className="rounded-sm"
+            className="rounded-md border border-gray-300"
             size={ESize.M}
             renderSelected={(props) => <UISingleSelect.Selected {...props} />}
             renderOption={(props) => <UISingleSelect.Option {...props} />}
           />
         </div>
-        <div className="flex gap-3">
-          <Button
-            className="h-[44px] bg-gray-600 hover:bg-gray-700"
-            onClick={() => refetch()}
-            title="Làm mới dữ liệu"
-          >
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            <span className="ml-2">Làm mới</span>
-          </Button>
-          <Button
-            className="h-[44px]"
-            onClick={() => router.push(getRouteWithRole(routerApp.voucher.form))}
-          >
-            <Plus className="w-[20px] h-[20px] text-white" />
-            <span className="ml-2">Thêm voucher</span>
-          </Button>
-        </div>
       </div>
 
-      <div className="bg-white rounded-[10px] px-[33px] pt-[20px] pb-[67px] mt-5">
-        <Table className="table-auto mt-3">
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  const widthClass = (header.column.columnDef.meta as any)?.width ?? "";
-                  const isActionsColumn = header.id === "actions";
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className={`text-[#A5A5A5] font-normal leading-[130%] text-sm ${widthClass} ${isActionsColumn ? 'text-right' : 'text-left'}`}
-                    >
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => {
-                    const widthClass = (cell.column.columnDef.meta as any)?.width ?? "";
-                    const isActionsColumn = cell.column.id === "actions";
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+        <div className="border-t border-gray-200 overflow-x-auto">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id} className="border-b border-gray-200 hover:bg-transparent">
+                  {headerGroup.headers.map((header) => {
+                    const widthClass = (header.column.columnDef.meta as any)?.width ?? "";
+                    const isActionsColumn = header.id === "actions";
                     return (
-                      <TableCell
-                        key={cell.id}
-                        className={`text-[#333333] font-normal leading-[130%] text-sm ${widthClass} ${isActionsColumn ? 'text-right' : 'text-left'} p-5`}
+                      <TableHead
+                        key={header.id}
+                        className={`bg-gradient-to-b from-gray-100 to-gray-50 font-semibold text-gray-700 py-4 px-4 border-r last:border-r-0 ${widthClass} ${isActionsColumn ? 'text-right' : ''}`}
                       >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
+                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
                     );
                   })}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Không có kết quả nào.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-
-        <div className="mt-[56px]">
-          <UIPaginationResuft
-            currentPage={queryStates.page + 1}
-            totalCount={data?.pagination?.totalElements || 0}
-            totalPage={data?.pagination?.totalPages || 1}
-          />
-          <UIPagination
-            currentPage={queryStates.page + 1}
-            totalPage={data?.pagination?.totalPages || 1}
-            onChange={handlePageChange}
-            displayPage={5}
-          />
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow 
+                    key={row.id}
+                    className="border-b border-gray-100 hover:bg-gradient-to-r hover:from-orange-50 hover:to-transparent transition-all duration-200"
+                  >
+                    {row.getVisibleCells().map((cell) => {
+                      const widthClass = (cell.column.columnDef.meta as any)?.width ?? "";
+                      const isActionsColumn = cell.column.id === "actions";
+                      return (
+                        <TableCell
+                          key={cell.id}
+                          className={`py-4 px-4 border-r last:border-r-0 ${widthClass} ${isActionsColumn ? 'text-right' : ''}`}
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-48 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-3 py-8">
+                      <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+                        <ArrowUp className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-500">Không có kết quả nào</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
+
+        {data?.pagination && data.pagination.totalPages > 1 && (
+          <div className="px-6 py-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+            <UIPaginationResuft
+              currentPage={queryStates.page + 1}
+              totalCount={data?.pagination?.totalElements || 0}
+              totalPage={data?.pagination?.totalPages || 1}
+            />
+            <UIPagination
+              currentPage={queryStates.page + 1}
+              totalPage={data?.pagination?.totalPages || 1}
+              onChange={handlePageChange}
+              displayPage={5}
+            />
+          </div>
+        )}
       </div>
 
       <Modal />

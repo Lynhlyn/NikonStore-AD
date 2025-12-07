@@ -20,32 +20,35 @@ function formatDate(dateString: string): string {
 
 export function OrderInfo({ order }: OrderInfoProps) {
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-lg font-semibold mb-3">Thông tin đơn hàng</h3>
-      <div className="space-y-2">
-        <p>
-          <span className="font-medium">Mã đơn hàng:</span> {order.trackingNumber}
-        </p>
-        <p>
-          <span className="font-medium">Ngày đặt:</span> {formatDate(order.orderDate)}
-        </p>
-        <p>
-          <span className="font-medium">Trạng thái:</span>
-          <Badge className={`ml-2 ${getOrderStatusColor(order.orderStatus)}`}>
+    <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-300">
+      <h3 className="text-xl font-bold mb-4 text-gray-800 pb-3 border-b border-gray-200">Thông tin đơn hàng</h3>
+      <div className="space-y-4">
+        <div className="flex items-start justify-between py-2">
+          <span className="font-semibold text-gray-600 min-w-[160px]">Mã đơn hàng:</span>
+          <span className="text-gray-900 font-mono font-semibold">{order.trackingNumber}</span>
+        </div>
+        <div className="flex items-start justify-between py-2">
+          <span className="font-semibold text-gray-600 min-w-[160px]">Ngày đặt:</span>
+          <span className="text-gray-700">{formatDate(order.orderDate)}</span>
+        </div>
+        <div className="flex items-start justify-between py-2">
+          <span className="font-semibold text-gray-600 min-w-[160px]">Trạng thái:</span>
+          <Badge className={`${getOrderStatusColor(order.orderStatus)} border font-medium px-3 py-1 rounded-full`}>
             {getOrderStatusLabel(order.orderStatus)}
           </Badge>
-        </p>
-        <p>
-          <span className="font-medium">Phương thức thanh toán:</span>{' '}
-          {getPaymentMethodLabel(order.paymentMethod)}
-        </p>
-        <p>
-          <span className="font-medium">Trạng thái thanh toán:</span>{' '}
-          {getPaymentStatusLabel(order.paymentStatus)}
-        </p>
-        <p>
-          <span className="font-medium">Loại đơn hàng:</span> {getOrderTypeLabel(order.orderType)}
-        </p>
+        </div>
+        <div className="flex items-start justify-between py-2">
+          <span className="font-semibold text-gray-600 min-w-[160px]">Phương thức thanh toán:</span>
+          <span className="text-gray-700">{getPaymentMethodLabel(order.paymentMethod)}</span>
+        </div>
+        <div className="flex items-start justify-between py-2">
+          <span className="font-semibold text-gray-600 min-w-[160px]">Trạng thái thanh toán:</span>
+          <span className="text-gray-700">{getPaymentStatusLabel(order.paymentStatus)}</span>
+        </div>
+        <div className="flex items-start justify-between py-2">
+          <span className="font-semibold text-gray-600 min-w-[160px]">Loại đơn hàng:</span>
+          <span className="text-gray-700">{getOrderTypeLabel(order.orderType)}</span>
+        </div>
       </div>
     </div>
   );

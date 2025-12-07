@@ -226,23 +226,27 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
   }
 
   return (
-    <div className="py-8 px-6">
-      <div className="mb-6 flex items-center gap-4">
-        <Button
-          variant="outline"
-          onClick={() => router.push(getRouteWithRole('/products'))}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Quay lại danh sách sản phẩm
-        </Button>
-        <div className="text-xl font-semibold text-gray-900">
-          <span className="gap-2 flex">
-            Chi tiết sản phẩm:
-            <span className="font-semibold text-primary">
-              {productName}
-            </span>
-          </span>
+    <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+      <div className="mb-6">
+        <div className="bg-gradient-to-r from-rose-600 to-rose-700 rounded-xl shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                onClick={() => router.push(getRouteWithRole('/products'))}
+                className="flex items-center gap-2 bg-white hover:bg-gray-100 text-rose-700 font-medium shadow-sm"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Quay lại
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-white">Chi tiết sản phẩm</h1>
+                <p className="text-rose-100 mt-1 text-sm">
+                  {productName}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -296,197 +300,208 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
           </div>
         </div>
         <div className="flex gap-3">
-          <Button
-            onClick={() => router.push(getRouteWithRole(`/products/${productId}/product-details/new`))}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Thêm sản phẩm chi tiết
-          </Button>
+        <Button
+          onClick={() => router.push(getRouteWithRole(`/products/${productId}/product-details/new`))}
+          className="flex items-center gap-2 bg-white hover:bg-gray-100 text-rose-700 font-medium shadow-sm border border-rose-200"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Thêm sản phẩm chi tiết</span>
+        </Button>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-gray-50">
-              <TableHead className="text-gray-700 font-semibold text-sm">
-                <div
-                  className="cursor-pointer flex items-center text-left"
-                  onClick={() => handleSortChange('id')}
-                >
-                  ID {getSortIcon('id')}
-                </div>
-              </TableHead>
-              <TableHead className="text-gray-700 font-semibold text-sm">
-                <div
-                  className="cursor-pointer flex items-center text-left"
-                  onClick={() => handleSortChange('sku')}
-                >
-                  SKU {getSortIcon('sku')}
-                </div>
-              </TableHead>
-              <TableHead className="text-gray-700 font-semibold text-sm">
-                <div className="flex items-center text-left">
-                  Tên sản phẩm
-                </div>
-              </TableHead>
-              <TableHead className="text-gray-700 font-semibold text-sm">
-                <div className="flex items-center text-left">
-                  Màu sắc
-                </div>
-              </TableHead>
-              <TableHead className="text-gray-700 font-semibold text-sm">
-                <div className="flex items-center text-left">
-                  Ảnh
-                </div>
-              </TableHead>
-              <TableHead className="text-gray-700 font-semibold text-sm">
-                <div className="flex items-center text-left">
-                  Dung tích
-                </div>
-              </TableHead>
-              <TableHead className="text-gray-700 font-semibold text-sm">
-                <div
-                  className="cursor-pointer flex items-center text-left"
-                  onClick={() => handleSortChange('price')}
-                >
-                  Giá {getSortIcon('price')}
-                </div>
-              </TableHead>
-              <TableHead className="text-gray-700 font-semibold text-sm">
-                <div
-                  className="cursor-pointer flex items-center text-left"
-                  onClick={() => handleSortChange('stock')}
-                >
-                  Tồn kho {getSortIcon('stock')}
-                </div>
-              </TableHead>
-              <TableHead className="text-gray-700 font-semibold text-sm">
-                <div
-                  className="cursor-pointer flex items-center text-left"
-                  onClick={() => handleSortChange('status')}
-                >
-                  Trạng thái {getSortIcon('status')}
-                </div>
-              </TableHead>
-              <TableHead className="text-gray-700 font-semibold text-sm text-right">
-                Hành động
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {productDetails.length > 0 ? (
-              productDetails.map((detail) => {
-                const color = detail.color;
-                const colorName = color?.name || detail.colorName || '-';
-                const hexCode = color?.hexCode || '#000000';
-                const capacity = detail.capacity;
-                const capacityName = capacity?.name || detail.capacityName || '-';
-                return (
-                  <TableRow key={detail.id} className="hover:bg-gray-50">
-                    <TableCell className="text-gray-900 text-sm py-4">
-                      <div className="text-left">{detail.id}</div>
-                    </TableCell>
-                    <TableCell className="text-gray-900 text-sm py-4">
-                      <div className="text-left font-medium">{detail.sku}</div>
-                    </TableCell>
-                    <TableCell className="text-gray-900 text-sm py-4">
-                      <div className="line-clamp-2 text-left">{detail.productName}</div>
-                    </TableCell>
-                    <TableCell className="text-gray-900 text-sm py-4">
-                      <div className="text-left flex items-center gap-2">
-                        {colorName}
-                        {color && (
-                          <div
-                            className="w-6 h-6 rounded border border-gray-300"
-                            style={{ backgroundColor: hexCode }}
-                          />
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-gray-900 text-sm py-4">
-                      <div className="text-left flex items-center gap-2">
-                        <div className="relative">
-                          {detail.colorImageUrl ? (
-                            <img
-                              src={detail.colorImageUrl}
-                              alt={`${detail.productName} - ${colorName}`}
-                              className="w-16 h-16 object-cover rounded border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
-                              onClick={() => {
-                                setSelectedColorId(detail.colorId || null);
-                                setIsImageModalOpen(true);
-                              }}
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                                const parent = target.parentElement;
-                                if (parent) {
-                                  const fallback = parent.querySelector('.image-placeholder') as HTMLElement;
-                                  if (fallback) fallback.style.display = 'flex';
-                                }
-                              }}
-                            />
-                          ) : null}
-                          <div 
-                            className={`image-placeholder w-16 h-16 items-center justify-center bg-gray-100 rounded border border-gray-200 ${detail.colorImageUrl ? 'hidden' : 'flex'}`}
-                          >
-                            <ImageIcon className="w-6 h-6 text-gray-400" />
-                          </div>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedColorId(detail.colorId || null);
-                            setIsImageModalOpen(true);
-                          }}
-                          title="Quản lý ảnh"
-                        >
-                          <ImageIcon className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-gray-900 text-sm py-4">
-                      <div className="text-left">{capacityName}</div>
-                    </TableCell>
-                    <TableCell className="text-gray-900 text-sm py-4">
-                      <div className="text-left font-medium">{formatPrice(detail.price)}</div>
-                    </TableCell>
-                    <TableCell className="text-gray-900 text-sm py-4">
-                      <div className="text-left">{detail.stock}</div>
-                    </TableCell>
-                    <TableCell className="text-gray-900 text-sm py-4">
-                      <div className="text-left">{getStatusDisplay(detail.status)}</div>
-                    </TableCell>
-                    <TableCell className="text-gray-900 text-sm py-4">
-                      <div className="flex gap-2 text-right justify-end">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => router.push(getRouteWithRole(`/products/${productId}/product-details/edit/${detail.id}`))}
-                          title="Chỉnh sửa"
-                        >
-                          <SquarePen className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            ) : (
-              <TableRow>
-                <TableCell colSpan={10} className="h-24 text-center text-gray-500">
-                  Không có dữ liệu sản phẩm chi tiết cho sản phẩm này.
-                </TableCell>
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+        <div className="border-t border-gray-200 overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-gray-200 hover:bg-transparent">
+                <TableHead className="bg-gradient-to-b from-gray-100 to-gray-50 font-semibold text-gray-700 py-4 px-4 border-r last:border-r-0">
+                  <div
+                    className="cursor-pointer flex items-center text-left"
+                    onClick={() => handleSortChange('id')}
+                  >
+                    ID {getSortIcon('id')}
+                  </div>
+                </TableHead>
+                <TableHead className="bg-gradient-to-b from-gray-100 to-gray-50 font-semibold text-gray-700 py-4 px-4 border-r last:border-r-0">
+                  <div
+                    className="cursor-pointer flex items-center text-left"
+                    onClick={() => handleSortChange('sku')}
+                  >
+                    SKU {getSortIcon('sku')}
+                  </div>
+                </TableHead>
+                <TableHead className="bg-gradient-to-b from-gray-100 to-gray-50 font-semibold text-gray-700 py-4 px-4 border-r last:border-r-0">
+                  <div className="flex items-center text-left">
+                    Tên sản phẩm
+                  </div>
+                </TableHead>
+                <TableHead className="bg-gradient-to-b from-gray-100 to-gray-50 font-semibold text-gray-700 py-4 px-4 border-r last:border-r-0">
+                  <div className="flex items-center text-left">
+                    Màu sắc
+                  </div>
+                </TableHead>
+                <TableHead className="bg-gradient-to-b from-gray-100 to-gray-50 font-semibold text-gray-700 py-4 px-4 border-r last:border-r-0">
+                  <div className="flex items-center text-left">
+                    Ảnh
+                  </div>
+                </TableHead>
+                <TableHead className="bg-gradient-to-b from-gray-100 to-gray-50 font-semibold text-gray-700 py-4 px-4 border-r last:border-r-0">
+                  <div className="flex items-center text-left">
+                    Dung tích
+                  </div>
+                </TableHead>
+                <TableHead className="bg-gradient-to-b from-gray-100 to-gray-50 font-semibold text-gray-700 py-4 px-4 border-r last:border-r-0">
+                  <div
+                    className="cursor-pointer flex items-center text-left"
+                    onClick={() => handleSortChange('price')}
+                  >
+                    Giá {getSortIcon('price')}
+                  </div>
+                </TableHead>
+                <TableHead className="bg-gradient-to-b from-gray-100 to-gray-50 font-semibold text-gray-700 py-4 px-4 border-r last:border-r-0">
+                  <div
+                    className="cursor-pointer flex items-center text-left"
+                    onClick={() => handleSortChange('stock')}
+                  >
+                    Tồn kho {getSortIcon('stock')}
+                  </div>
+                </TableHead>
+                <TableHead className="bg-gradient-to-b from-gray-100 to-gray-50 font-semibold text-gray-700 py-4 px-4 border-r last:border-r-0">
+                  <div
+                    className="cursor-pointer flex items-center text-left"
+                    onClick={() => handleSortChange('status')}
+                  >
+                    Trạng thái {getSortIcon('status')}
+                  </div>
+                </TableHead>
+                <TableHead className="bg-gradient-to-b from-gray-100 to-gray-50 font-semibold text-gray-700 py-4 px-4 border-r last:border-r-0 text-right">
+                  Hành động
+                </TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {productDetails.length > 0 ? (
+                productDetails.map((detail) => {
+                  const color = detail.color;
+                  const colorName = color?.name || detail.colorName || '-';
+                  const hexCode = color?.hexCode || '#000000';
+                  const capacity = detail.capacity;
+                  const capacityName = capacity?.name || detail.capacityName || '-';
+                  return (
+                    <TableRow 
+                      key={detail.id}
+                      className="border-b border-gray-100 hover:bg-gradient-to-r hover:from-rose-50 hover:to-transparent transition-all duration-200"
+                    >
+                      <TableCell className="py-4 px-4 border-r last:border-r-0">
+                        <div className="text-left">{detail.id}</div>
+                      </TableCell>
+                      <TableCell className="py-4 px-4 border-r last:border-r-0">
+                        <div className="text-left font-medium">{detail.sku}</div>
+                      </TableCell>
+                      <TableCell className="py-4 px-4 border-r last:border-r-0">
+                        <div className="line-clamp-2 text-left">{detail.productName}</div>
+                      </TableCell>
+                      <TableCell className="py-4 px-4 border-r last:border-r-0">
+                        <div className="text-left flex items-center gap-2">
+                          {colorName}
+                          {color && (
+                            <div
+                              className="w-6 h-6 rounded border border-gray-300"
+                              style={{ backgroundColor: hexCode }}
+                            />
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-4 px-4 border-r last:border-r-0">
+                        <div className="text-left flex items-center gap-2">
+                          <div className="relative">
+                            {detail.colorImageUrl ? (
+                              <img
+                                src={detail.colorImageUrl}
+                                alt={`${detail.productName} - ${colorName}`}
+                                className="w-16 h-16 object-cover rounded border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => {
+                                  setSelectedColorId(detail.colorId || null);
+                                  setIsImageModalOpen(true);
+                                }}
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  const parent = target.parentElement;
+                                  if (parent) {
+                                    const fallback = parent.querySelector('.image-placeholder') as HTMLElement;
+                                    if (fallback) fallback.style.display = 'flex';
+                                  }
+                                }}
+                              />
+                            ) : null}
+                            <div 
+                              className={`image-placeholder w-16 h-16 items-center justify-center bg-gray-100 rounded border border-gray-200 ${detail.colorImageUrl ? 'hidden' : 'flex'}`}
+                            >
+                              <ImageIcon className="w-6 h-6 text-gray-400" />
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedColorId(detail.colorId || null);
+                              setIsImageModalOpen(true);
+                            }}
+                            title="Quản lý ảnh"
+                          >
+                            <ImageIcon className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-4 px-4 border-r last:border-r-0">
+                        <div className="text-left">{capacityName}</div>
+                      </TableCell>
+                      <TableCell className="py-4 px-4 border-r last:border-r-0">
+                        <div className="text-left font-medium">{formatPrice(detail.price)}</div>
+                      </TableCell>
+                      <TableCell className="py-4 px-4 border-r last:border-r-0">
+                        <div className="text-left">{detail.stock}</div>
+                      </TableCell>
+                      <TableCell className="py-4 px-4 border-r last:border-r-0">
+                        <div className="text-left">{getStatusDisplay(detail.status)}</div>
+                      </TableCell>
+                      <TableCell className="py-4 px-4 border-r last:border-r-0">
+                        <div className="flex gap-2 text-right justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => router.push(getRouteWithRole(`/products/${productId}/product-details/edit/${detail.id}`))}
+                            title="Chỉnh sửa"
+                          >
+                            <SquarePen className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={10} className="h-48 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-3 py-8">
+                      <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+                        <ImageIcon className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-500">Không có dữ liệu sản phẩm chi tiết cho sản phẩm này</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
         {data?.pagination && data.pagination.totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-            <div className="text-sm text-gray-600">
-              Hiển thị {data.pagination.page * data.pagination.size + 1} - {Math.min((data.pagination.page + 1) * data.pagination.size, data.pagination.totalElements)} của {data.pagination.totalElements} kết quả
+          <div className="px-6 py-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-white flex items-center justify-between">
+            <div className="text-sm text-gray-600 font-medium">
+              Hiển thị <span className="font-semibold text-gray-900">{data.pagination.page * data.pagination.size + 1}</span> - <span className="font-semibold text-gray-900">{Math.min((data.pagination.page + 1) * data.pagination.size, data.pagination.totalElements)}</span> của <span className="font-semibold text-gray-900">{data.pagination.totalElements}</span> kết quả
             </div>
             <div className="flex gap-2">
               <Button
@@ -494,10 +509,11 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
                 size="sm"
                 onClick={() => handlePageChange(data.pagination.page)}
                 disabled={data.pagination.page === 0}
+                className="border-gray-300 hover:bg-gray-50"
               >
                 Trước
               </Button>
-              <span className="px-3 py-1 text-sm text-gray-700">
+              <span className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-md border border-gray-200">
                 Trang {data.pagination.page + 1} / {data.pagination.totalPages}
               </span>
               <Button
@@ -505,6 +521,7 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
                 size="sm"
                 onClick={() => handlePageChange(data.pagination.page + 2)}
                 disabled={data.pagination.page + 1 >= data.pagination.totalPages}
+                className="border-gray-300 hover:bg-gray-50"
               >
                 Sau
               </Button>

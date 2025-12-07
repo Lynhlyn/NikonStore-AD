@@ -22,7 +22,7 @@ import { UITextField } from "@/core/ui/UITextField";
 import { useCancelOrderMutation, useExportOrdersToExcelMutation, useFetchOrdersQuery, useUpdateStatusOrderMutation } from "@/lib/services/modules/orderService";
 import { routerApp } from "@/router";
 import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
-import { Eye, Filter, Loader2, MoreHorizontal, RotateCcw, Search, X as CancelIcon, AlertTriangle as FailedIcon } from "lucide-react";
+import { Eye, Filter, Loader2, MoreHorizontal, RotateCcw, Search, X as CancelIcon, AlertTriangle as FailedIcon, Download } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
@@ -51,15 +51,15 @@ const formatCurrency = (amount: number) => {
 
 const getStatusColor = (status: number) => {
   return (
-    status === 3 ? 'bg-yellow-100 text-yellow-800' :
-      status === 4 ? 'bg-blue-100 text-blue-800' :
-        status === 5 ? 'bg-orange-100 text-orange-800' :
-          status === 6 ? 'bg-green-100 text-green-800' :
-            status === 7 ? 'bg-red-100 text-red-800' :
-              status === 8 ? 'bg-yellow-100 text-yellow-800' :
-                status === 12 ? 'bg-red-100 text-red-800' :
-                  status === 13 ? 'bg-purple-100 text-purple-800' :
-                    'bg-gray-100 text-gray-800'
+    status === 3 ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+      status === 4 ? 'bg-blue-50 text-blue-700 border-blue-200' :
+        status === 5 ? 'bg-orange-50 text-orange-700 border-orange-200' :
+          status === 6 ? 'bg-green-50 text-green-700 border-green-200' :
+            status === 7 ? 'bg-red-50 text-red-700 border-red-200' :
+              status === 8 ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                status === 12 ? 'bg-red-50 text-red-700 border-red-200' :
+                  status === 13 ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                    'bg-gray-50 text-gray-700 border-gray-200'
   );
 };
 
@@ -270,7 +270,7 @@ const OrderOnlineTable = () => {
       accessorKey: "orderStatus",
       header: "Trạng thái",
       cell: ({ row }: any) => (
-        <Badge className={getStatusColor(row.original.orderStatus)}>
+        <Badge className={`${getStatusColor(row.original.orderStatus)} border font-medium px-2.5 py-0.5 rounded-full`}>
           {getStatusLabel(row.original.orderStatus)}
         </Badge>
       ),
@@ -281,33 +281,45 @@ const OrderOnlineTable = () => {
       cell: ({ row }: any) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
+            <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600">
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => {
-              router.push(getRouteWithRole(routerApp.order.detail({ id: row.original.orderid.toString() })));
-            }}>
-              <Eye className="h-4 w-4 mr-2" />
-              Xem chi tiết
+          <DropdownMenuContent align="end" className="w-48 border border-gray-200 shadow-lg">
+            <DropdownMenuItem 
+              onClick={() => {
+                router.push(getRouteWithRole(routerApp.order.detail({ id: row.original.orderid.toString() })));
+              }}
+              className="cursor-pointer hover:bg-blue-50"
+            >
+              <Eye className="h-4 w-4 mr-2 text-blue-600" />
+              <span className="font-medium">Xem chi tiết</span>
             </DropdownMenuItem>
             {row.original.orderStatus === 3 && (
-              <DropdownMenuItem onClick={() => handleCancelOrder(row.original)}>
+              <DropdownMenuItem 
+                onClick={() => handleCancelOrder(row.original)}
+                className="cursor-pointer hover:bg-red-50"
+              >
                 <CancelIcon className="h-4 w-4 mr-2 text-red-600" />
-                <span className="text-red-600">Hủy đơn hàng</span>
+                <span className="text-red-600 font-medium">Hủy đơn hàng</span>
               </DropdownMenuItem>
             )}
             {![8, 12, 6, 7].includes(row.original.orderStatus) && getNextStatus(row.original.orderStatus) && (
-              <DropdownMenuItem onClick={() => handleChangeStatus(row.original)}>
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Chuyển trạng thái
+              <DropdownMenuItem 
+                onClick={() => handleChangeStatus(row.original)}
+                className="cursor-pointer hover:bg-blue-50"
+              >
+                <RotateCcw className="h-4 w-4 mr-2 text-blue-600" />
+                <span className="font-medium">Chuyển trạng thái</span>
               </DropdownMenuItem>
             )}
             {row.original.orderStatus === 5 && (
-              <DropdownMenuItem onClick={() => handleFailedDelivery(row.original)}>
+              <DropdownMenuItem 
+                onClick={() => handleFailedDelivery(row.original)}
+                className="cursor-pointer hover:bg-orange-50"
+              >
                 <FailedIcon className="h-4 w-4 mr-2 text-orange-600" />
-                <span className="text-orange-600">Giao hàng thất bại</span>
+                <span className="text-orange-600 font-medium">Giao hàng thất bại</span>
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>
@@ -326,45 +338,63 @@ const OrderOnlineTable = () => {
   });
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-64">Đang tải...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-96 space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Đang tải dữ liệu...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-lg border">
+    <div className="space-y-6 p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
         <Collapsible open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-          <div className="p-6 border-b">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold">Danh sách đơn hàng online</h2>
-                <p className="text-sm text-muted-foreground mt-1">
+                <h2 className="text-2xl font-bold text-white mb-2">Danh sách đơn hàng online</h2>
+                <p className="text-sm text-blue-100">
                   {hasActiveFilters && (
-                    <span className="text-blue-600">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500 text-white">
                       Đang áp dụng {Object.values({ keyword, status: status !== "" ? status : "", fromDate, toDate }).filter(Boolean).length} bộ lọc
                     </span>
                   )}
-                  {!hasActiveFilters && "Hiển thị tất cả đơn hàng online"}
+                  {!hasActiveFilters && <span className="text-blue-100">Hiển thị tất cả đơn hàng online trong hệ thống</span>}
                 </p>
               </div>
               <div className="flex items-center space-x-2">
                 <CollapsibleTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button variant="secondary" size="sm" className="bg-white hover:bg-gray-100 text-blue-700 font-medium shadow-sm">
                     <Filter className="h-4 w-4 mr-2" />
                     {isFilterOpen ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
                   </Button>
                 </CollapsibleTrigger>
                 {hasActiveFilters && (
-                  <Button variant="outline" size="sm" onClick={clearAllFilters}>
+                  <Button variant="secondary" size="sm" onClick={clearAllFilters} className="bg-white hover:bg-gray-100 text-blue-700 font-medium shadow-sm">
                     <RotateCcw className="h-4 w-4 mr-2" />
                     Làm mới
                   </Button>
                 )}
+                <Button
+                  onClick={handleExportExcel}
+                  disabled={isExporting}
+                  size="sm"
+                  className="bg-white hover:bg-gray-100 text-blue-700 font-medium shadow-sm"
+                >
+                  {isExporting ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4 mr-2" />
+                  )}
+                  {isExporting ? 'Đang xuất...' : 'Xuất Excel'}
+                </Button>
               </div>
             </div>
           </div>
 
           <CollapsibleContent>
-            <div className="p-6 bg-gray-50 border-b">
+            <div className="p-6 bg-gradient-to-br from-gray-50 to-blue-50 border-b border-gray-200">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Tìm kiếm tổng hợp</label>
@@ -413,13 +443,13 @@ const OrderOnlineTable = () => {
           </CollapsibleContent>
         </Collapsible>
 
-        <div className="border-t">
+        <div className="border-t border-gray-200 overflow-x-auto">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id} className="border-b">
+                <TableRow key={headerGroup.id} className="border-b border-gray-200 hover:bg-transparent">
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} className="border-r last:border-r-0 bg-gray-50 font-medium">
+                    <TableHead key={header.id} className="bg-gradient-to-b from-gray-100 to-gray-50 font-semibold text-gray-700 py-4 px-4 border-r last:border-r-0">
                       {header.isPlaceholder
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}
@@ -430,10 +460,14 @@ const OrderOnlineTable = () => {
             </TableHeader>
             <TableBody>
               {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className="border-b hover:bg-gray-50">
+                table.getRowModel().rows.map((row, index) => (
+                  <TableRow 
+                    key={row.id} 
+                    data-state={row.getIsSelected() && "selected"} 
+                    className="border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-transparent transition-all duration-200 cursor-pointer"
+                  >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="border-r last:border-r-0">
+                      <TableCell key={cell.id} className="py-4 px-4 border-r last:border-r-0">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -441,8 +475,14 @@ const OrderOnlineTable = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    Không có dữ liệu
+                  <TableCell colSpan={columns.length} className="h-48 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-3 py-8">
+                      <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+                        <Search className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <p className="text-gray-500 font-medium">Không tìm thấy dữ liệu</p>
+                      <p className="text-sm text-gray-400">Thử điều chỉnh bộ lọc để xem kết quả khác</p>
+                    </div>
                   </TableCell>
                 </TableRow>
               )}
@@ -450,7 +490,7 @@ const OrderOnlineTable = () => {
           </Table>
         </div>
 
-        <div className="flex items-center justify-between p-6 border-t">
+        <div className="flex flex-col sm:flex-row items-center justify-between p-6 border-t border-gray-200 bg-gray-50 gap-4">
           <UIPaginationResuft
             currentPage={page + 1}
             totalPage={totalPages}
@@ -481,8 +521,8 @@ const OrderOnlineTable = () => {
             <p>Bạn muốn chuyển trạng thái đơn hàng <b>{selectedOrderForStatus?.trackingNumber}</b> sang trạng thái <b>{getStatusLabel(nextStatus || 0)}</b>?</p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setChangeStatusModalOpen(false)} disabled={isUpdating}>Hủy</Button>
-            <Button onClick={handleConfirmChangeStatus} disabled={isUpdating}>
+            <Button variant="outline" onClick={() => setChangeStatusModalOpen(false)} disabled={isUpdating} className="border-gray-300">Hủy</Button>
+            <Button onClick={handleConfirmChangeStatus} disabled={isUpdating} className="bg-blue-600 hover:bg-blue-700">
               {isUpdating ? <Loader2 className="w-4 h-4 animate-spin inline-block mr-2" /> : null}
               Xác nhận
             </Button>
