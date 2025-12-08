@@ -13,8 +13,8 @@ const notoSans = Noto_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'NikonStore Admin Dashboard',
-  description: 'NikonStore Admin Dashboard - Manage camera and photography equipment',
+  title: 'Quản trị cửa hàng Nikon Store Dashboard',
+  description: 'Quản trị cửa hàng Nikon Store Dashboard - Manage camera and photography equipment',
 };
 
 const ReduxProvider = dynamic(() => import('@/lib/Provider/StoreProvider'), {

@@ -18,14 +18,14 @@ const NameInput = () => {
 
   return (
     <UIFormControl>
-      <UIFormControl.Label isRequired>Tên banner</UIFormControl.Label>
+      <UIFormControl.Label>Tên banner</UIFormControl.Label>
       <Controller
         control={control}
         name="name"
         render={({ field }) => (
           <UITextField
             value={field.value || ''}
-            onChange={(e) => field.onChange(e.target.value)}
+            onChange={(e) => field.onChange(e.target.value || null)}
             onBlur={field.onBlur}
             name={field.name}
             isInvalid={!!errors.name}

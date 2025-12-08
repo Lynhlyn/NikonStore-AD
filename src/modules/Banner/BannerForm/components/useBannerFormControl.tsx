@@ -22,7 +22,7 @@ export type BannerFormContextData = ReturnType<typeof useBannerFormProvider>;
 export const BannerFormContext = createContext({} as BannerFormContextData);
 
 const bannerSchema: yup.ObjectSchema<TBannerFormField> = yup.object({
-  name: yup.string().required('Tên banner là bắt buộc').max(255, 'Tên banner không được vượt quá 255 ký tự'),
+  name: yup.string().nullable().optional().max(255, 'Tên banner không được vượt quá 255 ký tự'),
   description: yup.string().optional().max(500, 'Mô tả không được vượt quá 500 ký tự'),
   url: yup.string().required('URL là bắt buộc'),
   status: yup.mixed<EStatusEnumString>().required('Trạng thái là bắt buộc'),
@@ -55,7 +55,7 @@ export function useBannerFormProvider(id?: number) {
   const methods = useForm<TBannerFormField>({
     resolver: yupResolver(bannerSchema),
     defaultValues: {
-      name: '',
+      name: null,
       description: '',
       url: '',
       status: EStatusEnumString.ACTIVE,
@@ -69,7 +69,7 @@ export function useBannerFormProvider(id?: number) {
   useEffect(() => {
     if (id && banner) {
       methods.reset({
-        name: banner.name,
+        name: banner.name || null,
         description: banner.description || '',
         url: banner.url,
         status: banner.status,
@@ -142,9 +142,10 @@ export function useBannerFormProvider(id?: number) {
 
   const onSubmit: SubmitHandler<TBannerFormField> = async (data) => {
     const actionText = id ? 'cập nhật' : 'thêm mới';
+    const bannerName = data.name || 'không có tên';
     setConfirmModalConfig({
       title: `Xác nhận ${actionText} banner`,
-      message: `Bạn có chắc chắn muốn ${actionText} banner "${data.name}" không?`,
+      message: `Bạn có chắc chắn muốn ${actionText} banner "${bannerName}" không?`,
       type: 'info',
       isLoading: false,
     });

@@ -150,7 +150,7 @@ const OrderOfflineTable = () => {
           <DropdownMenuContent align="end" className="w-48 border border-gray-200 shadow-lg">
             <DropdownMenuItem 
               onClick={() => {
-                router.push(getRouteWithRole(routerApp.order.detail({ id: row.original.orderid.toString() })));
+                router.push(getRouteWithRole(routerApp.order.detail({ id: row.original.orderid.toString() })) + '?source=offline');
               }}
               className="cursor-pointer hover:bg-indigo-50"
             >

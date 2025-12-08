@@ -62,7 +62,7 @@ const LayoutRootDashboard = ({ children, initialUserData }: ILayoutRootDashboard
                             <div className="hidden md:flex items-center gap-3">
                                 <div className="h-8 w-px bg-slate-700"></div>
                                 <div className="text-lg font-bold leading-[155%] text-white">
-                                    NikonStore Admin
+                                    Quản trị cửa hàng Nikon Store
                                 </div>
                             </div>
                         </div>

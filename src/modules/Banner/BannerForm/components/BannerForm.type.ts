@@ -1,7 +1,7 @@
 import { EStatusEnumString } from '@/common/enums';
 
 export type TBannerFormField = {
-  name: string;
+  name?: string | null;
   description?: string;
   url: string;
   status: EStatusEnumString;

@@ -15,6 +15,7 @@ import { addRolePrefixToRoutes, extractRoleFromPath } from '@/common/utils/prepe
 import { usePathname } from 'next/navigation';
 import { useAppNavigation } from '@/common/hooks';
 import { routerApp } from '@/router';
+import logoImage from '@/assets/images/logo.png';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const sidebarDashboardState = useAppSelector<
@@ -31,8 +32,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarHeader className='border-b border-slate-700 bg-slate-800 backdrop-blur-sm'>
                 <div className="flex items-center mx-auto cursor-pointer px-4 py-4 group" onClick={handleGoHome}>
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-200">
-                            <span className="text-white font-bold text-lg">N</span>
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-200 overflow-hidden">
+                            <img src={logoImage.src || logoImage} alt="NikonStore Logo" className="w-full h-full object-contain" />
                         </div>
                         <span className="font-bold leading-[155%] text-xl text-white text-center group-hover:text-blue-100 transition-colors duration-200">
                             NikonStore
