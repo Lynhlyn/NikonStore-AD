@@ -81,7 +81,7 @@ export function ProductList({ items, orderId }: ProductListProps) {
                           className="rounded-lg object-cover border-2 border-gray-200 shadow-sm flex-shrink-0 hover:shadow-md transition-shadow"
                           unoptimized
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/placeholder.svg';
+                            (e.target as HTMLImageElement).src = 'https://cdn-app.sealsubscriptions.com/shopify/public/img/promo/no-image-placeholder.png';
                           }}
                         />
                       ) : (

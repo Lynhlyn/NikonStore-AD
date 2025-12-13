@@ -25,6 +25,7 @@ interface PaymentSectionProps {
   receivedAmount: number
   onReceivedAmountChange: (amount: number) => void
   totalAmount: number
+  subtotal: number
   changeAmount: number
   onCompleteOrder: () => void
   isDisabled: boolean
@@ -44,6 +45,7 @@ export function PaymentSection({
   receivedAmount,
   onReceivedAmountChange,
   totalAmount,
+  subtotal,
   changeAmount,
   onCompleteOrder,
   isDisabled,
@@ -136,7 +138,7 @@ export function PaymentSection({
           <VoucherSelector
             selectedVoucher={selectedVoucher}
             onVoucherSelect={onVoucherSelect}
-            orderTotal={totalAmount}
+            orderTotal={subtotal}
             customerId={selectedCustomer?.id ?? null}
           />
         </div>

@@ -48,7 +48,7 @@ export function OrderReviews({ orderId, orderDetails = [] }: OrderReviewsProps) 
     if (orderDetailId) {
       orderDetailMap.set(orderDetailId, {
         name: detail.productName || `Sản phẩm #${detail.productId || orderDetailId}`,
-        image: detail.imageUrl || '/placeholder.svg',
+        image: detail.imageUrl || 'https://cdn-app.sealsubscriptions.com/shopify/public/img/promo/no-image-placeholder.png',
         productId: detail.productId || 0,
       });
     }
@@ -136,7 +136,7 @@ export function OrderReviews({ orderId, orderDetails = [] }: OrderReviewsProps) 
         {Object.entries(reviewsByOrderDetail).map(([orderDetailId, orderDetailReviews]) => {
           const orderDetailInfo = orderDetailMap.get(Number(orderDetailId)) || {
             name: `Chi tiết đơn hàng #${orderDetailId}`,
-            image: '/placeholder.svg',
+            image: 'https://cdn-app.sealsubscriptions.com/shopify/public/img/promo/no-image-placeholder.png',
             productId: 0,
           };
           return (

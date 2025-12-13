@@ -106,19 +106,49 @@ export const usePosLogic = (staffId: number) => {
 
   const calculateFinalAmount = useCallback((order: PosOrderResponse | undefined, voucher: Voucher | null) => {
     if (!order) return 0;
-    let finalAmount = order.totalAmount;
-    if (voucher) {
-      let discount = 0;
-      if (voucher.discountType === "percentage") {
-        discount = (order.totalAmount * voucher.discountValue) / 100;
-        if (voucher.maxDiscount) {
-          discount = Math.min(discount, voucher.maxDiscount);
-        }
-      } else {
-        discount = voucher.discountValue;
-      }
-      finalAmount = Math.max(0, order.totalAmount - discount);
+    
+    const subtotal = order.subtotal || 0;
+    
+    if (!voucher) {
+      return subtotal;
     }
+    
+    const now = new Date();
+    const startDate = voucher.startDate ? new Date(voucher.startDate) : null;
+    const endDate = voucher.endDate ? new Date(voucher.endDate) : null;
+    
+    if (startDate && startDate > now) {
+      return subtotal;
+    }
+    
+    if (endDate && endDate < now) {
+      return subtotal;
+    }
+    
+    if (voucher.status !== "ACTIVE") {
+      return subtotal;
+    }
+    
+    if (voucher.minOrderValue && subtotal < voucher.minOrderValue) {
+      return subtotal;
+    }
+    
+    let voucherDiscount = 0;
+    
+    if (voucher.discountType === "percentage") {
+      voucherDiscount = (subtotal * voucher.discountValue) / 100;
+      
+      if (voucher.maxDiscount) {
+        voucherDiscount = Math.min(voucherDiscount, voucher.maxDiscount);
+      }
+    } else {
+      voucherDiscount = voucher.discountValue;
+    }
+    
+    voucherDiscount = Math.min(voucherDiscount, subtotal);
+    
+    const finalAmount = Math.max(0, subtotal - voucherDiscount);
+    
     return finalAmount;
   }, []);
 

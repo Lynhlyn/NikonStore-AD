@@ -202,7 +202,7 @@ export function DialogProductDetailTable({ isOpen, onClose, productId, onAddToCa
                           <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
                             {detail.thumbnailImage && !imageErrors[detail.id] ? (
                               <img
-                                src={detail.thumbnailImage || "/placeholder.svg"}
+                                src={detail.thumbnailImage || "https://cdn-app.sealsubscriptions.com/shopify/public/img/promo/no-image-placeholder.png"}
                                 alt={`${detail.productName} - ${detail.color.name}`}
                                 className="w-full h-full object-cover"
                                 onError={() => handleImageError(detail.id)}

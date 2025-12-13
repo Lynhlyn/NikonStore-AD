@@ -18,6 +18,12 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'api.qrserver.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn-app.sealsubscriptions.com',
+        port: '',
+        pathname: '/**',
+      }
     ],
   },
   webpack: (config, { isServer }) => {

@@ -22,7 +22,7 @@ export function ProductImage({ src, alt, className }: ProductImageProps) {
 
   return (
     <img
-      src={src || "/placeholder.svg"}
+      src={src || "https://cdn-app.sealsubscriptions.com/shopify/public/img/promo/no-image-placeholder.png"}
       alt={alt}
       className={`${className} object-cover rounded-md`}
       onError={() => setImageError(true)}

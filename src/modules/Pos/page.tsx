@@ -318,6 +318,7 @@ export default function POSPage() {
             receivedAmount={receivedAmount}
             onReceivedAmountChange={setReceivedAmount}
             totalAmount={finalAmount}
+            subtotal={selectedOrder?.subtotal || 0}
             changeAmount={changeAmount}
             onCompleteOrder={handleOrderComplete}
             isDisabled={

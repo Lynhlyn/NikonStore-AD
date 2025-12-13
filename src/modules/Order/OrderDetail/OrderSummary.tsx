@@ -21,8 +21,10 @@ import { Receipt, Tag, Truck, FileText } from 'lucide-react';
 export function OrderSummary({ totalAmount, discount, shippingFee, note }: OrderSummaryProps) {
   const safeTotalAmount = Math.max(0, totalAmount || 0);
   const safeDiscount = Math.max(0, discount || 0);
-  const cappedDiscount = Math.min(safeDiscount, safeTotalAmount);
-  const finalAmount = Math.max(0, safeTotalAmount - cappedDiscount + (shippingFee || 0));
+  
+  const subtotal = safeTotalAmount + safeDiscount;
+  const cappedDiscount = Math.min(safeDiscount, subtotal);
+  const finalAmount = Math.max(0, safeTotalAmount + (shippingFee || 0));
 
   return (
     <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-lg border border-gray-200 p-6">
@@ -33,7 +35,7 @@ export function OrderSummary({ totalAmount, discount, shippingFee, note }: Order
             <Receipt className="h-5 w-5 text-gray-600" />
             <span className="font-semibold text-gray-700">Tổng tiền hàng:</span>
           </div>
-          <span className="font-bold text-gray-900">{formatCurrency(safeTotalAmount)}</span>
+          <span className="font-bold text-gray-900">{formatCurrency(subtotal)}</span>
         </div>
         {cappedDiscount > 0 && (
           <div className="flex justify-between items-center py-2 bg-white rounded-lg px-4 shadow-sm">
