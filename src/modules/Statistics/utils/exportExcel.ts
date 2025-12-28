@@ -55,7 +55,7 @@ export const exportStatisticsToExcel = (data: GeneralStatisticsData, fromDate?: 
         ["", "", "", ""],
         ["CHỈ SỐ TỔNG QUAN", "", "", ""],
         ["", "", "", ""],
-        ["Tổng doanh thu (sau phí ship)", formatCurrency(data.totalRevenue || 0), "", ""],
+        ["Tiền lãi thực tế", formatCurrency(data.totalRevenue || 0), "", ""],
         ["Tổng phí ship", formatCurrency(data.totalShippingFee || 0), "", ""],
         ["Tổng đơn hàng", formatNumber(data.totalOrders || 0), "", ""],
         ["Khách hàng", formatNumber(data.totalCustomers || 0), "", ""],

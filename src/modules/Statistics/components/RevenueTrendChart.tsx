@@ -133,7 +133,7 @@ const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ data, title = "Xu
                             transition={{ duration: 0.5, delay: 0.1 }}
                             whileHover={{ scale: 1.05, y: -2 }}
                         >
-                            <div className="text-xs text-green-700 font-medium mb-1">Tổng doanh thu</div>
+                            <div className="text-xs text-green-700 font-medium mb-1">Doanh thu thực tế</div>
                             <motion.div 
                                 className="text-lg font-bold text-green-700"
                                 initial={{ scale: 0 }}

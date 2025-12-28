@@ -2,8 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/core/shadcn/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/core/shadcn/components/ui/chart"
-import { Star, StarHalf } from "lucide-react"
-import type React from "react"
+import { Star } from "lucide-react"
+import * as React from "react"
 import { motion } from "framer-motion"
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, XAxis, YAxis } from "recharts"
 
@@ -81,7 +81,7 @@ const ReviewRatingChart: React.FC<ReviewRatingChartProps> = ({
                     </div>
                 </CardContent>
             </Card>
-        )
+        );
     }
 
     return (
@@ -245,48 +245,48 @@ const ReviewRatingChart: React.FC<ReviewRatingChartProps> = ({
                         <div className="space-y-4">
                             <h3 className="text-lg font-semibold text-gray-800">Phân bố theo sao</h3>
                             <ChartContainer config={chartConfig} className="h-[300px] w-full">
-                                    <BarChart data={[...chartData].reverse()}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                                        <XAxis
-                                            dataKey="rating"
-                                            tick={{ fontSize: 12, fill: "#64748b" }}
-                                            tickLine={{ stroke: "#e2e8f0" }}
-                                            axisLine={{ stroke: "#e2e8f0" }}
-                                            tickFormatter={(value) => `${value} sao`}
-                                        />
-                                        <YAxis
-                                            tick={{ fontSize: 12, fill: "#64748b" }}
-                                            tickLine={{ stroke: "#e2e8f0" }}
-                                            axisLine={{ stroke: "#e2e8f0" }}
-                                        />
-                                        <ChartTooltip
-                                            content={
-                                                <ChartTooltipContent
-                                                    formatter={(value: number | string) => [
-                                                        formatNumber(Number(value)),
-                                                        "Số lượng"
-                                                    ]}
-                                                    labelFormatter={(label) => `${label} sao`}
-                                                    className="bg-white border border-gray-200 shadow-lg rounded-lg"
-                                                />
-                                            }
-                                        />
-                                        <Bar 
-                                            dataKey="count" 
-                                            radius={[8, 8, 0, 0]}
-                                            isAnimationActive={true}
-                                            animationBegin={0}
-                                            animationDuration={1500}
-                                            animationEasing="ease-out"
-                                        >
-                                            {chartData.map((entry, index) => (
-                                                <Cell
-                                                    key={`cell-${index}`}
-                                                    fill={COLORS[entry.rating as keyof typeof COLORS]}
-                                                />
-                                            ))}
-                                        </Bar>
-                                    </BarChart>
+                                <BarChart data={[...chartData].reverse()}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                                    <XAxis
+                                        dataKey="rating"
+                                        tick={{ fontSize: 12, fill: "#64748b" }}
+                                        tickLine={{ stroke: "#e2e8f0" }}
+                                        axisLine={{ stroke: "#e2e8f0" }}
+                                        tickFormatter={(value) => `${value} sao`}
+                                    />
+                                    <YAxis
+                                        tick={{ fontSize: 12, fill: "#64748b" }}
+                                        tickLine={{ stroke: "#e2e8f0" }}
+                                        axisLine={{ stroke: "#e2e8f0" }}
+                                    />
+                                    <ChartTooltip
+                                        content={
+                                            <ChartTooltipContent
+                                                formatter={(value: any) => [
+                                                    formatNumber(Number(value)),
+                                                    "Số lượng"
+                                                ]}
+                                                labelFormatter={(label) => `${label} sao`}
+                                                className="bg-white border border-gray-200 shadow-lg rounded-lg"
+                                            />
+                                        }
+                                    />
+                                    <Bar 
+                                        dataKey="count" 
+                                        radius={[8, 8, 0, 0]}
+                                        isAnimationActive={true}
+                                        animationBegin={0}
+                                        animationDuration={1500}
+                                        animationEasing="ease-out"
+                                    >
+                                        {chartData.map((entry, index) => (
+                                            <Cell
+                                                key={`cell-${index}`}
+                                                fill={COLORS[entry.rating as keyof typeof COLORS]}
+                                            />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
                             </ChartContainer>
                         </div>
 
@@ -294,37 +294,37 @@ const ReviewRatingChart: React.FC<ReviewRatingChartProps> = ({
                             <h3 className="text-lg font-semibold text-gray-800">Tỉ lệ đánh giá</h3>
                             <div className="flex items-center justify-center h-[300px]">
                                 <ChartContainer config={chartConfig} className="h-full w-full">
-                                        <PieChart>
-                                            <Pie
-                                                data={pieData}
-                                                cx="50%"
-                                                cy="50%"
-                                                labelLine={false}
-                                                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                                outerRadius={100}
-                                                fill="#8884d8"
-                                                dataKey="value"
-                                                isAnimationActive={true}
-                                                animationBegin={0}
-                                                animationDuration={1500}
-                                                animationEasing="ease-out"
-                                            >
-                                                {pieData.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={entry.color} />
-                                                ))}
-                                            </Pie>
-                                            <ChartTooltip
-                                                content={
-                                                    <ChartTooltipContent
-                                                        formatter={(value: number | string) => [
-                                                            formatNumber(Number(value)),
-                                                            "Số lượng"
-                                                        ]}
-                                                        className="bg-white border border-gray-200 shadow-lg rounded-lg"
-                                                    />
-                                                }
-                                            />
-                                        </PieChart>
+                                    <PieChart>
+                                        <Pie
+                                            data={pieData}
+                                            cx="50%"
+                                            cy="50%"
+                                            labelLine={false}
+                                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                            outerRadius={100}
+                                            fill="#8884d8"
+                                            dataKey="value"
+                                            isAnimationActive={true}
+                                            animationBegin={0}
+                                            animationDuration={1500}
+                                            animationEasing="ease-out"
+                                        >
+                                            {pieData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                            ))}
+                                        </Pie>
+                                        <ChartTooltip
+                                            content={
+                                                <ChartTooltipContent
+                                                    formatter={(value: any) => [
+                                                        formatNumber(Number(value)),
+                                                        "Số lượng"
+                                                    ]}
+                                                    className="bg-white border border-gray-200 shadow-lg rounded-lg"
+                                                />
+                                            }
+                                        />
+                                    </PieChart>
                                 </ChartContainer>
                             </div>
                         </div>
@@ -377,7 +377,7 @@ const ReviewRatingChart: React.FC<ReviewRatingChartProps> = ({
                                                 {percentage.toFixed(1)}%
                                             </span>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 )
                             })}
                         </div>
@@ -385,7 +385,7 @@ const ReviewRatingChart: React.FC<ReviewRatingChartProps> = ({
                 </div>
             </CardContent>
         </Card>
-    )
+    );
 }
 
 export default ReviewRatingChart

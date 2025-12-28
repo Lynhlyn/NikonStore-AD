@@ -351,7 +351,7 @@ const StatisticsPage: React.FC = () => {
                     <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                             <StatisticsCard
-                                title="Tổng doanh thu (sau phí ship)"
+                                title="Tiền lãi thực tế"
                                 value=""
                                 animatedValue={statistics.data.totalRevenue || 0}
                                 formatValue={formatCurrency}

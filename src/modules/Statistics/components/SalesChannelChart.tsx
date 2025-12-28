@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/core/shadcn/components/ui/card"
 import type { SalesChannelStatisticsResponse } from "@/lib/services/modules/statisticsService"
 import { Globe, PieChart, Store, TrendingUp } from "lucide-react"
-import type React from "react"
+import * as React from "react"
 import { motion } from "framer-motion"
 
 interface SalesChannelChartProps {
@@ -152,7 +152,7 @@ const SalesChannelChart: React.FC<SalesChannelChartProps> = ({ data, title = "Ph
             >
               {formatCurrency(totalRevenue)}
             </motion.div>
-            <div className="text-sm text-gray-600">Tổng doanh thu</div>
+            <div className="text-sm text-gray-600">Doanh thu thực tế</div>
           </div>
         </motion.div>
       </motion.div>
@@ -199,7 +199,7 @@ const SalesChannelChart: React.FC<SalesChannelChartProps> = ({ data, title = "Ph
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600 mb-1">{formatCurrency(totalRevenue)}</div>
-              <div className="text-sm font-medium text-green-700">Tổng doanh thu</div>
+              <div className="text-sm font-medium text-green-700">Doanh thu thực tế</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-blue-600 mb-1">{data.length}</div>
@@ -307,7 +307,7 @@ const SalesChannelChart: React.FC<SalesChannelChartProps> = ({ data, title = "Ph
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 )
               })}
             </div>
