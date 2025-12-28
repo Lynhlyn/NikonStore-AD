@@ -18,8 +18,9 @@ import { useAppSelector } from "@/lib/hook/redux"
 import type { Customer } from "@/lib/services/modules/customerService/type"
 import type { Voucher } from "@/lib/services/modules/voucherService/type"
 import type { RootState } from "@/lib/services/store"
+import { useFetchVouchersQuery } from "@/lib/services/modules/voucherService"
 import { AlertCircle, RefreshCw, User } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useState, useRef, useMemo } from "react"
 import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 
@@ -36,6 +37,9 @@ export default function POSPage() {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null)
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [orderToCancel, setOrderToCancel] = useState<{ id: number; code: string } | null>(null)
+  const hasAutoSelectedVoucherRef = useRef(false)
+  const lastSubtotalRef = useRef<number>(0)
+  const lastOrderIdRef = useRef<number | null>(null)
 
   const {
     selectedOrderId,
@@ -151,6 +155,9 @@ export default function POSPage() {
       if (selectedOrderId) {
         await handleVoucherChange(voucher)
       }
+      if (voucher) {
+        hasAutoSelectedVoucherRef.current = true
+      }
     },
     [selectedOrderId, handleVoucherChange],
   )
@@ -226,6 +233,163 @@ export default function POSPage() {
       }
     }
   }, [orderToCancel, handleCancelOrder])
+
+  const subtotal = selectedOrder?.subtotal || 0
+
+  const {
+    data: vouchersResponse,
+    isLoading: isLoadingVouchers,
+  } = useFetchVouchersQuery(
+    {
+      page: 0,
+      size: 100,
+      status: "ACTIVE",
+      isAll: true,
+      customerId: selectedCustomer?.id ?? undefined,
+    },
+    {
+      skip: !selectedOrderId || subtotal <= 0,
+      refetchOnMountOrArgChange: true,
+    },
+  )
+
+  const vouchers = useMemo(() => vouchersResponse?.data || [], [vouchersResponse?.data])
+
+  const calculateVoucherDiscount = useCallback((voucher: Voucher, orderTotal: number) => {
+    if (!voucher || voucher.status !== "ACTIVE") {
+      return 0
+    }
+    const now = new Date()
+    const startDate = new Date(voucher.startDate)
+    const endDate = new Date(voucher.endDate)
+    if (now < startDate || now > endDate) {
+      return 0
+    }
+    if (voucher.minOrderValue && orderTotal < voucher.minOrderValue) {
+      return 0
+    }
+    let discount = 0
+    if (voucher.discountType === "percentage") {
+      discount = (orderTotal * voucher.discountValue) / 100
+      if (voucher.maxDiscount && discount > voucher.maxDiscount) {
+        discount = voucher.maxDiscount
+      }
+    } else {
+      discount = voucher.discountValue
+      if (discount > orderTotal) {
+        discount = orderTotal
+      }
+    }
+    return Math.round(discount)
+  }, [])
+
+  const isVoucherValid = useCallback((voucher: Voucher, orderTotal: number) => {
+    if (!voucher || voucher.status !== "ACTIVE") {
+      return false
+    }
+    const now = new Date()
+    const startDate = new Date(voucher.startDate)
+    const endDate = new Date(voucher.endDate)
+    if (now < startDate || now > endDate) {
+      return false
+    }
+    if (voucher.minOrderValue && orderTotal < voucher.minOrderValue) {
+      return false
+    }
+    if (voucher.quantity <= 0) {
+      return false
+    }
+    return true
+  }, [])
+
+  useEffect(() => {
+    if (lastOrderIdRef.current !== selectedOrderId) {
+      hasAutoSelectedVoucherRef.current = false
+      lastSubtotalRef.current = 0
+      lastOrderIdRef.current = selectedOrderId
+    }
+  }, [selectedOrderId])
+
+  useEffect(() => {
+    if (
+      selectedOrderId &&
+      subtotal > 0 &&
+      vouchers.length > 0 &&
+      !isLoadingVouchers
+    ) {
+      const subtotalChanged = Math.abs(subtotal - lastSubtotalRef.current) > 100
+      const shouldAutoSelect = !hasAutoSelectedVoucherRef.current || subtotalChanged
+
+      if (shouldAutoSelect) {
+        const validVouchers = vouchers
+          .map((voucher) => {
+            const isValid = isVoucherValid(voucher, subtotal)
+            const actualDiscount = isValid ? calculateVoucherDiscount(voucher, subtotal) : 0
+            return {
+              voucher,
+              isValid,
+              actualDiscount,
+            }
+          })
+          .filter((item) => item.isValid && item.actualDiscount > 0)
+          .sort((a, b) => {
+            if (b.actualDiscount !== a.actualDiscount) {
+              return b.actualDiscount - a.actualDiscount
+            }
+            
+            const aVoucher = a.voucher
+            const bVoucher = b.voucher
+            
+            if (aVoucher.discountType === "percentage" && bVoucher.discountType === "percentage") {
+              if (bVoucher.discountValue !== aVoucher.discountValue) {
+                return bVoucher.discountValue - aVoucher.discountValue
+              }
+            }
+            
+            if (aVoucher.minOrderValue && bVoucher.minOrderValue) {
+              return aVoucher.minOrderValue - bVoucher.minOrderValue
+            }
+            if (!aVoucher.minOrderValue && bVoucher.minOrderValue) return -1
+            if (aVoucher.minOrderValue && !bVoucher.minOrderValue) return 1
+            
+            return 0
+          })
+
+        if (validVouchers.length > 0) {
+          const bestVoucher = validVouchers[0].voucher
+          const currentBestDiscount = selectedVoucher
+            ? calculateVoucherDiscount(selectedVoucher, subtotal)
+            : 0
+          const newBestDiscount = validVouchers[0].actualDiscount
+
+          if (!selectedVoucher) {
+            handleVoucherSelect(bestVoucher)
+            hasAutoSelectedVoucherRef.current = true
+          } else if (!isVoucherValid(selectedVoucher, subtotal)) {
+            handleVoucherSelect(bestVoucher)
+            hasAutoSelectedVoucherRef.current = true
+          } else if (subtotalChanged && newBestDiscount > currentBestDiscount) {
+            handleVoucherSelect(bestVoucher)
+            hasAutoSelectedVoucherRef.current = true
+          }
+        } else if (selectedVoucher && !isVoucherValid(selectedVoucher, subtotal)) {
+          handleVoucherSelect(null)
+          hasAutoSelectedVoucherRef.current = false
+        }
+
+        lastSubtotalRef.current = subtotal
+      }
+    }
+  }, [
+    selectedOrderId,
+    subtotal,
+    vouchers,
+    isLoadingVouchers,
+    selectedVoucher,
+    isVoucherValid,
+    calculateVoucherDiscount,
+    handleVoucherSelect,
+  ])
 
   const finalAmount = calculateFinalAmount(selectedOrder, selectedVoucher)
   const changeAmount = receivedAmount - finalAmount

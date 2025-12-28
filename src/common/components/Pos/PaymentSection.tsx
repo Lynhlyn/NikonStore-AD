@@ -131,16 +131,20 @@ export function PaymentSection({
           <span className="text-sm sm:text-base font-semibold">Thanh toán</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2 sm:space-y-2.5 p-2 sm:p-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
-          <CustomerSelector selectedCustomer={selectedCustomer} onCustomerSelect={onCustomerSelect} />
+      <CardContent className="space-y-2 sm:space-y-2.5 p-2 sm:p-3 min-w-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 min-w-0">
+          <div className="min-w-0">
+            <CustomerSelector selectedCustomer={selectedCustomer} onCustomerSelect={onCustomerSelect} />
+          </div>
 
-          <VoucherSelector
-            selectedVoucher={selectedVoucher}
-            onVoucherSelect={onVoucherSelect}
-            orderTotal={subtotal}
-            customerId={selectedCustomer?.id ?? null}
-          />
+          <div className="min-w-0">
+            <VoucherSelector
+              selectedVoucher={selectedVoucher}
+              onVoucherSelect={onVoucherSelect}
+              orderTotal={subtotal}
+              customerId={selectedCustomer?.id ?? null}
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">

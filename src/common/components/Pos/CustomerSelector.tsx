@@ -105,15 +105,15 @@ export function CustomerSelector({ selectedCustomer, onCustomerSelect }: Custome
   }, [])
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1 min-w-0">
       <label htmlFor="customer-select" className="block text-xs font-medium text-gray-700">
         Khách hàng
       </label>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <Button id="customer-select" variant="outline" className="w-full justify-start bg-transparent h-9 text-sm">
-            <User className="w-3.5 h-3.5 mr-2" aria-hidden="true" />
-            <span className="truncate">{selectedCustomer ? selectedCustomer.fullName : "Khách vãng lai"}</span>
+          <Button id="customer-select" variant="outline" className="w-full justify-start bg-transparent h-8 sm:h-9 text-xs sm:text-sm min-w-0">
+            <User className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2 flex-shrink-0" aria-hidden="true" />
+            <span className="truncate min-w-0">{selectedCustomer ? selectedCustomer.fullName : "Khách vãng lai"}</span>
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-4xl max-h-[80vh]">
