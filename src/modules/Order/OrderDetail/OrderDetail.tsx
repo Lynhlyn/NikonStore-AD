@@ -16,6 +16,7 @@ import { CustomerInfo } from './CustomerInfo';
 import { ProductList } from './ProductList';
 import { OrderSummary } from './OrderSummary';
 import { StatusActions } from './StatusActions';
+import { OrderHistoryTimeline } from './OrderHistoryTimeline';
 
 export function OrderDetail({ orderId, source = 'online' }: OrderDetailProps) {
   const router = useRouter();
@@ -185,6 +186,10 @@ export function OrderDetail({ orderId, source = 'online' }: OrderDetailProps) {
         shippingFee={orderDetail.shippingFee || 0}
         note={orderDetail.note}
       />
+
+      <div className="mb-8">
+        <OrderHistoryTimeline trackingNumber={orderDetail.trackingNumber || ''} />
+      </div>
     </div>
   );
 }

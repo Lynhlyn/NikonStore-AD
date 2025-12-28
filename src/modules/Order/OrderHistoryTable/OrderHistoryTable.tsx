@@ -53,6 +53,21 @@ const getStatusColor = (status: number) => {
   );
 };
 
+const getChangeByTypeLabel = (changeByType: string | null | undefined) => {
+  if (!changeByType) return 'Hệ thống';
+  const typeMap: { [key: string]: string } = {
+    'staff': 'Nhân viên',
+    'admin': 'Quản lý',
+    'customer': 'Khách hàng',
+    'system': 'Hệ thống',
+    'STAFF': 'Nhân viên',
+    'ADMIN': 'Quản lý',
+    'CUSTOMER': 'Khách hàng',
+    'SYSTEM': 'Hệ thống'
+  };
+  return typeMap[changeByType] || changeByType;
+};
+
 const OrderHistoryTable = () => {
   const router = useRouter();
   const { getRouteWithRole } = useAppNavigation();
@@ -105,6 +120,12 @@ const OrderHistoryTable = () => {
     { value: '13', label: 'Đang chuẩn bị hàng' }
   ];
 
+  const orderTypeOptions = [
+    { value: '', label: 'Tất cả' },
+    { value: 'ONLINE', label: 'Online' },
+    { value: 'IN_STORE', label: 'Tại quầy' },
+  ];
+
   const clearAllFilters = () => {
     setQuery({
       page: 0,
@@ -139,7 +160,7 @@ const OrderHistoryTable = () => {
     {
       accessorKey: "changeByType",
       header: "Loại người dùng",
-      cell: ({ row }: any) => row.original.changeByType || '-',
+      cell: ({ row }: any) => getChangeByTypeLabel(row.original.changeByType),
     },
     {
       accessorKey: "statusBefore",
@@ -285,10 +306,14 @@ const OrderHistoryTable = () => {
                   <label className="text-sm font-medium">Trạng thái sau</label>
                   <UISingleSelect
                     options={statusOptions.map(opt => ({ value: opt.value, label: opt.label }))}
-                    value={statusAfter}
+                    selected={statusOptions.find(opt => opt.value === statusAfter) || null}
                     onChange={(value: { value: string; label: string } | null) => setQuery({ statusAfter: value?.value || "", page: 0 })}
                     placeholder="Tất cả trạng thái"
-                    textFieldSize={ESize.M}
+                    size={ESize.M}
+                    bindLabel="label"
+                    bindValue="value"
+                    renderSelected={(props) => <UISingleSelect.Selected {...props} />}
+                    renderOption={(props) => <UISingleSelect.Option {...props} />}
                   />
                 </div>
 
@@ -304,15 +329,15 @@ const OrderHistoryTable = () => {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Loại đơn hàng</label>
                   <UISingleSelect
-                    options={[
-                      { value: '', label: 'Tất cả' },
-                      { value: 'ONLINE', label: 'Online' },
-                      { value: 'IN_STORE', label: 'Tại quầy' },
-                    ]}
-                    value={orderType}
+                    options={orderTypeOptions.map(opt => ({ value: opt.value, label: opt.label }))}
+                    selected={orderTypeOptions.find(opt => opt.value === orderType) || null}
                     onChange={(value: { value: string; label: string } | null) => setQuery({ orderType: value?.value || "", page: 0 })}
                     placeholder="Tất cả loại đơn"
-                    textFieldSize={ESize.M}
+                    size={ESize.M}
+                    bindLabel="label"
+                    bindValue="value"
+                    renderSelected={(props) => <UISingleSelect.Selected {...props} />}
+                    renderOption={(props) => <UISingleSelect.Option {...props} />}
                   />
                 </div>
               </div>
