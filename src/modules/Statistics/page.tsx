@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import type React from "react"
 import { useEffect, useState } from "react"
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
 import {
     CustomerChart,
     FilterPanel,
@@ -26,15 +27,69 @@ import {
 } from "./components"
 import { exportStatisticsToExcel } from "./utils/exportExcel"
 
+interface AnimatedNumberProps {
+    value: number
+    format?: (value: number) => string
+    className?: string
+}
+
+const AnimatedNumber: React.FC<AnimatedNumberProps> = ({ value, format, className = "" }) => {
+    const [displayValue, setDisplayValue] = useState(0)
+    const motionValue = useMotionValue(0)
+    const spring = useSpring(motionValue, {
+        damping: 30,
+        stiffness: 100,
+    })
+
+    useEffect(() => {
+        motionValue.set(0)
+        const timer = setTimeout(() => {
+            motionValue.set(value)
+        }, 100)
+        return () => clearTimeout(timer)
+    }, [motionValue, value])
+
+    useEffect(() => {
+        const unsubscribe = spring.on("change", (latest) => {
+            setDisplayValue(Math.floor(latest))
+        })
+        return () => unsubscribe()
+    }, [spring])
+
+    const displayText = format ? format(displayValue) : displayValue.toLocaleString("vi-VN")
+
+    return (
+        <motion.span 
+            className={className} 
+            initial={{ opacity: 0 }} 
+            whileInView={{ opacity: 1 }} 
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.3 }}
+        >
+            {displayText}
+        </motion.span>
+    )
+}
+
 interface StatisticsCardProps {
     title: string
     value: string | number
     icon: React.ReactNode
     subtitle?: string
     color?: "primary" | "success" | "secondary" | "neutral"
+    animatedValue?: number
+    formatValue?: (value: number) => string
 }
 
-const StatisticsCard: React.FC<StatisticsCardProps> = ({ title, value, icon, subtitle, color = "primary" }) => {
+const StatisticsCard: React.FC<StatisticsCardProps> = ({ 
+    title, 
+    value, 
+    icon, 
+    subtitle, 
+    color = "primary",
+    animatedValue,
+    formatValue
+}) => {
     const colorClasses = {
         primary: "from-blue-500 to-blue-600 text-blue-600 bg-blue-50",
         success: "from-green-500 to-green-600 text-green-600 bg-green-50",
@@ -42,22 +97,122 @@ const StatisticsCard: React.FC<StatisticsCardProps> = ({ title, value, icon, sub
         neutral: "from-gray-500 to-gray-600 text-gray-600 bg-gray-50",
     }
 
+    const iconBackgrounds = {
+        primary: "bg-blue-100",
+        success: "bg-green-100",
+        secondary: "bg-purple-100",
+        neutral: "bg-gray-100",
+    }
+
+    const iconColors = {
+        primary: "text-blue-700",
+        success: "text-green-700",
+        secondary: "text-purple-700",
+        neutral: "text-gray-700",
+    }
+
+    const gradientColors = {
+        primary: "from-blue-400 via-blue-500 to-blue-600",
+        success: "from-green-400 via-green-500 to-green-600",
+        secondary: "from-purple-400 via-purple-500 to-purple-600",
+        neutral: "from-gray-400 via-gray-500 to-gray-600",
+    }
+
     return (
-        <Card className="relative overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-200 shadow-sm bg-white group">
-            <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${colorClasses[color]}`} />
-            <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-xl bg-gradient-to-br ${colorClasses[color]} opacity-10 group-hover:opacity-20 transition-opacity`}>
-                        <div className={`${colorClasses[color].split(" ")[2]}`}>
-                            {icon}
-                        </div>
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5 }}
+            whileHover={{ y: -8, scale: 1.02 }}
+            className="h-full"
+        >
+            <Card className="relative overflow-hidden border border-gray-200 shadow-sm bg-white group h-full cursor-pointer">
+                <motion.div 
+                    className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${colorClasses[color]}`}
+                    animate={{
+                        background: [
+                            `linear-gradient(to right, var(--tw-gradient-stops))`,
+                        ]
+                    }}
+                />
+                <motion.div
+                    className={`absolute inset-0 bg-gradient-to-r ${gradientColors[color]} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
+                    animate={{
+                        backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                    }}
+                    transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "linear"
+                    }}
+                />
+                <CardContent className="p-6 relative z-10">
+                    <div className="flex items-center justify-end mb-4">
+                        <motion.div
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 15 }}
+                            whileHover={{ 
+                                scale: 1.15, 
+                                rotate: [0, -10, 10, -10, 0],
+                                transition: { duration: 0.5 }
+                            }}
+                            className={`p-3 rounded-xl ${iconBackgrounds[color]} transition-all duration-300 relative`}
+                        >
+                            <motion.div
+                                className={`absolute inset-0 rounded-xl bg-gradient-to-r ${gradientColors[color]} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300`}
+                                animate={{
+                                    scale: [1, 1.2, 1],
+                                    opacity: [0, 0.3, 0],
+                                }}
+                                transition={{
+                                    duration: 2,
+                                    repeat: Infinity,
+                                    ease: "easeInOut"
+                                }}
+                            />
+                            <motion.div
+                                className={iconColors[color]}
+                                animate={{
+                                    y: [0, -5, 0],
+                                }}
+                                transition={{
+                                    duration: 3,
+                                    repeat: Infinity,
+                                    ease: "easeInOut"
+                                }}
+                            >
+                                {icon}
+                            </motion.div>
+                        </motion.div>
                     </div>
-                </div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">{value}</div>
-                <div className="text-sm font-medium text-gray-600 mb-1">{title}</div>
-                {subtitle && <p className="text-xs text-gray-500 mt-2">{subtitle}</p>}
-            </CardContent>
-        </Card>
+                    <motion.div 
+                        className="text-3xl font-bold text-gray-900 mb-1"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                    >
+                        {animatedValue !== undefined && formatValue ? (
+                            <AnimatedNumber value={animatedValue} format={formatValue} />
+                        ) : (
+                            value
+                        )}
+                    </motion.div>
+                    <div className="text-sm font-medium text-gray-600 mb-1">{title}</div>
+                    {subtitle && (
+                        <motion.p 
+                            className="text-xs text-gray-500 mt-2"
+                            initial={{ opacity: 0 }}
+                            whileInView={{ opacity: 1 }}
+                            viewport={{ once: true, amount: 0.2 }}
+                            transition={{ delay: 0.4 }}
+                        >
+                            {subtitle}
+                        </motion.p>
+                    )}
+                </CardContent>
+            </Card>
+        </motion.div>
     )
 }
 
@@ -109,12 +264,15 @@ const StatisticsPage: React.FC = () => {
     }
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat("vi-VN", {
-            style: "currency",
-            currency: "VND",
-            notation: "compact",
-            maximumFractionDigits: 1,
-        }).format(amount)
+        if (amount >= 1000000000000) {
+            const trillion = amount / 1000000000000
+            return `${trillion.toFixed(1)} nghìn tỷ đ`
+        }
+        if (amount >= 1000000000) {
+            const billion = amount / 1000000000
+            return `${billion.toFixed(1)} tỷ đ`
+        }
+        return new Intl.NumberFormat("vi-VN").format(amount) + " đ"
     }
 
     const formatNumber = (num: number) => {
@@ -193,47 +351,75 @@ const StatisticsPage: React.FC = () => {
                     <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                             <StatisticsCard
-                                title="Tổng doanh thu"
-                                value={formatCurrency(statistics.data.totalRevenue || 0)}
+                                title="Tổng doanh thu (sau phí ship)"
+                                value=""
+                                animatedValue={statistics.data.totalRevenue || 0}
+                                formatValue={formatCurrency}
                                 icon={<DollarSign className="w-6 h-6" />}
                                 subtitle={`${formatNumber(statistics.data.totalOrders || 0)} đơn hàng`}
                                 color="success"
                             />
                             <StatisticsCard
+                                title="Tổng phí ship"
+                                value=""
+                                animatedValue={statistics.data.totalShippingFee || 0}
+                                formatValue={formatCurrency}
+                                icon={<Package className="w-6 h-6" />}
+                                subtitle="Phí vận chuyển"
+                                color="neutral"
+                            />
+                            <StatisticsCard
                                 title="Tổng đơn hàng"
-                                value={formatNumber(statistics.data.totalOrders || 0)}
+                                value=""
+                                animatedValue={statistics.data.totalOrders || 0}
+                                formatValue={formatNumber}
                                 icon={<ShoppingCart className="w-6 h-6" />}
                                 subtitle={`${formatNumber(statistics.data.orderStatistics?.completedOrders || 0)} đơn hoàn thành`}
                                 color="primary"
                             />
                             <StatisticsCard
                                 title="Khách hàng"
-                                value={formatNumber(statistics.data.totalCustomers || 0)}
+                                value=""
+                                animatedValue={statistics.data.totalCustomers || 0}
+                                formatValue={formatNumber}
                                 icon={<Users className="w-6 h-6" />}
                                 subtitle={`${formatNumber(statistics.data.customerGrowth?.[statistics.data.customerGrowth?.length - 1]?.newCustomers || 0)} khách mới`}
                                 color="secondary"
                             />
-                            <StatisticsCard
-                                title="Sản phẩm"
-                                value={formatNumber(statistics.data.totalProducts || 0)}
-                                icon={<Package className="w-6 h-6" />}
-                                subtitle="Sản phẩm đang kinh doanh"
-                                color="neutral"
-                            />
                         </div>
 
-                        <RevenueTrendChart
-                            data={statistics.data.revenueByDate || []}
-                            title="Xu hướng doanh thu theo thời gian"
-                        />
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.2 }}
+                            transition={{ duration: 0.6 }}
+                        >
+                            <RevenueTrendChart
+                                data={statistics.data.revenueByDate || []}
+                                title="Xu hướng doanh thu theo thời gian"
+                            />
+                        </motion.div>
 
-                        <OrderStatusTrendChart
-                            orderStats={statistics.data.orderStatistics}
-                            revenueByDate={statistics.data.revenueByDate || []}
-                            title="Phân tích trạng thái đơn hàng"
-                        />
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.2 }}
+                            transition={{ duration: 0.6, delay: 0.1 }}
+                        >
+                            <OrderStatusTrendChart
+                                orderStats={statistics.data.orderStatistics}
+                                revenueByDate={statistics.data.revenueByDate || []}
+                                title="Phân tích trạng thái đơn hàng"
+                            />
+                        </motion.div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.2 }}
+                            transition={{ duration: 0.6, delay: 0.2 }}
+                            className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+                        >
                             <CustomerChart
                                 data={statistics.data.customerGrowth || []}
                                 title="Tăng trưởng khách hàng"
@@ -242,95 +428,318 @@ const StatisticsPage: React.FC = () => {
                                 data={getReviewRatingData()}
                                 title="Phân bố đánh giá sản phẩm"
                             />
-                        </div>
+                        </motion.div>
 
-                        <SalesChannelChart
-                            data={statistics.data.salesChannelComparison || []}
-                            title="So sánh kênh bán hàng"
-                        />
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.2 }}
+                            transition={{ duration: 0.6, delay: 0.3 }}
+                        >
+                            <SalesChannelChart
+                                data={statistics.data.salesChannelComparison || []}
+                                title="So sánh kênh bán hàng"
+                            />
+                        </motion.div>
 
                         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                            <Card className="border border-gray-200 shadow-sm bg-white">
-                                <CardContent className="p-6">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h3 className="text-lg font-semibold text-gray-800">Sản phẩm bán chạy</h3>
-                                        <TrendingUp className="w-5 h-5 text-purple-600" />
-                                    </div>
-                                    <div className="space-y-3">
-                                        {statistics.data.topSellingProducts?.slice(0, 5).map((product, index) => (
-                                            <div
-                                                key={index}
-                                                className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200 hover:shadow-md transition-all duration-300"
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true, amount: 0.3 }}
+                                transition={{ duration: 0.5, delay: 0.2 }}
+                            >
+                                <Card className="border border-gray-200 shadow-sm bg-white hover:shadow-xl transition-all duration-300">
+                                    <CardContent className="p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-lg font-semibold text-gray-800">Sản phẩm bán chạy</h3>
+                                            <motion.div
+                                                animate={{ rotate: [0, 10, -10, 0] }}
+                                                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                                             >
-                                                <div className="flex items-center flex-1 min-w-0">
-                                                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold text-sm mr-4 flex-shrink-0">
-                                                        {index + 1}
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="font-semibold text-gray-800 truncate">{product.productName}</div>
-                                                        <div className="text-xs text-gray-600 truncate">
-                                                            {product.brandName} • {product.categoryName}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="text-right ml-4 flex-shrink-0">
-                                                    <div className="font-bold text-purple-700">{formatNumber(product.totalSold)}</div>
-                                                    <div className="text-xs text-gray-600">đã bán</div>
-                                                    <div className="text-xs text-green-600 font-medium">
-                                                        {formatCurrency(product.totalRevenue)}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="border border-gray-200 shadow-sm bg-white">
-                                <CardContent className="p-6">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h3 className="text-lg font-semibold text-gray-800">Voucher được sử dụng</h3>
-                                        <TrendingUp className="w-5 h-5 text-orange-600" />
-                                    </div>
-                                    <div className="space-y-4">
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200">
-                                                <div className="text-sm text-orange-700 font-medium mb-1">Tổng voucher</div>
-                                                <div className="text-2xl font-bold text-orange-700">
-                                                    {formatNumber(statistics.data.totalVouchers || 0)}
-                                                </div>
-                                            </div>
-                                            <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200">
-                                                <div className="text-sm text-green-700 font-medium mb-1">Tổng giảm giá</div>
-                                                <div className="text-lg font-bold text-green-700">
-                                                    {formatCurrency(statistics.data.totalDiscountAmount || 0)}
-                                                </div>
-                                            </div>
+                                                <TrendingUp className="w-5 h-5 text-purple-600" />
+                                            </motion.div>
                                         </div>
-                                        <div className="space-y-2">
-                                            {statistics.data.voucherUsage?.slice(0, 5).map((voucher, index) => (
-                                                <div
+                                        <div className="space-y-3">
+                                            {statistics.data.topSellingProducts?.slice(0, 5).map((product, index) => (
+                                                <motion.div
                                                     key={index}
-                                                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
+                                                    initial={{ opacity: 0, x: -20 }}
+                                                    whileInView={{ opacity: 1, x: 0 }}
+                                                    viewport={{ once: true, amount: 0.2 }}
+                                                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                                                    whileHover={{ 
+                                                        scale: 1.02, 
+                                                        x: 5,
+                                                        transition: { duration: 0.2 }
+                                                    }}
+                                                    className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200 hover:shadow-md transition-all duration-300 cursor-pointer group"
                                                 >
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="font-medium text-gray-800 truncate">{voucher.voucherCode}</div>
-                                                        <div className="text-xs text-gray-600">
-                                                            Đã dùng: {voucher.usedCount}/{voucher.totalQuantity}
+                                                    <div className="flex items-center flex-1 min-w-0">
+                                                        <motion.div 
+                                                            className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold text-sm mr-4 flex-shrink-0"
+                                                            whileHover={{ scale: 1.1, rotate: 360 }}
+                                                            transition={{ duration: 0.5 }}
+                                                        >
+                                                            {index + 1}
+                                                        </motion.div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="font-semibold text-gray-800 truncate group-hover:text-purple-600 transition-colors">{product.productName}</div>
+                                                            <div className="text-xs text-gray-600 truncate">
+                                                                {product.brandName} • {product.categoryName}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div className="text-right ml-2 flex-shrink-0">
-                                                        <div className="text-sm font-bold text-green-600">
-                                                            {formatCurrency(voucher.totalDiscountAmount)}
+                                                    <div className="text-right ml-4 flex-shrink-0">
+                                                        <motion.div 
+                                                            className="font-bold text-purple-700"
+                                                            whileHover={{ scale: 1.1 }}
+                                                        >
+                                                            {formatNumber(product.totalSold)}
+                                                        </motion.div>
+                                                        <div className="text-xs text-gray-600">đã bán</div>
+                                                        <div className="text-xs text-green-600 font-medium">
+                                                            {formatCurrency(product.totalRevenue)}
                                                         </div>
-                                                        <div className="text-xs text-gray-600">{voucher.orderCount} đơn</div>
                                                     </div>
-                                                </div>
+                                                </motion.div>
                                             ))}
                                         </div>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true, amount: 0.3 }}
+                                transition={{ duration: 0.5, delay: 0.3 }}
+                            >
+                                <Card className="border border-gray-200 shadow-sm bg-white hover:shadow-xl transition-all duration-300">
+                                    <CardContent className="p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-lg font-semibold text-gray-800">Voucher được sử dụng</h3>
+                                            <motion.div
+                                                animate={{ rotate: [0, -10, 10, 0] }}
+                                                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                            >
+                                                <TrendingUp className="w-5 h-5 text-orange-600" />
+                                            </motion.div>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <motion.div 
+                                                    className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200"
+                                                    whileHover={{ scale: 1.05, y: -2 }}
+                                                    transition={{ type: "spring", stiffness: 300 }}
+                                                >
+                                                    <div className="text-sm text-orange-700 font-medium mb-1">Tổng voucher</div>
+                                                    <motion.div 
+                                                        className="text-2xl font-bold text-orange-700"
+                                                        animate={{ scale: [1, 1.05, 1] }}
+                                                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                                    >
+                                                        {formatNumber(statistics.data.totalVouchers || 0)}
+                                                    </motion.div>
+                                                </motion.div>
+                                                <motion.div 
+                                                    className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200"
+                                                    whileHover={{ scale: 1.05, y: -2 }}
+                                                    transition={{ type: "spring", stiffness: 300 }}
+                                                >
+                                                    <div className="text-sm text-green-700 font-medium mb-1">Tổng giảm giá</div>
+                                                    <motion.div 
+                                                        className="text-lg font-bold text-green-700"
+                                                        animate={{ scale: [1, 1.05, 1] }}
+                                                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                                                    >
+                                                        {formatCurrency(statistics.data.totalDiscountAmount || 0)}
+                                                    </motion.div>
+                                                </motion.div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {statistics.data.voucherUsage?.slice(0, 5).map((voucher, index) => (
+                                                    <motion.div
+                                                        key={index}
+                                                        initial={{ opacity: 0, y: 10 }}
+                                                        whileInView={{ opacity: 1, y: 0 }}
+                                                        viewport={{ once: true, amount: 0.2 }}
+                                                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                                                        whileHover={{ 
+                                                            scale: 1.02, 
+                                                            x: 5,
+                                                            transition: { duration: 0.2 }
+                                                        }}
+                                                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer group hover:bg-gray-100 transition-colors"
+                                                    >
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="font-medium text-gray-800 truncate group-hover:text-orange-600 transition-colors">{voucher.voucherCode}</div>
+                                                            <div className="text-xs text-gray-600">
+                                                                Đã dùng: {voucher.usedCount}/{voucher.totalQuantity}
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right ml-2 flex-shrink-0">
+                                                            <motion.div 
+                                                                className="text-sm font-bold text-green-600"
+                                                                whileHover={{ scale: 1.1 }}
+                                                            >
+                                                                {formatCurrency(voucher.totalDiscountAmount)}
+                                                            </motion.div>
+                                                            <div className="text-xs text-gray-600">{voucher.orderCount} đơn</div>
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+                        </div>
+
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true, amount: 0.3 }}
+                                transition={{ duration: 0.5, delay: 0.4 }}
+                            >
+                                <Card className="border border-gray-200 shadow-sm bg-white hover:shadow-xl transition-all duration-300">
+                                    <CardContent className="p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-lg font-semibold text-gray-800">Khách hàng có đơn hoàn thành nhiều nhất</h3>
+                                            <motion.div
+                                                animate={{ y: [0, -5, 0] }}
+                                                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                            >
+                                                <Users className="w-5 h-5 text-green-600" />
+                                            </motion.div>
+                                        </div>
+                                        <div className="space-y-3">
+                                            {statistics.data.topCustomersByCompletedOrders && statistics.data.topCustomersByCompletedOrders.length > 0 ? (
+                                                statistics.data.topCustomersByCompletedOrders.map((customer, index) => (
+                                                    <motion.div
+                                                        key={customer.customerId}
+                                                        initial={{ opacity: 0, x: -20 }}
+                                                        whileInView={{ opacity: 1, x: 0 }}
+                                                        viewport={{ once: true, amount: 0.2 }}
+                                                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                                                        whileHover={{ 
+                                                            scale: 1.02, 
+                                                            x: 5,
+                                                            transition: { duration: 0.2 }
+                                                        }}
+                                                        className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200 hover:shadow-md transition-all duration-300 cursor-pointer group"
+                                                    >
+                                                    <div className="flex items-center flex-1 min-w-0">
+                                                        <motion.div 
+                                                            className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-green-600 text-white font-bold text-sm mr-4 flex-shrink-0"
+                                                            whileHover={{ scale: 1.1, rotate: 360 }}
+                                                            transition={{ duration: 0.5 }}
+                                                        >
+                                                            {index + 1}
+                                                        </motion.div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="font-semibold text-gray-800 truncate group-hover:text-green-600 transition-colors">{customer.customerName}</div>
+                                                            <div className="text-xs text-gray-600 truncate">
+                                                                {customer.email} • {customer.phoneNumber}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right ml-4 flex-shrink-0">
+                                                        <motion.div 
+                                                            className="font-bold text-green-700"
+                                                            whileHover={{ scale: 1.1 }}
+                                                        >
+                                                            {formatNumber(customer.completedOrdersCount)}
+                                                        </motion.div>
+                                                        <div className="text-xs text-gray-600">đơn hoàn thành</div>
+                                                        <div className="text-xs text-blue-600 font-medium">
+                                                            {formatCurrency(customer.totalSpent)}
+                                                        </div>
+                                                    </div>
+                                                    </motion.div>
+                                                ))
+                                            ) : (
+                                                <div className="text-center py-8 text-gray-500">
+                                                    Không có dữ liệu
+                                                </div>
+                                            )}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true, amount: 0.3 }}
+                                transition={{ duration: 0.5, delay: 0.6 }}
+                            >
+                                <Card className="border border-gray-200 shadow-sm bg-white hover:shadow-xl transition-all duration-300">
+                                    <CardContent className="p-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-lg font-semibold text-gray-800">Khách hàng có đơn hủy nhiều nhất</h3>
+                                        <motion.div
+                                            animate={{ rotate: [0, 15, -15, 0] }}
+                                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                        >
+                                            <X className="w-5 h-5 text-red-600" />
+                                        </motion.div>
+                                    </div>
+                                    <div className="space-y-3">
+                                        {statistics.data.topCustomersByCancelledOrders && statistics.data.topCustomersByCancelledOrders.length > 0 ? (
+                                                statistics.data.topCustomersByCancelledOrders.map((customer, index) => (
+                                                    <motion.div
+                                                        key={customer.customerId}
+                                                        initial={{ opacity: 0, x: 20 }}
+                                                        whileInView={{ opacity: 1, x: 0 }}
+                                                        viewport={{ once: true, amount: 0.2 }}
+                                                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                                                        whileHover={{ 
+                                                            scale: 1.02, 
+                                                            x: -5,
+                                                            transition: { duration: 0.2 }
+                                                        }}
+                                                        className="flex items-center justify-between p-4 bg-gradient-to-r from-red-50 to-red-100 rounded-lg border border-red-200 hover:shadow-md transition-all duration-300 cursor-pointer group"
+                                                    >
+                                                    <div className="flex items-center flex-1 min-w-0">
+                                                        <motion.div 
+                                                            className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white font-bold text-sm mr-4 flex-shrink-0"
+                                                            whileHover={{ scale: 1.1, rotate: -360 }}
+                                                            transition={{ duration: 0.5 }}
+                                                        >
+                                                            {index + 1}
+                                                        </motion.div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="font-semibold text-gray-800 truncate group-hover:text-red-600 transition-colors">{customer.customerName}</div>
+                                                            <div className="text-xs text-gray-600 truncate">
+                                                                {customer.email} • {customer.phoneNumber}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right ml-4 flex-shrink-0">
+                                                        <motion.div 
+                                                            className="font-bold text-red-700"
+                                                            whileHover={{ scale: 1.1 }}
+                                                        >
+                                                            {formatNumber(customer.cancelledOrdersCount)}
+                                                        </motion.div>
+                                                        <div className="text-xs text-gray-600">đơn đã hủy</div>
+                                                        <div className="text-xs text-blue-600 font-medium">
+                                                            {formatCurrency(customer.totalSpent)}
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            ))
+                                        ) : (
+                                            <div className="text-center py-8 text-gray-500">
+                                                Không có dữ liệu
+                                            </div>
+                                        )}
                                     </div>
                                 </CardContent>
                             </Card>
+                            </motion.div>
                         </div>
                     </>
                 )}

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/core/shadcn/componen
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/core/shadcn/components/ui/chart"
 import { Star, StarHalf } from "lucide-react"
 import type React from "react"
+import { motion } from "framer-motion"
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, XAxis, YAxis } from "recharts"
 
 interface ReviewRatingData {
@@ -94,14 +95,32 @@ const ReviewRatingChart: React.FC<ReviewRatingChartProps> = ({
             <CardContent className="p-6">
                 <div className="space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="p-4 bg-gradient-to-br from-yellow-50 to-amber-100 rounded-xl border border-yellow-200">
+                        <motion.div 
+                            className="p-4 bg-gradient-to-br from-yellow-50 to-amber-100 rounded-xl border border-yellow-200"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            transition={{ duration: 0.5, delay: 0.1 }}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                        >
                             <div className="flex items-center justify-between mb-2">
-                                <Star className="w-5 h-5 text-yellow-600" />
+                                <motion.div
+                                    animate={{ rotate: [0, 15, -15, 0] }}
+                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                >
+                                    <Star className="w-5 h-5 text-yellow-600" />
+                                </motion.div>
                                 <span className="text-xs font-medium text-yellow-700">Điểm trung bình</span>
                             </div>
-                            <div className="text-3xl font-bold text-yellow-700 mb-2">
+                            <motion.div 
+                                className="text-3xl font-bold text-yellow-700 mb-2"
+                                initial={{ scale: 0 }}
+                                whileInView={{ scale: 1 }}
+                                viewport={{ once: true, amount: 0.3 }}
+                                transition={{ delay: 0.3, type: "spring" }}
+                            >
                                 {averageRating.toFixed(1)}
-                            </div>
+                            </motion.div>
                             <div className="flex items-center space-x-1">
                                 {[1, 2, 3, 4, 5].map((star) => (
                                     <Star
@@ -115,50 +134,114 @@ const ReviewRatingChart: React.FC<ReviewRatingChartProps> = ({
                                 ))}
                             </div>
                             <div className="text-xs text-yellow-600 mt-1">Từ {formatNumber(totalReviews)} đánh giá</div>
-                        </div>
+                        </motion.div>
 
-                        <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200">
+                        <motion.div 
+                            className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                        >
                             <div className="flex items-center justify-between mb-2">
-                                <Star className="w-5 h-5 text-green-600 fill-green-600" />
+                                <motion.div
+                                    animate={{ scale: [1, 1.2, 1] }}
+                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                >
+                                    <Star className="w-5 h-5 text-green-600 fill-green-600" />
+                                </motion.div>
                                 <span className="text-xs font-medium text-green-700">≥ 4 sao</span>
                             </div>
-                            <div className="text-2xl font-bold text-green-700 mb-1">
+                            <motion.div 
+                                className="text-2xl font-bold text-green-700 mb-1"
+                                initial={{ scale: 0 }}
+                                whileInView={{ scale: 1 }}
+                                viewport={{ once: true, amount: 0.3 }}
+                                transition={{ delay: 0.4, type: "spring" }}
+                            >
                                 {formatNumber(reviewsAbove4)}
-                            </div>
+                            </motion.div>
                             <div className="flex items-center text-xs">
-                                <div className="w-full bg-green-200 rounded-full h-1.5 mr-2">
-                                    <div
-                                        className="bg-green-600 h-1.5 rounded-full transition-all duration-500"
-                                        style={{ width: `${above4Rate}%` }}
+                                <div className="w-full bg-green-200 rounded-full h-1.5 mr-2 overflow-hidden">
+                                    <motion.div
+                                        className="bg-green-600 h-1.5 rounded-full"
+                                        initial={{ width: 0 }}
+                                        whileInView={{ width: `${above4Rate}%` }}
+                                        viewport={{ once: true, amount: 0.3 }}
+                                        transition={{ duration: 1.5, delay: 0.5, ease: "easeOut" }}
                                     />
                                 </div>
-                                <span className="text-green-700 font-semibold">{above4Rate.toFixed(1)}%</span>
+                                <motion.span 
+                                    className="text-green-700 font-semibold"
+                                    initial={{ opacity: 0 }}
+                                    whileInView={{ opacity: 1 }}
+                                    viewport={{ once: true, amount: 0.3 }}
+                                    transition={{ delay: 1 }}
+                                >
+                                    {above4Rate.toFixed(1)}%
+                                </motion.span>
                             </div>
                             <div className="text-xs text-green-600 mt-1">Đánh giá tích cực</div>
-                        </div>
+                        </motion.div>
 
-                        <div className="p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200">
+                        <motion.div 
+                            className="p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            transition={{ duration: 0.5, delay: 0.3 }}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                        >
                             <div className="flex items-center justify-between mb-2">
-                                <Star className="w-5 h-5 text-red-600" />
+                                <motion.div
+                                    animate={{ y: [0, -5, 0] }}
+                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                >
+                                    <Star className="w-5 h-5 text-red-600" />
+                                </motion.div>
                                 <span className="text-xs font-medium text-red-700">&lt; 4 sao</span>
                             </div>
-                            <div className="text-2xl font-bold text-red-700 mb-1">
+                            <motion.div 
+                                className="text-2xl font-bold text-red-700 mb-1"
+                                initial={{ scale: 0 }}
+                                whileInView={{ scale: 1 }}
+                                viewport={{ once: true, amount: 0.3 }}
+                                transition={{ delay: 0.5, type: "spring" }}
+                            >
                                 {formatNumber(reviewsBelow4)}
-                            </div>
+                            </motion.div>
                             <div className="flex items-center text-xs">
-                                <div className="w-full bg-red-200 rounded-full h-1.5 mr-2">
-                                    <div
-                                        className="bg-red-600 h-1.5 rounded-full transition-all duration-500"
-                                        style={{ width: `${below4Rate}%` }}
+                                <div className="w-full bg-red-200 rounded-full h-1.5 mr-2 overflow-hidden">
+                                    <motion.div
+                                        className="bg-red-600 h-1.5 rounded-full"
+                                        initial={{ width: 0 }}
+                                        whileInView={{ width: `${below4Rate}%` }}
+                                        viewport={{ once: true, amount: 0.3 }}
+                                        transition={{ duration: 1.5, delay: 0.6, ease: "easeOut" }}
                                     />
                                 </div>
-                                <span className="text-red-700 font-semibold">{below4Rate.toFixed(1)}%</span>
+                                <motion.span 
+                                    className="text-red-700 font-semibold"
+                                    initial={{ opacity: 0 }}
+                                    whileInView={{ opacity: 1 }}
+                                    viewport={{ once: true, amount: 0.3 }}
+                                    transition={{ delay: 1.1 }}
+                                >
+                                    {below4Rate.toFixed(1)}%
+                                </motion.span>
                             </div>
                             <div className="text-xs text-red-600 mt-1">Cần cải thiện</div>
-                        </div>
+                        </motion.div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.2 }}
+                        transition={{ duration: 0.6 }}
+                        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+                    >
                         <div className="space-y-4">
                             <h3 className="text-lg font-semibold text-gray-800">Phân bố theo sao</h3>
                             <ChartContainer config={chartConfig} className="h-[300px] w-full">
@@ -188,7 +271,14 @@ const ReviewRatingChart: React.FC<ReviewRatingChartProps> = ({
                                                 />
                                             }
                                         />
-                                        <Bar dataKey="count" radius={[8, 8, 0, 0]}>
+                                        <Bar 
+                                            dataKey="count" 
+                                            radius={[8, 8, 0, 0]}
+                                            isAnimationActive={true}
+                                            animationBegin={0}
+                                            animationDuration={1500}
+                                            animationEasing="ease-out"
+                                        >
                                             {chartData.map((entry, index) => (
                                                 <Cell
                                                     key={`cell-${index}`}
@@ -214,6 +304,10 @@ const ReviewRatingChart: React.FC<ReviewRatingChartProps> = ({
                                                 outerRadius={100}
                                                 fill="#8884d8"
                                                 dataKey="value"
+                                                isAnimationActive={true}
+                                                animationBegin={0}
+                                                animationDuration={1500}
+                                                animationEasing="ease-out"
                                             >
                                                 {pieData.map((entry, index) => (
                                                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -234,7 +328,7 @@ const ReviewRatingChart: React.FC<ReviewRatingChartProps> = ({
                                 </ChartContainer>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
 
                     <div className="border-t pt-4">
                         <h4 className="text-sm font-semibold text-gray-700 mb-3">Chi tiết từng mức đánh giá</h4>
@@ -242,9 +336,14 @@ const ReviewRatingChart: React.FC<ReviewRatingChartProps> = ({
                             {[...chartData].reverse().map((item, index) => {
                                 const percentage = totalReviews > 0 ? (item.count / totalReviews) * 100 : 0
                                 return (
-                                    <div
+                                    <motion.div
                                         key={index}
-                                        className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200"
+                                        initial={{ opacity: 0, x: -20 }}
+                                        whileInView={{ opacity: 1, x: 0 }}
+                                        viewport={{ once: true, amount: 0.2 }}
+                                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                                        whileHover={{ scale: 1.02, x: 5 }}
+                                        className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200 cursor-pointer group"
                                     >
                                         <div className="flex items-center space-x-3">
                                             <div className="flex items-center space-x-1">

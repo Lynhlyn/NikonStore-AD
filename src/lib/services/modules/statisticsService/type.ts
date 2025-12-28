@@ -38,6 +38,8 @@ export interface ProductStatisticsResponse {
 export interface RevenueStatisticsResponse {
     date: string
     dailyRevenue: number
+    shippingFee: number
+    netRevenue: number
     dailyOrders: number
     onlineRevenue: number
     posRevenue: number
@@ -80,6 +82,16 @@ export interface VoucherStatisticsResponse {
     status: string
 }
 
+export interface TopCustomerStatisticsResponse {
+    customerId: number
+    customerName: string
+    email: string
+    phoneNumber: string
+    completedOrdersCount: number
+    cancelledOrdersCount: number
+    totalSpent: number
+}
+
 export interface GeneralStatisticsData {
     orderStatistics: OrderStatisticsResponse
     topSellingProducts: ProductStatisticsResponse[]
@@ -87,7 +99,10 @@ export interface GeneralStatisticsData {
     customerGrowth: CustomerStatisticsResponse[]
     salesChannelComparison: SalesChannelStatisticsResponse[]
     voucherUsage: VoucherStatisticsResponse[]
+    topCustomersByCompletedOrders: TopCustomerStatisticsResponse[]
+    topCustomersByCancelledOrders: TopCustomerStatisticsResponse[]
     totalRevenue: number
+    totalShippingFee: number
     totalOrders: number
     totalCustomers: number
     totalProducts: number

@@ -55,7 +55,8 @@ export const exportStatisticsToExcel = (data: GeneralStatisticsData, fromDate?: 
         ["", "", "", ""],
         ["CHỈ SỐ TỔNG QUAN", "", "", ""],
         ["", "", "", ""],
-        ["Tổng doanh thu", formatCurrency(data.totalRevenue || 0), "", ""],
+        ["Tổng doanh thu (sau phí ship)", formatCurrency(data.totalRevenue || 0), "", ""],
+        ["Tổng phí ship", formatCurrency(data.totalShippingFee || 0), "", ""],
         ["Tổng đơn hàng", formatNumber(data.totalOrders || 0), "", ""],
         ["Khách hàng", formatNumber(data.totalCustomers || 0), "", ""],
         ["Sản phẩm", formatNumber(data.totalProducts || 0), "", ""],
@@ -90,13 +91,15 @@ export const exportStatisticsToExcel = (data: GeneralStatisticsData, fromDate?: 
 
     if (data.revenueByDate && data.revenueByDate.length > 0) {
         const revenueData: any[][] = [
-            ["Ngày", "Doanh thu", "Số đơn", "Doanh thu Online", "Doanh thu Tại quầy", "Đơn Online", "Đơn Tại quầy"],
+            ["Ngày", "Doanh thu (tổng)", "Phí ship", "Doanh thu (sau phí ship)", "Số đơn", "Doanh thu Online", "Doanh thu Tại quầy", "Đơn Online", "Đơn Tại quầy"],
         ]
 
         data.revenueByDate.forEach((item) => {
             revenueData.push([
                 formatDate(item.date),
                 item.dailyRevenue || 0,
+                item.shippingFee || 0,
+                item.netRevenue !== undefined ? item.netRevenue : ((item.dailyRevenue || 0) - (item.shippingFee || 0)),
                 item.dailyOrders || 0,
                 item.onlineRevenue || 0,
                 item.posRevenue || 0,
@@ -108,6 +111,8 @@ export const exportStatisticsToExcel = (data: GeneralStatisticsData, fromDate?: 
         const totalRow = [
             "TỔNG CỘNG",
             data.revenueByDate.reduce((sum, item) => sum + (item.dailyRevenue || 0), 0),
+            data.revenueByDate.reduce((sum, item) => sum + (item.shippingFee || 0), 0),
+            data.revenueByDate.reduce((sum, item) => sum + (item.netRevenue !== undefined ? item.netRevenue : ((item.dailyRevenue || 0) - (item.shippingFee || 0))), 0),
             data.revenueByDate.reduce((sum, item) => sum + (item.dailyOrders || 0), 0),
             data.revenueByDate.reduce((sum, item) => sum + (item.onlineRevenue || 0), 0),
             data.revenueByDate.reduce((sum, item) => sum + (item.posRevenue || 0), 0),
@@ -120,6 +125,8 @@ export const exportStatisticsToExcel = (data: GeneralStatisticsData, fromDate?: 
         revenueSheet["!cols"] = [
             { wch: 15 },
             { wch: 20 },
+            { wch: 15 },
+            { wch: 25 },
             { wch: 12 },
             { wch: 20 },
             { wch: 20 },
@@ -311,6 +318,66 @@ export const exportStatisticsToExcel = (data: GeneralStatisticsData, fromDate?: 
             { wch: 15 },
         ]
         XLSX.utils.book_append_sheet(workbook, voucherSheet, "Voucher")
+    }
+
+    if (data.topCustomersByCompletedOrders && data.topCustomersByCompletedOrders.length > 0) {
+        const customerCompletedData: any[][] = [
+            ["STT", "Tên khách hàng", "Email", "Số điện thoại", "Số đơn hoàn thành", "Số đơn hủy", "Tổng chi tiêu"],
+        ]
+
+        data.topCustomersByCompletedOrders.forEach((customer, index) => {
+            customerCompletedData.push([
+                index + 1,
+                customer.customerName || "",
+                customer.email || "",
+                customer.phoneNumber || "",
+                customer.completedOrdersCount || 0,
+                customer.cancelledOrdersCount || 0,
+                customer.totalSpent || 0,
+            ])
+        })
+
+        const customerCompletedSheet = XLSX.utils.aoa_to_sheet(customerCompletedData)
+        customerCompletedSheet["!cols"] = [
+            { wch: 5 },
+            { wch: 30 },
+            { wch: 30 },
+            { wch: 15 },
+            { wch: 18 },
+            { wch: 15 },
+            { wch: 20 },
+        ]
+        XLSX.utils.book_append_sheet(workbook, customerCompletedSheet, "KH đơn hoàn thành")
+    }
+
+    if (data.topCustomersByCancelledOrders && data.topCustomersByCancelledOrders.length > 0) {
+        const customerCancelledData: any[][] = [
+            ["STT", "Tên khách hàng", "Email", "Số điện thoại", "Số đơn hoàn thành", "Số đơn hủy", "Tổng chi tiêu"],
+        ]
+
+        data.topCustomersByCancelledOrders.forEach((customer, index) => {
+            customerCancelledData.push([
+                index + 1,
+                customer.customerName || "",
+                customer.email || "",
+                customer.phoneNumber || "",
+                customer.completedOrdersCount || 0,
+                customer.cancelledOrdersCount || 0,
+                customer.totalSpent || 0,
+            ])
+        })
+
+        const customerCancelledSheet = XLSX.utils.aoa_to_sheet(customerCancelledData)
+        customerCancelledSheet["!cols"] = [
+            { wch: 5 },
+            { wch: 30 },
+            { wch: 30 },
+            { wch: 15 },
+            { wch: 18 },
+            { wch: 15 },
+            { wch: 20 },
+        ]
+        XLSX.utils.book_append_sheet(workbook, customerCancelledSheet, "KH đơn hủy")
     }
 
     const fileName = `Bao_Cao_Thong_Ke_${dateRangeRaw.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.xlsx`

@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/core/shadcn/componen
 import type { SalesChannelStatisticsResponse } from "@/lib/services/modules/statisticsService"
 import { Globe, PieChart, Store, TrendingUp } from "lucide-react"
 import type React from "react"
+import { motion } from "framer-motion"
 
 interface SalesChannelChartProps {
   data: SalesChannelStatisticsResponse[]
@@ -10,96 +11,31 @@ interface SalesChannelChartProps {
 
 const SalesChannelChart: React.FC<SalesChannelChartProps> = ({ data, title = "Phân bố doanh thu theo kênh bán hàng" }) => {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount)
+    if (amount >= 1000000000000) {
+      const trillion = amount / 1000000000000
+      return `${trillion.toFixed(1)} nghìn tỷ đ`
+    }
+    if (amount >= 1000000000) {
+      const billion = amount / 1000000000
+      return `${billion.toFixed(1)} tỷ đ`
+    }
+    return new Intl.NumberFormat("vi-VN").format(amount) + " đ"
   }
 
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat("vi-VN").format(num)
   }
 
-  const PieChartComponent = ({ data }: { data: SalesChannelStatisticsResponse[] }) => {
-    const totalRevenue = data.reduce((sum, channel) => sum + channel.totalRevenue, 0)
-
-    if (totalRevenue === 0) {
-      return (
-        <div className="flex items-center justify-center w-64 h-64 mx-auto">
-          <div className="text-center text-gray-500">
-            <PieChart className="w-16 h-16 mx-auto mb-2 opacity-30" />
-            <p>Không có doanh thu</p>
-          </div>
-        </div>
-      )
+  const getChannelColorHex = (channel: string) => {
+    switch (channel) {
+      case "IN_STORE":
+        return "#3B82F6"
+      case "ONLINE":
+        return "#10B981"
+      default:
+        return "#6B7280"
     }
-
-    let cumulativePercentage = 0
-
-    return (
-      <div className="relative w-64 h-64 mx-auto">
-        <svg width="256" height="256" className="transform -rotate-90">
-          {data.map((channel, index) => {
-            const percentage = (channel as any).revenuePercentage || 0
-            const radius = 100
-            const circumference = 2 * Math.PI * radius
-            const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`
-            const strokeDashoffset = -((cumulativePercentage / 100) * circumference)
-
-            cumulativePercentage += percentage
-
-            return (
-              <circle
-                key={index}
-                cx="128"
-                cy="128"
-                r={radius}
-                fill="none"
-                stroke={getChannelColorHex(channel.channel)}
-                strokeWidth="40"
-                strokeDasharray={strokeDasharray}
-                strokeDashoffset={strokeDashoffset}
-                className="transition-all duration-1000 ease-out"
-                style={{
-                  strokeLinecap: 'round'
-                }}
-              />
-            )
-          })}
-        </svg>
-
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-800">{formatCurrency(totalRevenue)}</div>
-            <div className="text-sm text-gray-600">Tổng doanh thu</div>
-          </div>
-        </div>
-      </div>
-    )
   }
-
-  if (!data || !Array.isArray(data) || data.length === 0) {
-    return (
-      <Card className="border border-gray-200 shadow-sm bg-white">
-        <CardHeader className="bg-gradient-to-r from-slate-50 to-gray-50 rounded-t-lg border-b border-gray-100">
-          <CardTitle className="flex items-center text-slate-800">
-            <TrendingUp className="w-5 h-5 mr-2" />
-            {title}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-            <Store className="w-16 h-16 mb-4 opacity-30 text-slate-300" />
-            <p className="text-lg font-medium text-gray-600">Không có dữ liệu kênh bán hàng</p>
-            <p className="text-sm text-gray-500">Vui lòng chọn khoảng thời gian khác</p>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  const totalRevenue = data.reduce((sum, channel) => sum + channel.totalRevenue, 0)
-  const totalOrders = data.reduce((sum, channel) => sum + channel.totalOrders, 0)
 
   const getChannelIcon = (channel: string) => {
     switch (channel) {
@@ -134,16 +70,117 @@ const SalesChannelChart: React.FC<SalesChannelChartProps> = ({ data, title = "Ph
     }
   }
 
-  const getChannelColorHex = (channel: string) => {
-    switch (channel) {
-      case "IN_STORE":
-        return "#3B82F6"
-      case "ONLINE":
-        return "#10B981"
-      default:
-        return "#6B7280"
+  const PieChartComponent = ({ data }: { data: SalesChannelStatisticsResponse[] }) => {
+    const totalRevenue = data.reduce((sum, channel) => sum + channel.totalRevenue, 0)
+
+    if (totalRevenue === 0) {
+      return (
+        <div className="flex items-center justify-center w-64 h-64 mx-auto">
+          <div className="text-center text-gray-500">
+            <PieChart className="w-16 h-16 mx-auto mb-2 opacity-30" />
+            <p>Không có doanh thu</p>
+          </div>
+        </div>
+      )
     }
+
+    let cumulativePercentage = 0
+
+    return (
+      <motion.div 
+        className="relative w-64 h-64 mx-auto"
+        initial={{ opacity: 0, scale: 0.8 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.8 }}
+      >
+        <svg width="256" height="256" className="transform -rotate-90">
+          {data.map((channel, index) => {
+            const percentage = (channel as any).revenuePercentage || 0
+            const radius = 100
+            const circumference = 2 * Math.PI * radius
+            const fullDasharray = `${circumference} ${circumference}`
+            const finalDasharray = `${(percentage / 100) * circumference} ${circumference}`
+            const strokeDashoffset = -((cumulativePercentage / 100) * circumference)
+
+            cumulativePercentage += percentage
+
+            return (
+              <circle
+                key={index}
+                cx="128"
+                cy="128"
+                r={radius}
+                fill="none"
+                stroke={getChannelColorHex(channel.channel)}
+                strokeWidth="40"
+                strokeDasharray={fullDasharray}
+                strokeDashoffset={strokeDashoffset}
+                style={{
+                  strokeLinecap: 'round',
+                  strokeDasharray: finalDasharray,
+                  transition: 'stroke-dasharray 1.5s ease-out',
+                  transitionDelay: `${index * 0.2}s`
+                }}
+              >
+                <animate
+                  attributeName="stroke-dasharray"
+                  from={fullDasharray}
+                  to={finalDasharray}
+                  dur="1.5s"
+                  begin={`${index * 0.2}s`}
+                  fill="freeze"
+                />
+              </circle>
+            )
+          })}
+        </svg>
+
+        <motion.div 
+          className="absolute inset-0 flex items-center justify-center"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ delay: 1 }}
+        >
+          <div className="text-center">
+            <motion.div 
+              className="text-2xl font-bold text-gray-800"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 1.2, type: "spring" }}
+            >
+              {formatCurrency(totalRevenue)}
+            </motion.div>
+            <div className="text-sm text-gray-600">Tổng doanh thu</div>
+          </div>
+        </motion.div>
+      </motion.div>
+    )
   }
+
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return (
+      <Card className="border border-gray-200 shadow-sm bg-white">
+        <CardHeader className="bg-gradient-to-r from-slate-50 to-gray-50 rounded-t-lg border-b border-gray-100">
+          <CardTitle className="flex items-center text-slate-800">
+            <TrendingUp className="w-5 h-5 mr-2" />
+            {title}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+            <Store className="w-16 h-16 mb-4 opacity-30 text-slate-300" />
+            <p className="text-lg font-medium text-gray-600">Không có dữ liệu kênh bán hàng</p>
+            <p className="text-sm text-gray-500">Vui lòng chọn khoảng thời gian khác</p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const totalRevenue = data.reduce((sum, channel) => sum + channel.totalRevenue, 0)
+  const totalOrders = data.reduce((sum, channel) => sum + channel.totalOrders, 0)
 
   return (
     <Card className="border border-gray-200 shadow-sm bg-white">
@@ -183,17 +220,24 @@ const SalesChannelChart: React.FC<SalesChannelChartProps> = ({ data, title = "Ph
                 const orderPercentage = totalOrders > 0 ? (channel.totalOrders / totalOrders) * 100 : 0
 
                 return (
-                  <div
+                  <motion.div
                     key={index}
-                    className="p-4 border border-gray-100 rounded-xl hover:shadow-md transition-all duration-300 bg-white"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    className="p-4 border border-gray-100 rounded-xl hover:shadow-md transition-all duration-300 bg-white cursor-pointer"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">
-                        <div
+                        <motion.div
                           className={`p-2 rounded-lg bg-gradient-to-r ${getChannelColor(channel.channel)} text-white mr-3 shadow-sm`}
+                          whileHover={{ scale: 1.1, rotate: 360 }}
+                          transition={{ duration: 0.5 }}
                         >
                           {getChannelIcon(channel.channel)}
-                        </div>
+                        </motion.div>
                         <div>
                           <h4 className="font-bold text-gray-800">{getChannelName(channel.channel)}</h4>
                           <p className="text-xs text-gray-600">
@@ -202,7 +246,14 @@ const SalesChannelChart: React.FC<SalesChannelChartProps> = ({ data, title = "Ph
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-bold text-lg text-gray-800">{formatCurrency(channel.totalRevenue)}</div>
+                        <motion.div 
+                          className="font-bold text-lg text-gray-800"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: index * 0.1 + 0.2, type: "spring" }}
+                        >
+                          {formatCurrency(channel.totalRevenue)}
+                        </motion.div>
                         <div className="text-sm text-gray-600">
                           {formatNumber(channel.totalOrders)} đơn
                         </div>
@@ -212,12 +263,22 @@ const SalesChannelChart: React.FC<SalesChannelChartProps> = ({ data, title = "Ph
                     <div className="space-y-2 mb-3">
                       <div className="flex justify-between text-sm font-medium">
                         <span className="text-gray-700">Doanh thu</span>
-                        <span className="text-blue-600 font-bold">{revenuePercentage.toFixed(1)}%</span>
+                        <motion.span 
+                          className="text-blue-600 font-bold"
+                          initial={{ opacity: 0 }}
+                          whileInView={{ opacity: 1 }}
+                          viewport={{ once: true, amount: 0.2 }}
+                          transition={{ delay: index * 0.1 + 0.5 }}
+                        >
+                          {revenuePercentage.toFixed(1)}%
+                        </motion.span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                        <div
-                          className={`bg-gradient-to-r ${getChannelColor(channel.channel)} h-2 rounded-full transition-all duration-700 ease-out`}
-                          style={{ width: `${revenuePercentage}%` }}
+                        <motion.div
+                          className={`bg-gradient-to-r ${getChannelColor(channel.channel)} h-2 rounded-full`}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${revenuePercentage}%` }}
+                          transition={{ duration: 1.5, delay: index * 0.1 + 0.3, ease: "easeOut" }}
                         />
                       </div>
                     </div>

@@ -29,6 +29,7 @@ export type {
     RevenueStatisticsResponse,
     SalesChannelStatisticsResponse,
     StatisticsFilterRequest,
+    TopCustomerStatisticsResponse,
     VoucherStatisticsResponse
 } from "./type";
 

@@ -5,6 +5,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/core/shadcn
 import type { OrderStatisticsResponse, RevenueStatisticsResponse } from "@/lib/services/modules/statisticsService"
 import { AlertTriangle, CheckCircle2, Clock, TrendingDown, TrendingUp, XCircle } from "lucide-react"
 import type React from "react"
+import { motion } from "framer-motion"
 import { Area, AreaChart, CartesianGrid, Legend, XAxis, YAxis } from "recharts"
 
 interface OrderStatusTrendChartProps {
@@ -19,12 +20,15 @@ const OrderStatusTrendChart: React.FC<OrderStatusTrendChartProps> = ({
     title = "Xu hướng trạng thái đơn hàng"
 }) => {
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat("vi-VN", {
-            style: "currency",
-            currency: "VND",
-            notation: "compact",
-            maximumFractionDigits: 1,
-        }).format(amount)
+        if (amount >= 1000000000000) {
+            const trillion = amount / 1000000000000
+            return `${trillion.toFixed(1)} nghìn tỷ đ`
+        }
+        if (amount >= 1000000000) {
+            const billion = amount / 1000000000
+            return `${billion.toFixed(1)} tỷ đ`
+        }
+        return new Intl.NumberFormat("vi-VN").format(amount) + " đ"
     }
 
     const formatNumber = (num: number) => {
@@ -93,75 +97,172 @@ const OrderStatusTrendChart: React.FC<OrderStatusTrendChartProps> = ({
             <CardContent className="p-6">
                 <div className="space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200">
+                        <motion.div 
+                            className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            transition={{ duration: 0.5, delay: 0.1 }}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                        >
                             <div className="flex items-center justify-between mb-2">
-                                <CheckCircle2 className="w-5 h-5 text-green-600" />
+                                <motion.div
+                                    animate={{ rotate: [0, 360] }}
+                                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                >
+                                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                                </motion.div>
                                 <span className="text-xs font-medium text-green-700">Hoàn thành</span>
                             </div>
-                            <div className="text-2xl font-bold text-green-700 mb-1">
+                            <motion.div 
+                                className="text-2xl font-bold text-green-700 mb-1"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: 0.3, type: "spring" }}
+                            >
                                 {formatNumber(orderStats.completedOrders || 0)}
-                            </div>
+                            </motion.div>
                             <div className="flex items-center text-xs">
-                                <div className="w-full bg-green-200 rounded-full h-1.5 mr-2">
-                                    <div
-                                        className="bg-green-600 h-1.5 rounded-full transition-all duration-500"
-                                        style={{ width: `${completionRate}%` }}
+                                <div className="w-full bg-green-200 rounded-full h-1.5 mr-2 overflow-hidden">
+                                    <motion.div
+                                        className="bg-green-600 h-1.5 rounded-full"
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${completionRate}%` }}
+                                        transition={{ duration: 1.5, delay: 0.5, ease: "easeOut" }}
                                     />
                                 </div>
-                                <span className="text-green-700 font-semibold">{completionRate.toFixed(1)}%</span>
+                                <motion.span 
+                                    className="text-green-700 font-semibold"
+                                    initial={{ opacity: 0 }}
+                                    whileInView={{ opacity: 1 }}
+                                    viewport={{ once: true, amount: 0.3 }}
+                                    transition={{ delay: 1 }}
+                                >
+                                    {completionRate.toFixed(1)}%
+                                </motion.span>
                             </div>
-                        </div>
+                        </motion.div>
 
-                        <div className="p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl border border-yellow-200">
+                        <motion.div 
+                            className="p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl border border-yellow-200"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                        >
                             <div className="flex items-center justify-between mb-2">
-                                <Clock className="w-5 h-5 text-yellow-600" />
+                                <motion.div
+                                    animate={{ rotate: [0, -15, 15, 0] }}
+                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                >
+                                    <Clock className="w-5 h-5 text-yellow-600" />
+                                </motion.div>
                                 <span className="text-xs font-medium text-yellow-700">Chờ thanh toán</span>
                             </div>
-                            <div className="text-2xl font-bold text-yellow-700 mb-1">
+                            <motion.div 
+                                className="text-2xl font-bold text-yellow-700 mb-1"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: 0.4, type: "spring" }}
+                            >
                                 {formatNumber(orderStats.pendingOrders || 0)}
-                            </div>
+                            </motion.div>
                             <div className="flex items-center text-xs">
-                                <div className="w-full bg-yellow-200 rounded-full h-1.5 mr-2">
-                                    <div
-                                        className="bg-yellow-600 h-1.5 rounded-full transition-all duration-500"
-                                        style={{ width: `${pendingPaymentRate}%` }}
+                                <div className="w-full bg-yellow-200 rounded-full h-1.5 mr-2 overflow-hidden">
+                                    <motion.div
+                                        className="bg-yellow-600 h-1.5 rounded-full"
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${pendingPaymentRate}%` }}
+                                        transition={{ duration: 1.5, delay: 0.6, ease: "easeOut" }}
                                     />
                                 </div>
-                                <span className="text-yellow-700 font-semibold">{pendingPaymentRate.toFixed(1)}%</span>
+                                <motion.span 
+                                    className="text-yellow-700 font-semibold"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 1.2 }}
+                                >
+                                    {pendingPaymentRate.toFixed(1)}%
+                                </motion.span>
                             </div>
-                        </div>
+                        </motion.div>
 
-                        <div className="p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200">
+                        <motion.div 
+                            className="p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            transition={{ duration: 0.5, delay: 0.3 }}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                        >
                             <div className="flex items-center justify-between mb-2">
-                                <XCircle className="w-5 h-5 text-red-600" />
+                                <motion.div
+                                    animate={{ scale: [1, 1.2, 1] }}
+                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                >
+                                    <XCircle className="w-5 h-5 text-red-600" />
+                                </motion.div>
                                 <span className="text-xs font-medium text-red-700">Đã hủy</span>
                             </div>
-                            <div className="text-2xl font-bold text-red-700 mb-1">
+                            <motion.div 
+                                className="text-2xl font-bold text-red-700 mb-1"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: 0.5, type: "spring" }}
+                            >
                                 {formatNumber(orderStats.cancelledOrders || 0)}
-                            </div>
+                            </motion.div>
                             <div className="flex items-center text-xs">
-                                <div className="w-full bg-red-200 rounded-full h-1.5 mr-2">
-                                    <div
-                                        className="bg-red-600 h-1.5 rounded-full transition-all duration-500"
-                                        style={{ width: `${cancellationRate}%` }}
+                                <div className="w-full bg-red-200 rounded-full h-1.5 mr-2 overflow-hidden">
+                                    <motion.div
+                                        className="bg-red-600 h-1.5 rounded-full"
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${cancellationRate}%` }}
+                                        transition={{ duration: 1.5, delay: 0.7, ease: "easeOut" }}
                                     />
                                 </div>
-                                <span className="text-red-700 font-semibold">{cancellationRate.toFixed(1)}%</span>
+                                <motion.span 
+                                    className="text-red-700 font-semibold"
+                                    initial={{ opacity: 0 }}
+                                    whileInView={{ opacity: 1 }}
+                                    viewport={{ once: true, amount: 0.3 }}
+                                    transition={{ delay: 1.4 }}
+                                >
+                                    {cancellationRate.toFixed(1)}%
+                                </motion.span>
                             </div>
-                        </div>
+                        </motion.div>
 
-                        <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+                        <motion.div 
+                            className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            transition={{ duration: 0.5, delay: 0.4 }}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                        >
                             <div className="flex items-center justify-between mb-2">
-                                <AlertTriangle className="w-5 h-5 text-blue-600" />
+                                <motion.div
+                                    animate={{ y: [0, -5, 0] }}
+                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                >
+                                    <AlertTriangle className="w-5 h-5 text-blue-600" />
+                                </motion.div>
                                 <span className="text-xs font-medium text-blue-700">Tổng đơn</span>
                             </div>
-                            <div className="text-2xl font-bold text-blue-700 mb-1">
+                            <motion.div 
+                                className="text-2xl font-bold text-blue-700 mb-1"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: 0.6, type: "spring" }}
+                            >
                                 {formatNumber(totalOrders)}
-                            </div>
+                            </motion.div>
                             <div className="text-xs text-blue-600">
                                 Trung bình: {formatCurrency(orderStats.averageOrderValue || 0)}
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
 
                     {chartData.length > 0 && (
@@ -247,6 +348,10 @@ const OrderStatusTrendChart: React.FC<OrderStatusTrendChartProps> = ({
                                             fill="url(#totalOrdersGradient)"
                                             dot={{ fill: "#3b82f6", strokeWidth: 2, r: 3 }}
                                             activeDot={{ r: 5 }}
+                                            isAnimationActive={true}
+                                            animationBegin={0}
+                                            animationDuration={1500}
+                                            animationEasing="ease-out"
                                         />
                                         <Area
                                             type="monotone"
@@ -256,6 +361,10 @@ const OrderStatusTrendChart: React.FC<OrderStatusTrendChartProps> = ({
                                             fill="url(#onlineOrdersGradient)"
                                             dot={{ fill: "#10b981", strokeWidth: 2, r: 3 }}
                                             activeDot={{ r: 5 }}
+                                            isAnimationActive={true}
+                                            animationBegin={200}
+                                            animationDuration={1500}
+                                            animationEasing="ease-out"
                                         />
                                         <Area
                                             type="monotone"
@@ -265,6 +374,10 @@ const OrderStatusTrendChart: React.FC<OrderStatusTrendChartProps> = ({
                                             fill="url(#posOrdersGradient)"
                                             dot={{ fill: "#8b5cf6", strokeWidth: 2, r: 3 }}
                                             activeDot={{ r: 5 }}
+                                            isAnimationActive={true}
+                                            animationBegin={400}
+                                            animationDuration={1500}
+                                            animationEasing="ease-out"
                                         />
                                     </AreaChart>
                             </ChartContainer>
@@ -273,24 +386,45 @@ const OrderStatusTrendChart: React.FC<OrderStatusTrendChartProps> = ({
                                 <div className="space-y-2">
                                     <h4 className="text-sm font-semibold text-gray-700 mb-3">Tăng trưởng đơn hàng</h4>
                                     {chartData.slice(-5).map((item, index) => (
-                                        <div
+                                        <motion.div
                                             key={index}
-                                            className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200"
+                                            initial={{ opacity: 0, x: -20 }}
+                                            whileInView={{ opacity: 1, x: 0 }}
+                                            viewport={{ once: true, amount: 0.2 }}
+                                            transition={{ duration: 0.3, delay: index * 0.1 }}
+                                            whileHover={{ scale: 1.02, x: 5 }}
+                                            className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200 cursor-pointer group"
                                         >
                                             <div className="flex items-center space-x-3">
                                                 <span className="text-xs text-gray-600 font-medium">{item.date}</span>
                                                 {item.changePercent !== 0 && (
-                                                    item.changePercent > 0 ? (
-                                                        <TrendingUp className="w-4 h-4 text-green-500" />
-                                                    ) : (
-                                                        <TrendingDown className="w-4 h-4 text-red-500" />
-                                                    )
+                                                    <motion.div
+                                                        animate={{ 
+                                                            rotate: item.changePercent > 0 ? [0, -10, 10, 0] : [0, 10, -10, 0],
+                                                            scale: [1, 1.2, 1]
+                                                        }}
+                                                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                                    >
+                                                        {item.changePercent > 0 ? (
+                                                            <TrendingUp className="w-4 h-4 text-green-500" />
+                                                        ) : (
+                                                            <TrendingDown className="w-4 h-4 text-red-500" />
+                                                        )}
+                                                    </motion.div>
                                                 )}
                                             </div>
                                             <div className="flex items-center space-x-4 text-xs">
-                                                <span className="text-gray-700 font-medium">{formatNumber(item.totalOrders)} đơn</span>
+                                                <motion.span 
+                                                    className="text-gray-700 font-medium"
+                                                    whileHover={{ scale: 1.1 }}
+                                                >
+                                                    {formatNumber(item.totalOrders)} đơn
+                                                </motion.span>
                                                 {item.changePercent !== 0 && (
-                                                    <span
+                                                    <motion.span
+                                                        initial={{ scale: 0 }}
+                                                        animate={{ scale: 1 }}
+                                                        transition={{ delay: index * 0.1 + 0.2, type: "spring" }}
                                                         className={`font-bold px-2 py-1 rounded-full ${
                                                             item.changePercent > 0
                                                                 ? "bg-green-100 text-green-700"
@@ -299,29 +433,40 @@ const OrderStatusTrendChart: React.FC<OrderStatusTrendChartProps> = ({
                                                     >
                                                         {item.changePercent > 0 ? "+" : ""}
                                                         {item.changePercent.toFixed(1)}%
-                                                    </span>
+                                                    </motion.span>
                                                 )}
                                             </div>
-                                        </div>
+                                        </motion.div>
                                     ))}
                                 </div>
                                 <div className="space-y-2">
                                     <h4 className="text-sm font-semibold text-gray-700 mb-3">So sánh kênh bán hàng</h4>
                                     {chartData.slice(-5).map((item, index) => (
-                                        <div
+                                        <motion.div
                                             key={index}
-                                            className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200"
+                                            initial={{ opacity: 0, x: 20 }}
+                                            whileInView={{ opacity: 1, x: 0 }}
+                                            viewport={{ once: true, amount: 0.2 }}
+                                            transition={{ duration: 0.3, delay: index * 0.1 }}
+                                            whileHover={{ scale: 1.02, x: -5 }}
+                                            className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer group"
                                         >
                                             <span className="text-xs text-gray-600">{item.date}</span>
                                             <div className="flex space-x-4 text-xs">
-                                                <span className="text-green-600 font-medium">
+                                                <motion.span 
+                                                    className="text-green-600 font-medium"
+                                                    whileHover={{ scale: 1.1 }}
+                                                >
                                                     Online: {formatNumber(item.onlineOrders)}
-                                                </span>
-                                                <span className="text-purple-600 font-medium">
+                                                </motion.span>
+                                                <motion.span 
+                                                    className="text-purple-600 font-medium"
+                                                    whileHover={{ scale: 1.1 }}
+                                                >
                                                     Quầy: {formatNumber(item.posOrders)}
-                                                </span>
+                                                </motion.span>
                                             </div>
-                                        </div>
+                                        </motion.div>
                                     ))}
                                 </div>
                             </div>

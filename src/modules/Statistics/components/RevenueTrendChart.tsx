@@ -5,6 +5,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/core/shadcn
 import type { RevenueStatisticsResponse } from "@/lib/services/modules/statisticsService"
 import { TrendingDown, TrendingUp } from "lucide-react"
 import type React from "react"
+import { motion } from "framer-motion"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 interface RevenueTrendChartProps {
@@ -14,12 +15,15 @@ interface RevenueTrendChartProps {
 
 const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ data, title = "Xu hướng doanh thu" }) => {
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat("vi-VN", {
-            style: "currency",
-            currency: "VND",
-            notation: "compact",
-            maximumFractionDigits: 1,
-        }).format(amount)
+        if (amount >= 1000000000000) {
+            const trillion = amount / 1000000000000
+            return `${trillion.toFixed(1)} nghìn tỷ đ`
+        }
+        if (amount >= 1000000000) {
+            const billion = amount / 1000000000
+            return `${billion.toFixed(1)} tỷ đ`
+        }
+        return new Intl.NumberFormat("vi-VN").format(amount) + " đ"
     }
 
     const formatDate = (dateString: string) => {
@@ -51,16 +55,18 @@ const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ data, title = "Xu
 
     const chartData = data.map((item, index) => {
         const prevItem = index > 0 ? data[index - 1] : null
-        const revenue = item.dailyRevenue || 0
-        const change = prevItem ? revenue - (prevItem.dailyRevenue || 0) : 0
-        const changePercent = prevItem && prevItem.dailyRevenue > 0
-            ? ((revenue - prevItem.dailyRevenue) / prevItem.dailyRevenue) * 100
+        const revenue = item.netRevenue !== undefined ? item.netRevenue : (item.dailyRevenue || 0)
+        const prevRevenue = prevItem ? (prevItem.netRevenue !== undefined ? prevItem.netRevenue : (prevItem.dailyRevenue || 0)) : 0
+        const change = prevItem ? revenue - prevRevenue : 0
+        const changePercent = prevItem && prevRevenue > 0
+            ? ((revenue - prevRevenue) / prevRevenue) * 100
             : 0
 
         return {
             date: formatDate(item.date),
             fullDate: item.date,
             revenue,
+            shippingFee: item.shippingFee || 0,
             online: item.onlineRevenue || 0,
             pos: item.posRevenue || 0,
             orders: item.dailyOrders || 0,
@@ -119,38 +125,111 @@ const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ data, title = "Xu
             <CardContent className="p-6">
                 <div className="space-y-6">
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        <div className="p-3 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
+                        <motion.div 
+                            className="p-3 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            transition={{ duration: 0.5, delay: 0.1 }}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                        >
                             <div className="text-xs text-green-700 font-medium mb-1">Tổng doanh thu</div>
-                            <div className="text-lg font-bold text-green-700">{formatCurrency(totalRevenue)}</div>
-                        </div>
-                        <div className="p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                            <motion.div 
+                                className="text-lg font-bold text-green-700"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ duration: 0.5, delay: 0.3, type: "spring" }}
+                            >
+                                {formatCurrency(totalRevenue)}
+                            </motion.div>
+                        </motion.div>
+                        <motion.div 
+                            className="p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                        >
                             <div className="text-xs text-blue-700 font-medium mb-1">Trung bình</div>
-                            <div className="text-lg font-bold text-blue-700">{formatCurrency(avgRevenue)}</div>
-                        </div>
-                        <div className="p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+                            <motion.div 
+                                className="text-lg font-bold text-blue-700"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ duration: 0.5, delay: 0.4, type: "spring" }}
+                            >
+                                {formatCurrency(avgRevenue)}
+                            </motion.div>
+                        </motion.div>
+                        <motion.div 
+                            className="p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            transition={{ duration: 0.5, delay: 0.3 }}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                        >
                             <div className="text-xs text-purple-700 font-medium mb-1">Cao nhất</div>
-                            <div className="text-lg font-bold text-purple-700">{formatCurrency(maxRevenue)}</div>
-                        </div>
-                        <div className="p-3 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200">
+                            <motion.div 
+                                className="text-lg font-bold text-purple-700"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ duration: 0.5, delay: 0.5, type: "spring" }}
+                            >
+                                {formatCurrency(maxRevenue)}
+                            </motion.div>
+                        </motion.div>
+                        <motion.div 
+                            className="p-3 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            transition={{ duration: 0.5, delay: 0.4 }}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                        >
                             <div className="text-xs text-orange-700 font-medium mb-1">Thấp nhất</div>
-                            <div className="text-lg font-bold text-orange-700">{formatCurrency(minRevenue)}</div>
-                        </div>
+                            <motion.div 
+                                className="text-lg font-bold text-orange-700"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ duration: 0.5, delay: 0.6, type: "spring" }}
+                            >
+                                {formatCurrency(minRevenue)}
+                            </motion.div>
+                        </motion.div>
                     </div>
 
-                    <ChartContainer config={chartConfig} className="h-[400px] w-full">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.8, delay: 0.5 }}
+                    >
+                        <ChartContainer config={chartConfig} className="h-[400px] w-full">
                             <AreaChart data={chartData}>
                                 <defs>
                                     <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
+                                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}>
+                                            <animate attributeName="stopOpacity" values="0.4;0.6;0.4" dur="3s" repeatCount="indefinite" />
+                                        </stop>
+                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0.05}>
+                                            <animate attributeName="stopOpacity" values="0.05;0.15;0.05" dur="3s" repeatCount="indefinite" />
+                                        </stop>
                                     </linearGradient>
                                     <linearGradient id="onlineGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05} />
+                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}>
+                                            <animate attributeName="stopOpacity" values="0.3;0.5;0.3" dur="3s" repeatCount="indefinite" />
+                                        </stop>
+                                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05}>
+                                            <animate attributeName="stopOpacity" values="0.05;0.15;0.05" dur="3s" repeatCount="indefinite" />
+                                        </stop>
                                     </linearGradient>
                                     <linearGradient id="posGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.05} />
+                                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}>
+                                            <animate attributeName="stopOpacity" values="0.3;0.5;0.3" dur="3s" repeatCount="indefinite" />
+                                        </stop>
+                                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.05}>
+                                            <animate attributeName="stopOpacity" values="0.05;0.15;0.05" dur="3s" repeatCount="indefinite" />
+                                        </stop>
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -169,10 +248,19 @@ const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ data, title = "Xu
                                 <ChartTooltip
                                     content={
                                         <ChartTooltipContent
-                                            formatter={(value: number | string, name: string) => [
-                                                formatCurrency(Number(value)),
-                                                name === "revenue" ? "Doanh thu" : name === "online" ? "Online" : "Tại quầy"
-                                            ]}
+                                            formatter={(value: number | string, name: string, payload: any) => {
+                                                const item = payload?.payload
+                                                if (name === "revenue" && item?.shippingFee) {
+                                                    return [
+                                                        `${formatCurrency(Number(value))} (Phí ship: ${formatCurrency(item.shippingFee)})`,
+                                                        "Doanh thu (sau phí ship)"
+                                                    ]
+                                                }
+                                                return [
+                                                    formatCurrency(Number(value)),
+                                                    name === "revenue" ? "Doanh thu" : name === "online" ? "Online" : "Tại quầy"
+                                                ]
+                                            }}
                                             labelFormatter={(label: string, payload: any[]) => {
                                                 const item = payload?.[0]?.payload
                                                 return item ? new Date(item.fullDate).toLocaleDateString("vi-VN") : label
@@ -189,6 +277,10 @@ const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ data, title = "Xu
                                     fill="url(#revenueGradient)"
                                     dot={{ fill: "#10b981", strokeWidth: 2, r: 4 }}
                                     activeDot={{ r: 6, stroke: "#10b981", strokeWidth: 2, fill: "#fff" }}
+                                    isAnimationActive={true}
+                                    animationBegin={0}
+                                    animationDuration={1500}
+                                    animationEasing="ease-out"
                                 />
                                 <Area
                                     type="monotone"
@@ -198,6 +290,10 @@ const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ data, title = "Xu
                                     fill="url(#onlineGradient)"
                                     dot={{ fill: "#3b82f6", strokeWidth: 1, r: 3 }}
                                     activeDot={{ r: 5 }}
+                                    isAnimationActive={true}
+                                    animationBegin={200}
+                                    animationDuration={1500}
+                                    animationEasing="ease-out"
                                 />
                                 <Area
                                     type="monotone"
@@ -207,32 +303,58 @@ const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ data, title = "Xu
                                     fill="url(#posGradient)"
                                     dot={{ fill: "#8b5cf6", strokeWidth: 1, r: 3 }}
                                     activeDot={{ r: 5 }}
+                                    isAnimationActive={true}
+                                    animationBegin={400}
+                                    animationDuration={1500}
+                                    animationEasing="ease-out"
                                 />
                             </AreaChart>
-                    </ChartContainer>
+                        </ChartContainer>
+                    </motion.div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
                         <div className="space-y-2">
                             <h4 className="text-sm font-semibold text-gray-700 mb-3">Biến động doanh thu</h4>
                             {chartData.slice(-7).map((item, index) => (
-                                <div
+                                <motion.div
                                     key={index}
-                                    className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200"
+                                    initial={{ opacity: 0, x: -20 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true, amount: 0.2 }}
+                                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                                    whileHover={{ scale: 1.02, x: 5 }}
+                                    className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200 cursor-pointer group"
                                 >
                                     <div className="flex items-center space-x-3">
                                         <span className="text-xs text-gray-600 font-medium w-16">{item.date}</span>
                                         {item.changePercent !== 0 && (
-                                            item.changePercent > 0 ? (
-                                                <TrendingUp className="w-4 h-4 text-green-500" />
-                                            ) : (
-                                                <TrendingDown className="w-4 h-4 text-red-500" />
-                                            )
+                                            <motion.div
+                                                animate={{ 
+                                                    rotate: item.changePercent > 0 ? [0, -10, 10, 0] : [0, 10, -10, 0],
+                                                    scale: [1, 1.2, 1]
+                                                }}
+                                                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                            >
+                                                {item.changePercent > 0 ? (
+                                                    <TrendingUp className="w-4 h-4 text-green-500" />
+                                                ) : (
+                                                    <TrendingDown className="w-4 h-4 text-red-500" />
+                                                )}
+                                            </motion.div>
                                         )}
                                     </div>
                                     <div className="flex items-center space-x-4 text-xs">
-                                        <span className="text-gray-700 font-medium">{formatCurrency(item.revenue)}</span>
+                                        <motion.span 
+                                            className="text-gray-700 font-medium"
+                                            whileHover={{ scale: 1.1 }}
+                                        >
+                                            {formatCurrency(item.revenue)}
+                                        </motion.span>
                                         {item.changePercent !== 0 && (
-                                            <span
+                                            <motion.span
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                transition={{ delay: index * 0.1 + 0.2, type: "spring" }}
                                                 className={`font-bold px-2 py-1 rounded-full ${
                                                     item.changePercent > 0
                                                         ? "bg-green-100 text-green-700"
@@ -241,29 +363,40 @@ const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ data, title = "Xu
                                             >
                                                 {item.changePercent > 0 ? "+" : ""}
                                                 {item.changePercent.toFixed(1)}%
-                                            </span>
+                                            </motion.span>
                                         )}
                                     </div>
-                                </div>
+                                </motion.div>
                             ))}
                         </div>
                         <div className="space-y-2">
                             <h4 className="text-sm font-semibold text-gray-700 mb-3">So sánh kênh bán hàng</h4>
                             {chartData.slice(-7).map((item, index) => (
-                                <div
+                                <motion.div
                                     key={index}
-                                    className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true, amount: 0.2 }}
+                                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                                    whileHover={{ scale: 1.02, x: -5 }}
+                                    className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer group"
                                 >
                                     <span className="text-xs text-gray-600">{item.date}</span>
                                     <div className="flex space-x-4 text-xs">
-                                        <span className="text-blue-600 font-medium">
+                                        <motion.span 
+                                            className="text-blue-600 font-medium"
+                                            whileHover={{ scale: 1.1 }}
+                                        >
                                             Online: {formatCurrency(item.online)}
-                                        </span>
-                                        <span className="text-purple-600 font-medium">
+                                        </motion.span>
+                                        <motion.span 
+                                            className="text-purple-600 font-medium"
+                                            whileHover={{ scale: 1.1 }}
+                                        >
                                             Quầy: {formatCurrency(item.pos)}
-                                        </span>
+                                        </motion.span>
                                     </div>
-                                </div>
+                                </motion.div>
                             ))}
                         </div>
                     </div>

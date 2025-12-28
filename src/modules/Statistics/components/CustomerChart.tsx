@@ -3,6 +3,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/core/shadcn
 import type { CustomerStatisticsResponse } from "@/lib/services/modules/statisticsService"
 import { Users } from "lucide-react"
 import type React from "react"
+import { motion } from "framer-motion"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 interface CustomerChartProps {
@@ -157,6 +158,10 @@ const CustomerChart: React.FC<CustomerChartProps> = ({ data, title = "Biểu đ�
                   fill="url(#tangTruongGradient)"
                   dot={{ fill: "#10b981", strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6, stroke: "#10b981", strokeWidth: 2, fill: "#fff" }}
+                  isAnimationActive={true}
+                  animationBegin={0}
+                  animationDuration={1500}
+                  animationEasing="ease-out"
                 />
               </AreaChart>
             </ChartContainer>
@@ -167,31 +172,68 @@ const CustomerChart: React.FC<CustomerChartProps> = ({ data, title = "Biểu đ�
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">Chi tiết khách hàng</h4>
                 {data.slice(0, 5).map((item, index) => (
-                  <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                  <motion.div 
+                    key={index} 
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                    whileHover={{ scale: 1.02, x: 5 }}
+                    className="flex justify-between items-center p-2 bg-gray-50 rounded cursor-pointer group"
+                  >
                     <span className="text-xs text-gray-600">{formatDate(item.date)}</span>
                     <div className="flex space-x-4 text-xs">
-                      <span className="text-purple-600 font-medium">Mới: {formatNumber(item.newCustomers)}</span>
-                      <span className="text-green-600 font-medium">Hoạt động: {formatNumber(item.activeCustomers)}</span>
+                      <motion.span 
+                        className="text-purple-600 font-medium"
+                        whileHover={{ scale: 1.1 }}
+                      >
+                        Mới: {formatNumber(item.newCustomers)}
+                      </motion.span>
+                      <motion.span 
+                        className="text-green-600 font-medium"
+                        whileHover={{ scale: 1.1 }}
+                      >
+                        Hoạt động: {formatNumber(item.activeCustomers)}
+                      </motion.span>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
 
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">Tăng trưởng theo thời gian</h4>
                 {chartData.slice(0, 5).map((item, index) => (
-                  <div key={index} className="flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                  <motion.div 
+                    key={index} 
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                    whileHover={{ scale: 1.02, x: -5 }}
+                    className="flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200 cursor-pointer group"
+                  >
                     <span className="text-xs text-gray-600 font-medium">{item.date}</span>
                     <div className="flex items-center space-x-3 text-xs">
-                      <span className="text-blue-600 font-medium">Khách lẻ: {formatNumber(item.khachLe)}</span>
-                      <span className={`font-bold px-2 py-1 rounded-full text-xs ${item.tangTruong >= 0
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
-                        }`}>
+                      <motion.span 
+                        className="text-blue-600 font-medium"
+                        whileHover={{ scale: 1.1 }}
+                      >
+                        Khách lẻ: {formatNumber(item.khachLe)}
+                      </motion.span>
+                      <motion.span 
+                        initial={{ scale: 0 }}
+                        whileInView={{ scale: 1 }}
+                        viewport={{ once: true, amount: 0.2 }}
+                        transition={{ delay: index * 0.1 + 0.2, type: "spring" }}
+                        className={`font-bold px-2 py-1 rounded-full text-xs ${item.tangTruong >= 0
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
+                          }`}
+                      >
                         {item.tangTruong >= 0 ? '↗' : '↘'} {item.tangTruong.toFixed(1)}%
-                      </span>
+                      </motion.span>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>

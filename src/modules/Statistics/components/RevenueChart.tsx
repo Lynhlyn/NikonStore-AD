@@ -12,10 +12,15 @@ interface RevenueChartProps {
 
 const RevenueChart: React.FC<RevenueChartProps> = ({ data, title = "Biểu đồ doanh thu" }) => {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount)
+    if (amount >= 1000000000000) {
+      const trillion = amount / 1000000000000
+      return `${trillion.toFixed(1)} nghìn tỷ đ`
+    }
+    if (amount >= 1000000000) {
+      const billion = amount / 1000000000
+      return `${billion.toFixed(1)} tỷ đ`
+    }
+    return new Intl.NumberFormat("vi-VN").format(amount) + " đ"
   }
 
   const formatDate = (dateString: string) => {
