@@ -10,6 +10,11 @@ export async function middleware(request: NextRequest) {
    const auth = await getAuthFromCookie();
    const { pathname } = request.nextUrl;
 
+  const publicRoutes = ['/pos/payment-result'];
+  if (publicRoutes.some(route => pathname.startsWith(route))) {
+    return NextResponse.next();
+  }
+
   const res = NextResponse.next();
   if (listPathRole.some((path) => pathname.includes(path))) {
     const rolePath = pathname.split('/')[1];
