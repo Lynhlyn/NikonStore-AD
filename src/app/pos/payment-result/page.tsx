@@ -63,7 +63,7 @@ export default function PosPaymentResultPage() {
 
         const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1/admin';
         const apiUrl = baseApiUrl.replace('/api/v1/admin', '');
-        const response = await fetch(`${apiUrl}/api/v1/pos/vnpay/callback?${params.toString()}`, {
+        const response = await fetch(`${apiUrl}/api/v1/admin/pos/vnpay/callback?${params.toString()}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
