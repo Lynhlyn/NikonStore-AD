@@ -11,7 +11,7 @@ import { Label } from "@/core/shadcn/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/core/shadcn/components/ui/select";
 import { Badge } from "@/core/shadcn/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/core/shadcn/components/ui/card";
-import { CalendarDays, User, UserCheck } from "lucide-react";
+import { CalendarDays, User, UserCheck, Eye, EyeOff } from "lucide-react";
 import { 
   useAddCustomerMutation, 
   useUpdateCustomerMutation 
@@ -50,6 +50,12 @@ const schema = yup.object().shape({
     .string()
     .required("Số điện thoại là bắt buộc")
     .matches(/^0\d{9}$/, "Số điện thoại phải gồm 10 số và bắt đầu bằng 0"),
+  password: yup
+    .string()
+    .min(8, "Mật khẩu phải có ít nhất 8 ký tự")
+    .max(32, "Mật khẩu không được quá 32 ký tự")
+    .nullable()
+    .transform((value) => value === '' ? null : value),
   gender: yup
     .string()
     .oneOf(["Nam", "Nữ", "Khác", ""], "Giới tính không hợp lệ"),
@@ -88,6 +94,7 @@ export const CustomerFormModal = ({ isOpen, onClose, customer, onSuccess }: Cust
     isLoading: false,
   });
   const [pendingFormData, setPendingFormData] = useState<any>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -104,6 +111,7 @@ export const CustomerFormModal = ({ isOpen, onClose, customer, onSuccess }: Cust
       fullName: customer?.fullName || "",
       email: customer?.email || "",
       phoneNumber: customer?.phoneNumber || "",
+      password: "",
       gender: customer?.gender ? genderMapper.toVietnamese(customer.gender) : (customer ? "" : "Nam"),
       dateOfBirth: customer?.dateOfBirth || "",
       status: customer?.status === 'ACTIVE' ? 1 : 
@@ -129,6 +137,7 @@ export const CustomerFormModal = ({ isOpen, onClose, customer, onSuccess }: Cust
         fullName: customer.fullName || "",
         email: customer.email || "",
         phoneNumber: customer.phoneNumber || "",
+        password: "",
         gender: customer.gender ? genderMapper.toVietnamese(customer.gender) : "",
         dateOfBirth: customer.dateOfBirth || "",
         status: statusValue,
@@ -148,6 +157,7 @@ export const CustomerFormModal = ({ isOpen, onClose, customer, onSuccess }: Cust
         fullName: "",
         email: "",
         phoneNumber: "",
+        password: "",
         gender: "Nam",
         dateOfBirth: "",
         status: 1,
@@ -213,6 +223,7 @@ export const CustomerFormModal = ({ isOpen, onClose, customer, onSuccess }: Cust
           fullName: data.fullName,
           email: data.email,
           phoneNumber: data.phoneNumber,
+          password: data.password,
           gender: genderMapper.toEnglish(data.gender),
           dateOfBirth: data.dateOfBirth,
           isGuest: false,
@@ -239,10 +250,10 @@ export const CustomerFormModal = ({ isOpen, onClose, customer, onSuccess }: Cust
             message: errors.email || 'Email đã tồn tại trong hệ thống'
           });
         }
-        if (errors.phone) {
+        if (errors.phoneNumber) {
           setError('phoneNumber', {
             type: 'manual',
-            message: errors.phone || 'Số điện thoại đã tồn tại trong hệ thống'
+            message: errors.phoneNumber || 'Số điện thoại đã tồn tại trong hệ thống'
           });
         }
         setIsConfirmModalOpen(false);
@@ -382,6 +393,41 @@ export const CustomerFormModal = ({ isOpen, onClose, customer, onSuccess }: Cust
               )}
             </div>
           </div>
+
+
+          {!isEdit && (
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <RequiredLabel htmlFor="password">Mật khẩu</RequiredLabel>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Nhập mật khẩu (để trống sẽ dùng số điện thoại)"
+                    {...register("password")}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-sm text-red-500">{errors.password.message}</p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Nếu để trống, mật khẩu mặc định sẽ là số điện thoại
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
