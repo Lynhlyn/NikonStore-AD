@@ -16,7 +16,6 @@ export const customerApi = apiSlice.injectEndpoints({
       email?: string;
       phoneNumber?: string;
       gender?: string;
-      provider?: string;
       isGuest?: boolean;
       createdFromDate?: string;
       createdToDate?: string;

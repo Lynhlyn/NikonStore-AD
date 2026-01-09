@@ -6,6 +6,7 @@ import { Badge } from "@/core/shadcn/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/core/shadcn/components/ui/card";
 import { User } from "lucide-react";
 import { Customer } from "@/lib/services/modules/customerService/type";
+import { mapGenderToVietnamese } from "@/common/utils/genderMapper";
 
 interface CustomerDetailModalProps {
   isOpen: boolean;
@@ -42,7 +43,7 @@ export const CustomerDetailModal = ({ isOpen, onClose, customer, onCustomerDataC
                 <h3 className="text-base font-semibold leading-tight break-words max-w-[200px]">
                   {customer.fullName}
                 </h3>
-                <p className="text-xs text-gray-500 mt-0.5">{customer.gender || 'Chưa rõ'}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{mapGenderToVietnamese(customer.gender)}</p>
               </div>
 
               <div className="w-full space-y-2 text-sm">

@@ -30,6 +30,7 @@ import { UIPagination, UIPaginationResuft } from "@/core/ui/UIPagination";
 import { BlockCustomerModal } from "../BlockCustomerModal/BlockCustomerModal";
 import { CustomerDetailModal } from "../CustomerDetailModal/CustomerDetailModal";
 import { CustomerFormModal } from "../CustomerFormModal/CustomerFormModal";
+import { mapGenderToEnglish, mapGenderToVietnamese } from "@/common/utils/genderMapper";
 
 export const CustomerTable = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -49,7 +50,7 @@ export const CustomerTable = () => {
     isLoading: false,
   });
 
-  const [{ page, size, keyword, status, email, phoneNumber, gender, provider, isGuest, createdFromDate, createdToDate }, setQuery] = useQueryStates({
+  const [{ page, size, keyword, status, email, phoneNumber, gender, isGuest, createdFromDate, createdToDate }, setQuery] = useQueryStates({
     page: parseAsInteger.withDefault(1),
     size: parseAsInteger.withDefault(10),
     keyword: parseAsString.withDefault(""),
@@ -57,11 +58,12 @@ export const CustomerTable = () => {
     email: parseAsString.withDefault(""),
     phoneNumber: parseAsString.withDefault(""),
     gender: parseAsString.withDefault("all"),
-    provider: parseAsString.withDefault("all"),
     isGuest: parseAsString.withDefault("all"),
     createdFromDate: parseAsString.withDefault(""),
     createdToDate: parseAsString.withDefault(""),
   });
+
+
 
   const { data: customersData, isLoading, refetch: refetchCustomers } = useFetchCustomersQuery({
     page: page - 1,
@@ -70,8 +72,7 @@ export const CustomerTable = () => {
     status: status === "all" ? undefined : parseInt(status),
     email: email || undefined,
     phoneNumber: phoneNumber || undefined,
-    gender: gender === "all" ? undefined : gender,
-    provider: provider === "all" ? undefined : provider,
+    gender: mapGenderToEnglish(gender),
     isGuest: isGuest === "all" ? undefined : isGuest === "true",
     createdFromDate: createdFromDate || undefined,
     createdToDate: createdToDate || undefined,
@@ -97,7 +98,6 @@ export const CustomerTable = () => {
       email: "",
       phoneNumber: "",
       gender: "all",
-      provider: "all",
       isGuest: "all",
       createdFromDate: "",
       createdToDate: "",
@@ -106,7 +106,7 @@ export const CustomerTable = () => {
   };
 
   const hasActiveFilters = keyword !== "" || status !== "all" || email !== "" ||
-    phoneNumber !== "" || gender !== "all" || provider !== "all" ||
+    phoneNumber !== "" || gender !== "all" ||
     isGuest !== "all" || createdFromDate !== "" || createdToDate !== "";
 
   const handleEdit = (customer: Customer) => {
@@ -286,7 +286,7 @@ export const CustomerTable = () => {
       accessorKey: "gender",
       header: () => <div className="text-center w-full">Giới tính</div>,
       cell: ({ row }: any) => (
-        <div className="text-center">{row.original.gender || "Khác"}</div>
+        <div className="text-center">{mapGenderToVietnamese(row.original.gender)}</div>
       ),
     },
     {
@@ -420,7 +420,7 @@ export const CustomerTable = () => {
                 <p className="text-sm text-slate-100">
                   {hasActiveFilters && (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-500 text-white">
-                      Đang áp dụng {Object.values({ keyword, status: status !== "all" ? status : "", email, phoneNumber, gender: gender !== "all" ? gender : "", provider: provider !== "all" ? provider : "", isGuest: isGuest !== "all" ? isGuest : "", createdFromDate, createdToDate }).filter(Boolean).length} bộ lọc
+                      Đang áp dụng {Object.values({ keyword, status: status !== "all" ? status : "", email, phoneNumber, gender: gender !== "all" ? gender : "", isGuest: isGuest !== "all" ? isGuest : "", createdFromDate, createdToDate }).filter(Boolean).length} bộ lọc
                     </span>
                   )}
                   {!hasActiveFilters && <span className="text-slate-100">Hiển thị tất cả khách hàng trong hệ thống</span>}
@@ -543,20 +543,6 @@ export const CustomerTable = () => {
                     value={createdToDate}
                     onChange={(e) => setQuery({ createdToDate: e.target.value, page: 1 })}
                   />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Phương thức đăng nhập</Label>
-                  <Select value={provider} onValueChange={(value) => setQuery({ provider: value, page: 1 })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Tất cả" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tất cả</SelectItem>
-                      <SelectItem value="google">Google</SelectItem>
-                      <SelectItem value="local">Đăng nhập bằng Email</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
               </div>
             </div>
