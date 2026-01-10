@@ -39,6 +39,7 @@ const schema = yup.object().shape({
     .string()
     .min(2, "Họ và tên phải có ít nhất 2 ký tự")
     .max(100, "Họ và tên không được quá 100 ký tự")
+    .matches(/^[a-zA-ZÀ-ỹ\s]+$/, "Họ và tên chỉ được chứa chữ cái và khoảng trắng")
     .nullable()
     .transform((value) => value === '' ? null : value),
   email: yup
