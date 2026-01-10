@@ -20,6 +20,7 @@ export interface CreateCustomerRequest {
   fullName?: string;
   email: string;
   phoneNumber: string;
+  password?: string;
   gender?: string;
   dateOfBirth?: string;
   isGuest?: boolean;
