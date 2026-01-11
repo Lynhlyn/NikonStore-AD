@@ -6,6 +6,7 @@ import type {
   IProductDetailResponse,
   ProductDetail,
   UpdateProductDetailRequest,
+  IExportProductDetailsRequest,
 } from './type';
 
 const productDetail = '/product-details';
@@ -62,6 +63,23 @@ export const productDetailApi = apiSlice.injectEndpoints({
         method: 'DELETE',
       }),
     }),
+    exportProductDetailsToExcel: build.mutation<Blob, IExportProductDetailsRequest>({
+      query: (params) => {
+        const searchParams = new URLSearchParams();
+        if (params.sku) searchParams.append('sku', params.sku);
+        if (params.status) searchParams.append('status', params.status);
+        if (params.productId !== undefined) searchParams.append('productId', params.productId.toString());
+        if (params.colorId) searchParams.append('colorId', params.colorId);
+        if (params.capacityId) searchParams.append('capacityId', params.capacityId);
+        return {
+          url: `${productDetail}/export/excel?${searchParams.toString()}`,
+          method: 'GET',
+          responseHandler: async (response) => {
+            return await response.blob();
+          },
+        };
+      },
+    }),
   }),
 });
 
@@ -71,5 +89,6 @@ export const {
   useAddProductDetailMutation,
   useUpdateProductDetailMutation,
   useDeleteProductDetailMutation,
+  useExportProductDetailsToExcelMutation,
 } = productDetailApi;
 

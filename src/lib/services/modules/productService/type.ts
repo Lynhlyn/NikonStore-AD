@@ -99,3 +99,12 @@ export interface IProductListQuery extends IListQuery {
   compartment?: string;
 }
 
+export interface IExportProductsRequest {
+  keyword?: string;
+  status?: string;
+  categoryId?: string;
+  brandId?: string;
+  materialId?: string;
+  strapTypeId?: string;
+}
+

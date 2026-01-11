@@ -3,9 +3,9 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/core/shadcn/components/ui/table";
 import { Button } from "@/core/shadcn/components/ui/button";
 import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
-import { SquarePen, ArrowUp, ArrowDown, Plus, Eye, Loader2, Search } from "lucide-react";
+import { SquarePen, ArrowUp, ArrowDown, Plus, Eye, Loader2, Search, Download } from "lucide-react";
 import { useAppNavigation } from "@/common/hooks";
-import { useFetchProductsQuery } from "@/lib/services/modules/productService";
+import { useFetchProductsQuery, useExportProductsToExcelMutation } from "@/lib/services/modules/productService";
 import { useFetchBrandsQuery } from "@/lib/services/modules/brandService";
 import { useFetchCategoriesQuery } from "@/lib/services/modules/categoryService";
 import { useFetchMaterialsQuery } from "@/lib/services/modules/materialService";
@@ -46,6 +46,8 @@ const ProductTable = () => {
     strapTypeId: queryStates.strapTypeId ? parseInt(queryStates.strapTypeId) : undefined,
     status: queryStates.status as EStatusEnumString || undefined,
   }, { refetchOnMountOrArgChange: true });
+
+  const [exportProductsToExcel, { isLoading: isExporting }] = useExportProductsToExcelMutation();
 
   const { data: brandsData } = useFetchBrandsQuery({
     page: 0,
@@ -145,6 +147,34 @@ const ProductTable = () => {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      const result = await exportProductsToExcel({
+        status: queryStates.status || undefined,
+        categoryId: queryStates.categoryId || undefined,
+        brandId: queryStates.brandId || undefined,
+        materialId: queryStates.materialId || undefined,
+        strapTypeId: queryStates.strapTypeId || undefined,
+      }).unwrap();
+
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '_');
+      const filename = `DanhSachSanPham_${timestamp}.xlsx`;
+
+      const url = window.URL.createObjectURL(result);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success('Xuất Excel thành công!');
+    } catch (error) {
+      toast.error('Có lỗi xảy ra khi xuất Excel');
+    }
   };
 
   const brandOptions = [
@@ -301,13 +331,27 @@ const ProductTable = () => {
         <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-xl shadow-lg p-6 mb-6">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-white">Quản lý sản phẩm</h1>
-            <Button
-              onClick={() => router.push(getRouteWithRole('/products/new'))}
-              className="flex items-center gap-2 bg-white hover:bg-gray-100 text-green-700 font-medium shadow-sm"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Thêm sản phẩm</span>
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleExportExcel}
+                disabled={isExporting}
+                className="flex items-center gap-2 bg-white hover:bg-gray-100 text-green-700 font-medium shadow-sm"
+              >
+                {isExporting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                <span>{isExporting ? 'Đang xuất...' : 'Xuất Excel'}</span>
+              </Button>
+              <Button
+                onClick={() => router.push(getRouteWithRole('/products/new'))}
+                className="flex items-center gap-2 bg-white hover:bg-gray-100 text-green-700 font-medium shadow-sm"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Thêm sản phẩm</span>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

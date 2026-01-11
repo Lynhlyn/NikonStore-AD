@@ -86,3 +86,11 @@ export interface IProductDetailListQuery extends IListQuery {
   productIds?: number[];
 }
 
+export interface IExportProductDetailsRequest {
+  sku?: string;
+  status?: string;
+  productId?: number;
+  colorId?: string;
+  capacityId?: string;
+}
+

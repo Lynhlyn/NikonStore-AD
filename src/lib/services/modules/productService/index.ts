@@ -6,6 +6,7 @@ import type {
   IProductListResponse,
   IProductResponse,
   IProductListQuery,
+  IExportProductsRequest,
 } from './type';
 
 const product = '/products';
@@ -50,6 +51,24 @@ export const productApi = apiSlice.injectEndpoints({
         method: 'DELETE',
       }),
     }),
+    exportProductsToExcel: build.mutation<Blob, IExportProductsRequest>({
+      query: (params) => {
+        const searchParams = new URLSearchParams();
+        if (params.keyword) searchParams.append('keyword', params.keyword);
+        if (params.status) searchParams.append('status', params.status);
+        if (params.categoryId) searchParams.append('categoryId', params.categoryId);
+        if (params.brandId) searchParams.append('brandId', params.brandId);
+        if (params.materialId) searchParams.append('materialId', params.materialId);
+        if (params.strapTypeId) searchParams.append('strapTypeId', params.strapTypeId);
+        return {
+          url: `${product}/export/excel?${searchParams.toString()}`,
+          method: 'GET',
+          responseHandler: async (response) => {
+            return await response.blob();
+          },
+        };
+      },
+    }),
   }),
 });
 
@@ -59,5 +78,6 @@ export const {
   useAddProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
+  useExportProductsToExcelMutation,
 } = productApi;
 

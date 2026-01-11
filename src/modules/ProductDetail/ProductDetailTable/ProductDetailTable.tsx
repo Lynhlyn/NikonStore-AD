@@ -2,17 +2,18 @@
 
 import { Button } from '@/core/shadcn/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/core/shadcn/components/ui/table';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/core/shadcn/components/ui/collapsible';
 import { UITextField } from '@/core/ui';
 import { UISingleSelect } from '@/core/ui/UISingleSelect';
 import { ESize } from '@/core/ui/Helpers/UIsize.enum';
-import { useFetchProductDetailsQuery } from '@/lib/services/modules/productDetailService';
+import { useFetchProductDetailsQuery, useExportProductDetailsToExcelMutation } from '@/lib/services/modules/productDetailService';
 import { useFetchColorsQuery } from '@/lib/services/modules/colorService';
 import { useFetchCapacitiesQuery } from '@/lib/services/modules/capacityService';
 import { useAppNavigation, useDebounce } from '@/common/hooks';
 import { getStatusEnumString } from '@/common/utils/statusOption';
 import { getStatusDisplay } from '@/common/utils/statusColor';
 import { EStatusEnumString } from '@/common/enums/status';
-import { ArrowLeft, ArrowUp, ArrowDown, Plus, SquarePen, ImageIcon } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, Plus, SquarePen, ImageIcon, Loader2, Download, Filter, RotateCcw, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { parseAsInteger, parseAsString, useQueryStates } from 'nuqs';
 import { useState } from 'react';
@@ -28,6 +29,7 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
   const { getRouteWithRole } = useAppNavigation();
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   if (!productId || isNaN(productId)) {
     return (
@@ -85,6 +87,8 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
     size: 100,
     isAll: true,
   });
+
+  const [exportProductDetailsToExcel, { isLoading: isExporting }] = useExportProductDetailsToExcelMutation();
 
   const handlePageChange = (newPage: number) => {
     setQueryStates((prev) => ({
@@ -147,6 +151,47 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
       style: 'currency',
       currency: 'VND'
     }).format(price);
+  };
+
+  const clearAllFilters = () => {
+    setQueryStates({
+      page: 0,
+      search: '',
+      colorId: '',
+      capacityId: '',
+      status: '',
+    });
+    toast.success('Đã xóa tất cả bộ lọc!');
+  };
+
+  const hasActiveFilters = queryStates.search !== '' || queryStates.colorId !== '' || queryStates.capacityId !== '' || queryStates.status !== '';
+
+  const handleExportExcel = async () => {
+    try {
+      const result = await exportProductDetailsToExcel({
+        productId: productId,
+        sku: debouncedSearch || undefined,
+        colorId: queryStates.colorId || undefined,
+        capacityId: queryStates.capacityId || undefined,
+        status: queryStates.status || undefined,
+      }).unwrap();
+
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '_');
+      const filename = `DanhSachSanPhamChiTiet_${timestamp}.xlsx`;
+
+      const url = window.URL.createObjectURL(result);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success('Xuất Excel thành công!');
+    } catch (error) {
+      toast.error('Có lỗi xảy ra khi xuất Excel');
+    }
   };
 
   const colorOptions = [
@@ -226,92 +271,131 @@ const ProductDetailTable = ({ productId }: ProductDetailTableProps) => {
   }
 
   return (
-    <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-      <div className="mb-6">
-        <div className="bg-gradient-to-r from-rose-600 to-rose-700 rounded-xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                onClick={() => router.push(getRouteWithRole('/products'))}
-                className="flex items-center gap-2 bg-white hover:bg-gray-100 text-rose-700 font-medium shadow-sm"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Quay lại
-              </Button>
-              <div>
-                <h1 className="text-2xl font-bold text-white">Chi tiết sản phẩm</h1>
-                <p className="text-rose-100 mt-1 text-sm">
-                  {productName}
-                </p>
+    <div className="space-y-6 p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+        <Collapsible open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+          <div className="bg-gradient-to-r from-rose-600 to-rose-700 p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="outline"
+                  onClick={() => router.push(getRouteWithRole('/products'))}
+                  className="flex items-center gap-2 bg-white hover:bg-gray-100 text-rose-700 font-medium shadow-sm"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Quay lại
+                </Button>
+                <div>
+                  <h2 className="text-2xl font-bold text-white mb-2">Chi tiết sản phẩm</h2>
+                  <p className="text-sm text-rose-100">
+                    {productName}
+                    {hasActiveFilters && (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-500 text-white ml-2">
+                        Đang áp dụng {Object.values({ search: queryStates.search, colorId: queryStates.colorId, capacityId: queryStates.capacityId, status: queryStates.status }).filter(Boolean).length} bộ lọc
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CollapsibleTrigger asChild>
+                  <Button variant="secondary" size="sm" className="bg-white hover:bg-gray-100 text-rose-700 font-medium shadow-sm">
+                    <Filter className="h-4 w-4 mr-2" />
+                    {isFilterOpen ? 'Ẩn bộ lọc' : 'Hiện bộ lọc'}
+                  </Button>
+                </CollapsibleTrigger>
+                {hasActiveFilters && (
+                  <Button variant="secondary" size="sm" onClick={clearAllFilters} className="bg-white hover:bg-gray-100 text-rose-700 font-medium shadow-sm">
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Làm mới
+                  </Button>
+                )}
+                <Button
+                  onClick={handleExportExcel}
+                  disabled={isExporting}
+                  size="sm"
+                  className="bg-white hover:bg-gray-100 text-rose-700 font-medium shadow-sm"
+                >
+                  {isExporting ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4 mr-2" />
+                  )}
+                  {isExporting ? 'Đang xuất...' : 'Xuất Excel'}
+                </Button>
+                <Button
+                  onClick={() => router.push(getRouteWithRole(`/products/${productId}/product-details/new`))}
+                  size="sm"
+                  className="bg-white hover:bg-gray-100 text-rose-700 font-medium shadow-sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Thêm sản phẩm chi tiết
+                </Button>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="flex justify-between items-end mb-5">
-        <div className="flex gap-4 flex-wrap">
-          <div className="w-[200px]">
-            <UITextField
-              placeholder="Tìm kiếm SKU..."
-              value={queryStates.search}
-              onChange={(e) => handleSearchChange(e.target.value)}
-            />
-          </div>
-          <div className="w-[150px]">
-            <UISingleSelect
-              options={colorOptions}
-              onChange={handleColorChange}
-              selected={colorOptions.find(option => option.value === queryStates.colorId)}
-              bindLabel="label"
-              bindValue="value"
-              size={ESize.M}
-              className="rounded-md border border-gray-300"
-              renderOption={(props) => <UISingleSelect.Option {...props} />}
-              renderSelected={(props) => <UISingleSelect.Selected {...props} />}
-            />
-          </div>
-          <div className="w-[170px]">
-            <UISingleSelect
-              options={capacityOptions}
-              onChange={handleCapacityChange}
-              selected={capacityOptions.find(option => option.value === queryStates.capacityId)}
-              bindLabel="label"
-              bindValue="value"
-              size={ESize.M}
-              className="rounded-md border border-gray-300"
-              renderOption={(props) => <UISingleSelect.Option {...props} />}
-              renderSelected={(props) => <UISingleSelect.Selected {...props} />}
-            />
-          </div>
-          <div className="w-[150px]">
-            <UISingleSelect
-              options={statusOptions}
-              onChange={handleStatusChange}
-              selected={statusOptions.find(option => option.value === queryStates.status)}
-              bindLabel="label"
-              bindValue="value"
-              size={ESize.M}
-              className="rounded-md border border-gray-300"
-              renderOption={(props) => <UISingleSelect.Option {...props} />}
-              renderSelected={(props) => <UISingleSelect.Selected {...props} />}
-            />
-          </div>
-        </div>
-        <div className="flex gap-3">
-        <Button
-          onClick={() => router.push(getRouteWithRole(`/products/${productId}/product-details/new`))}
-          className="flex items-center gap-2 bg-white hover:bg-gray-100 text-rose-700 font-medium shadow-sm border border-rose-200"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Thêm sản phẩm chi tiết</span>
-        </Button>
-        </div>
-      </div>
+          <CollapsibleContent>
+            <div className="p-6 bg-gradient-to-br from-gray-50 to-rose-50 border-b border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Tìm kiếm SKU</label>
+                  <UITextField
+                    placeholder="Tìm kiếm SKU..."
+                    value={queryStates.search}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    leftIcon={<Search className="w-4 h-4" />}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Màu sắc</label>
+                  <UISingleSelect
+                    options={colorOptions}
+                    onChange={handleColorChange}
+                    selected={colorOptions.find(option => option.value === queryStates.colorId)}
+                    bindLabel="label"
+                    bindValue="value"
+                    size={ESize.M}
+                    placeholder="Tất cả màu sắc"
+                    renderOption={(props) => <UISingleSelect.Option {...props} />}
+                    renderSelected={(props) => <UISingleSelect.Selected {...props} />}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Dung tích</label>
+                  <UISingleSelect
+                    options={capacityOptions}
+                    onChange={handleCapacityChange}
+                    selected={capacityOptions.find(option => option.value === queryStates.capacityId)}
+                    bindLabel="label"
+                    bindValue="value"
+                    size={ESize.M}
+                    placeholder="Tất cả dung tích"
+                    renderOption={(props) => <UISingleSelect.Option {...props} />}
+                    renderSelected={(props) => <UISingleSelect.Selected {...props} />}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Trạng thái</label>
+                  <UISingleSelect
+                    options={statusOptions}
+                    onChange={handleStatusChange}
+                    selected={statusOptions.find(option => option.value === queryStates.status)}
+                    bindLabel="label"
+                    bindValue="value"
+                    size={ESize.M}
+                    placeholder="Tất cả trạng thái"
+                    renderOption={(props) => <UISingleSelect.Option {...props} />}
+                    renderSelected={(props) => <UISingleSelect.Selected {...props} />}
+                  />
+                </div>
+              </div>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
 
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
         <div className="border-t border-gray-200 overflow-x-auto">
+
           <Table>
             <TableHeader>
               <TableRow className="border-b border-gray-200 hover:bg-transparent">
