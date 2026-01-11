@@ -68,6 +68,7 @@ export const productApi = apiSlice.injectEndpoints({
           },
         };
       },
+      keepUnusedDataFor: 0,
     }),
   }),
 });
