@@ -79,7 +79,6 @@ export const productDetailApi = apiSlice.injectEndpoints({
           },
         };
       },
-      keepUnusedDataFor: 0,
     }),
   }),
 });
