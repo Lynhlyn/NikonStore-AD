@@ -174,12 +174,18 @@ const DisplayOrderInput = () => {
         render={({ field }) => (
           <UITextField
             type="number"
+            min="0"
             value={field.value?.toString() || '0'}
-            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+            onChange={(e) => {
+              const value = parseInt(e.target.value) || 0;
+              if (value >= 0) {
+                field.onChange(value);
+              }
+            }}
+            onKeyDown={(e) => ['e', 'E', '+', '-', '.'].includes(e.key) && e.preventDefault()}
             onBlur={field.onBlur}
             name={field.name}
             isInvalid={!!errors.displayOrder}
-            min={0}
           />
         )}
       />

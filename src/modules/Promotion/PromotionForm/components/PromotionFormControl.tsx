@@ -155,8 +155,15 @@ const DiscountValueInput = () => {
         render={({ field }) => (
           <UITextField
             type="number"
+            min="0"
             value={field.value?.toString() || ''}
-            onChange={(e) => field.onChange(Number(e.target.value))}
+            onChange={(e) => {
+              const value = Number(e.target.value);
+              if (value >= 0 || e.target.value === '') {
+                field.onChange(value);
+              }
+            }}
+            onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
             onBlur={field.onBlur}
             name={field.name}
             isInvalid={!!errors.discountValue}

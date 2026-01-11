@@ -146,7 +146,7 @@ export const CustomerSelectionModal: React.FC<CustomerSelectionModalProps> = ({
             setSearchTerm('');
             setCurrentPage(0);
         }
-    }, [isOpen, initialSelectedCustomerIds]);
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -248,7 +248,10 @@ export const CustomerSelectionModal: React.FC<CustomerSelectionModalProps> = ({
                                         <input
                                             type="checkbox"
                                             checked={selectedCustomers.includes(customer.id)}
-                                            onChange={() => handleCustomerToggle(customer.id)}
+                                            onChange={(e) => {
+                                                e.stopPropagation();
+                                                handleCustomerToggle(customer.id);
+                                            }}
                                             className="w-4 h-4 text-gray-900 focus:ring-gray-400 border-gray-300 rounded"
                                         />
                                     </div>

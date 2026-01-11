@@ -85,17 +85,20 @@ const StockInput = () => {
         render={({ field }) => (
           <UITextField
             type="number"
+            min="0"
             value={field.value === 0 ? '0' : field.value || ''}
             onChange={(e) => {
               const value = e.target.value;
               const numericValue = value === '' ? 0 : Number(value);
-              field.onChange(numericValue);
+              if (numericValue >= 0) {
+                field.onChange(numericValue);
+              }
             }}
+            onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
             onBlur={field.onBlur}
             name={field.name}
             isInvalid={!!errors.stock}
             placeholder="Nhập số lượng tồn kho"
-            min={0}
           />
         )}
       />

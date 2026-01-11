@@ -8,8 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/core/shadcn/componen
 import { Input } from "@/core/shadcn/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/core/shadcn/components/ui/table"
 import { useGetPosProductsQuery } from "@/lib/services/modules/posService"
-import { Loader2, Package, Plus, Search } from "lucide-react"
+import { Package, Plus, Search } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { UIPagination, UIPaginationResuft } from "@/core/ui/UIPagination"
 
 interface ProductTableProps {
   onProductSelect: (productId: number) => void
@@ -20,14 +21,11 @@ interface ProductTableProps {
 export function DialogProductTable({ onProductSelect, onScanSuccess, scanDisabled }: ProductTableProps) {
   const [searchProduct, setSearchProduct] = useState("")
   const [currentPage, setCurrentPage] = useState(0)
-  const [pageSize] = useState(20)
-  const [hasMore, setHasMore] = useState(true)
-  const [allProducts, setAllProducts] = useState<any[]>([])
+  const [pageSize] = useState(10)
 
   const {
     data: productsResponse,
     isLoading,
-    isFetching,
   } = useGetPosProductsQuery(
     {
       page: currentPage,
@@ -44,44 +42,17 @@ export function DialogProductTable({ onProductSelect, onScanSuccess, scanDisable
   const pagination = productsResponse?.pagination
 
   useEffect(() => {
-    if (searchProduct) {
+    if (searchProduct !== undefined) {
       setCurrentPage(0)
-      setAllProducts([])
-      setHasMore(true)
     }
   }, [searchProduct])
 
-  useEffect(() => {
-    if (products.length > 0) {
-      if (currentPage === 0) {
-        setAllProducts(products)
-      } else {
-        setAllProducts(prev => {
-          const existingIds = new Set(prev.map(p => p.id))
-          const newProducts = products.filter(p => !existingIds.has(p.id))
-          return [...prev, ...newProducts]
-        })
-      }
-
-      if (pagination) {
-        setHasMore(currentPage < pagination.totalPages - 1)
-      } else {
-        setHasMore(products.length === pageSize)
-      }
-    } else if (currentPage === 0) {
-      setAllProducts([])
-      setHasMore(false)
-    }
-  }, [products, currentPage, pagination, pageSize])
-
-  const loadMore = useCallback(() => {
-    if (hasMore && !isFetching) {
-      setCurrentPage(prev => prev + 1)
-    }
-  }, [hasMore, isFetching])
-
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchProduct(e.target.value)
+  }, [])
+
+  const handlePageChange = useCallback((newPage: number) => {
+    setCurrentPage(newPage - 1)
   }, [])
 
   return (
@@ -112,8 +83,8 @@ export function DialogProductTable({ onProductSelect, onScanSuccess, scanDisable
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-2 sm:p-4 flex-1 min-h-0 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 -mx-2 sm:-mx-4 px-2 sm:px-4">
+      <CardContent className="p-0 flex-1 min-h-0 flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
           <Table className="min-w-full">
             <TableHeader className="sticky top-0 bg-gray-50 z-10">
               <TableRow className="bg-gray-50">
@@ -125,7 +96,7 @@ export function DialogProductTable({ onProductSelect, onScanSuccess, scanDisable
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading && currentPage === 0 ? (
+              {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8">
                     <div
@@ -136,85 +107,95 @@ export function DialogProductTable({ onProductSelect, onScanSuccess, scanDisable
                     <p className="mt-2 text-sm text-gray-600">Đang tải...</p>
                   </TableCell>
                 </TableRow>
-              ) : allProducts.length === 0 ? (
+              ) : products.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8 text-gray-400 text-xs sm:text-sm">
                     Không tìm thấy sản phẩm
                   </TableCell>
                 </TableRow>
               ) : (
-                <>
-                  {allProducts.map((product) => (
-                    <TableRow key={product.id} className="hover:bg-gray-50 transition-colors">
-                      <TableCell className="py-2 sm:py-3 text-xs sm:text-sm text-gray-600 font-medium">
-                        #{product.id}
-                      </TableCell>
-                      <TableCell className="py-2 sm:py-3">
-                        <div className="min-w-0 max-w-[200px] sm:max-w-[300px]">
-                          <div className="font-semibold text-xs sm:text-sm text-gray-900 line-clamp-2 break-words" title={product.name}>
-                            {product.name}
-                          </div>
-                          {product.description && (
-                            <div className="text-xs text-gray-500 truncate max-w-xs hidden sm:block" title={product.description}>{product.description}</div>
-                          )}
-                          <div className="flex gap-1 sm:hidden mt-1">
-                            {product.brand?.name && (
-                              <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-300 text-xs px-1 py-0">{product.brand.name}</Badge>
-                            )}
-                            {product.category?.name && (
-                              <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-300 text-xs px-1 py-0">{product.category.name}</Badge>
-                            )}
-                          </div>
+                products.map((product) => (
+                  <TableRow key={product.id} className="hover:bg-gray-50 transition-colors">
+                    <TableCell className="py-2 sm:py-3 text-xs sm:text-sm text-gray-600 font-medium">
+                      #{product.id}
+                    </TableCell>
+                    <TableCell className="py-2 sm:py-3">
+                      <div className="min-w-0 max-w-[200px] sm:max-w-[300px]">
+                        <div className="font-semibold text-xs sm:text-sm text-gray-900 line-clamp-2 break-words" title={product.name}>
+                          {product.name}
                         </div>
-                      </TableCell>
-                      <TableCell className="py-2 sm:py-3 hidden sm:table-cell">
-                        <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-300 text-xs">{product.brand?.name || "N/A"}</Badge>
-                      </TableCell>
-                      <TableCell className="py-2 sm:py-3 hidden md:table-cell">
-                        <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-300 text-xs">{product.category?.name || "N/A"}</Badge>
-                      </TableCell>
-                      <TableCell className="py-2 sm:py-3">
-                        <Button
-                          size="sm"
-                          onClick={() => onProductSelect(product.id)}
-                          disabled={product.status !== "ACTIVE"}
-                          className="w-full h-7 sm:h-8 text-xs"
-                          aria-label={`Chọn sản phẩm ${product.name}`}
-                        >
-                          <Plus className="w-3 h-3 sm:w-4 sm:h-4" aria-hidden="true" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-
-                  {hasMore && (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center py-3 sm:py-4">
-                        <Button
-                          onClick={loadMore}
-                          disabled={isFetching}
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center gap-2 mx-auto border-gray-300 hover:bg-gray-100 text-xs sm:text-sm h-8 sm:h-9"
-                        >
-                          {isFetching ? (
-                            <>
-                              <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
-                              <span className="hidden sm:inline">Đang tải...</span>
-                              <span className="sm:hidden">Tải...</span>
-                            </>
-                          ) : (
-                            "Tải thêm sản phẩm"
+                        {product.description && (
+                          <div className="text-xs text-gray-500 truncate max-w-xs hidden sm:block" title={product.description}>{product.description}</div>
+                        )}
+                        <div className="flex gap-1 sm:hidden mt-1">
+                          {product.brand?.name && (
+                            <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-300 text-xs px-1 py-0">{product.brand.name}</Badge>
                           )}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </>
+                          {product.category?.name && (
+                            <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-300 text-xs px-1 py-0">{product.category.name}</Badge>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-2 sm:py-3 hidden sm:table-cell">
+                      <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-300 text-xs">{product.brand?.name || "N/A"}</Badge>
+                    </TableCell>
+                    <TableCell className="py-2 sm:py-3 hidden md:table-cell">
+                      <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-300 text-xs">{product.category?.name || "N/A"}</Badge>
+                    </TableCell>
+                    <TableCell className="py-2 sm:py-3">
+                      <Button
+                        size="sm"
+                        onClick={() => onProductSelect(product.id)}
+                        disabled={product.status !== "ACTIVE"}
+                        className="w-full h-7 sm:h-8 text-xs"
+                        aria-label={`Chọn sản phẩm ${product.name}`}
+                      >
+                        <Plus className="w-3 h-3 sm:w-4 sm:h-4" aria-hidden="true" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
               )}
             </TableBody>
           </Table>
         </div>
+        
+        {pagination && pagination.totalPages > 1 && (
+          <div className="px-2 sm:px-4 py-2 sm:py-3 border-t bg-white flex-shrink-0">
+            <UIPaginationResuft
+              currentPage={currentPage + 1}
+              totalCount={pagination.totalElements || 0}
+              totalPage={pagination.totalPages || 1}
+            />
+            <div className="flex items-center justify-center gap-3 mt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage)}
+                disabled={currentPage === 0}
+                className="h-8 text-xs"
+              >
+                Trước
+              </Button>
+              <UIPagination
+                currentPage={currentPage + 1}
+                totalPage={pagination.totalPages || 1}
+                onChange={handlePageChange}
+                displayPage={5}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage + 2)}
+                disabled={currentPage >= pagination.totalPages - 1}
+                className="h-8 text-xs"
+              >
+                Sau
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

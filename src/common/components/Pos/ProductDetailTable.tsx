@@ -303,11 +303,16 @@ export function DialogProductDetailTable({ isOpen, onClose, productId, onAddToCa
                               max={detail.availableStock}
                               value={getQuantity(detail.id)}
                               onChange={(e) => {
-                                const value = Number.parseInt(e.target.value) || 1
+                                const value = Number.parseInt(e.target.value);
                                 if (value >= 1 && value <= detail.availableStock) {
                                   updateQuantity(detail.id, value)
+                                } else if (value < 1) {
+                                  updateQuantity(detail.id, 1); // Set to 1 if less than 1
+                                } else if (value > detail.availableStock) {
+                                  updateQuantity(detail.id, detail.availableStock); // Set to max if greater than available stock
                                 }
                               }}
+                              onKeyDown={(e) => ['e', 'E', '+', '-', '.'].includes(e.key) && e.preventDefault()}
                               className="w-10 h-6 text-center text-xs p-1"
                               aria-label={`Số lượng sản phẩm chi tiết ${detail.productName} ${detail.color.name}`}
                             />

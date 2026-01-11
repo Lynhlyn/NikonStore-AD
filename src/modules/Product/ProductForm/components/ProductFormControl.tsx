@@ -84,8 +84,15 @@ const WeightInput = () => {
           <UITextField
             type="number"
             step="0.01"
+            min="0"
             value={field.value || ''}
-            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+            onChange={(e) => {
+              const value = e.target.value ? parseFloat(e.target.value) : undefined;
+              if (value === undefined || value >= 0) {
+                field.onChange(value);
+              }
+            }}
+            onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
             onBlur={field.onBlur}
             name={field.name}
             isInvalid={!!errors.weight}

@@ -77,8 +77,15 @@ const QuantityInput = () => {
         render={({ field }) => (
           <UITextField
             type="number"
+            min="0"
             value={field.value?.toString() || ''}
-            onChange={(e) => field.onChange(Number(e.target.value))}
+            onChange={(e) => {
+              const value = Number(e.target.value);
+              if (value >= 0 || e.target.value === '') {
+                field.onChange(value);
+              }
+            }}
+            onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
             onBlur={field.onBlur}
             name={field.name}
             isInvalid={!!errors.quantity}
@@ -147,14 +154,18 @@ const DiscountValueInput = () => {
         render={({ field }) => (
           <UITextField
             type="number"
+            min="0"
             value={field.value?.toString() || ''}
             onChange={(e) => {
               const value = Number(e.target.value);
-              field.onChange(value);
-              if (discountType === 'fixed_amount') {
-                setValue('maxDiscount', value);
+              if (value >= 0 || e.target.value === '') {
+                field.onChange(value);
+                if (discountType === 'fixed_amount') {
+                  setValue('maxDiscount', value);
+                }
               }
             }}
+            onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
             onBlur={field.onBlur}
             name={field.name}
             isInvalid={!!errors.discountValue}
@@ -182,8 +193,15 @@ const MinOrderValueInput = () => {
         render={({ field }) => (
           <UITextField
             type="number"
+            min="0"
             value={field.value?.toString() || ''}
-            onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+            onChange={(e) => {
+              const value = e.target.value ? Number(e.target.value) : undefined;
+              if (value === undefined || value >= 0) {
+                field.onChange(value);
+              }
+            }}
+            onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
             onBlur={field.onBlur}
             name={field.name}
             isInvalid={!!errors.minOrderValue}
@@ -216,8 +234,15 @@ const MaxDiscountInput = () => {
         render={({ field }) => (
           <UITextField
             type="number"
+            min="0"
             value={field.value?.toString() || ''}
-            onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+            onChange={(e) => {
+              const value = e.target.value ? Number(e.target.value) : undefined;
+              if (value === undefined || value >= 0) {
+                field.onChange(value);
+              }
+            }}
+            onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
             onBlur={field.onBlur}
             name={field.name}
             isInvalid={!!errors.maxDiscount}
