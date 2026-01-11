@@ -126,7 +126,7 @@ export function CustomerSelector({ selectedCustomer, onCustomerSelect }: Custome
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" aria-hidden="true" />
                 <Input
-                  placeholder="Tìm kiếm khách hàng..."
+                  placeholder="Tìm theo tên, email, SĐT, username..."
                   value={searchTerm}
                   onChange={handleSearchChange}
                   className="pl-10"

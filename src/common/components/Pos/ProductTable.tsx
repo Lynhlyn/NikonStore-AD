@@ -93,10 +93,10 @@ export function DialogProductTable({ onProductSelect, onScanSuccess, scanDisable
             <span className="text-sm sm:text-base font-semibold">Danh sách sản phẩm</span>
           </CardTitle>
           <div className="flex items-center gap-2">
-            <div className="relative flex-1 sm:flex-none sm:w-64 lg:w-72">
+            <div className="relative flex-1">
               <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" aria-hidden="true" />
               <Input
-                placeholder="Tìm kiếm sản phẩm..."
+                placeholder="Tìm theo tên, mô tả, thương hiệu, chất liệu, SKU..."
                 value={searchProduct}
                 onChange={handleSearchChange}
                 className="pl-8 sm:pl-10 h-8 sm:h-9 text-xs sm:text-sm border-gray-300 focus:border-blue-500 focus:ring-blue-500"

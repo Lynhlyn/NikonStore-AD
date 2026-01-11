@@ -2,9 +2,10 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/core/shadcn/components/ui/table";
 import { Button } from "@/core/shadcn/components/ui/button";
+import { Input } from "@/core/shadcn/components/ui/input";
 import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { SquarePen, Plus, ArrowUp, ArrowDown, Loader2, Search } from "lucide-react";
-import { useAppNavigation } from "@/common/hooks";
+import { useAppNavigation, useDebounce } from "@/common/hooks";
 import { useFetchStaffsQuery, useDeleteStaffMutation } from "@/lib/services/modules/staffService";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { toast } from "sonner";
@@ -26,16 +27,23 @@ const StaffTable = () => {
   
   const [queryStates, setQueryStates] = useQueryStates({
     page: parseAsInteger.withDefault(0),
+    keyword: parseAsString.withDefault(""),
+    role: parseAsString.withDefault(""),
     status: parseAsString.withDefault(""),
     sort: parseAsString.withDefault("id"),
     direction: parseAsString.withDefault("desc"),
   });
+
+  const debouncedKeyword = useDebounce(queryStates.keyword, 500);
 
   const { data, refetch } = useFetchStaffsQuery({
     page: queryStates.page,
     size: 10,
     sort: queryStates.sort,
     direction: (queryStates.direction === "asc" || queryStates.direction === "desc") ? queryStates.direction : undefined,
+    fullName: debouncedKeyword || undefined,
+    phoneNumber: debouncedKeyword || undefined,
+    role: queryStates.role || undefined,
     status: queryStates.status as EStatusEnumString || undefined,
   }, { refetchOnMountOrArgChange: true });
 
@@ -45,6 +53,22 @@ const StaffTable = () => {
     setQueryStates((prev) => ({
       ...prev,
       page: newPage - 1,
+    }));
+  };
+
+  const handleKeywordChange = (value: string) => {
+    setQueryStates((prev) => ({
+      ...prev,
+      keyword: value,
+      page: 0,
+    }));
+  };
+
+  const handleRoleChange = (role: { value: string; label: string }) => {
+    setQueryStates((prev) => ({
+      ...prev,
+      role: role.value || "",
+      page: 0,
     }));
   };
 
@@ -106,6 +130,11 @@ const StaffTable = () => {
   const roleOptions = [
     { label: 'Quản lý', value: EUserRole.ADMIN },
     { label: 'Nhân viên', value: EUserRole.STAFF },
+  ];
+
+  const roleFilterOptions = [
+    { value: "", label: "Tất cả vai trò" },
+    ...roleOptions
   ];
 
   const statusOptions = [
@@ -221,8 +250,33 @@ const StaffTable = () => {
         </div>
       </div>
 
-      <div className="mb-5 flex items-center gap-4">
-        <div className="w-[220px]">
+      <div className="mb-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="relative flex-1 w-full sm:max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Tìm kiếm theo họ tên hoặc số điện thoại..."
+            value={queryStates.keyword}
+            onChange={(e) => handleKeywordChange(e.target.value)}
+            className="pl-10 pr-4 py-2 w-full border-gray-300 focus:border-sky-500 focus:ring-sky-500"
+          />
+        </div>
+        <div className="w-full sm:w-[200px]">
+          <UISingleSelect
+            options={roleFilterOptions}
+            selected={
+              queryStates.role
+                ? roleFilterOptions.find(item => item.value === queryStates.role) || roleFilterOptions[0]
+                : roleFilterOptions[0]
+            }
+            onChange={(selected) => handleRoleChange(selected as { value: string; label: string })}
+            className="rounded-md border border-gray-300"
+            size={ESize.M}
+            renderSelected={(props) => <UISingleSelect.Selected {...props} />}
+            renderOption={(props) => <UISingleSelect.Option {...props} />}
+          />
+        </div>
+        <div className="w-full sm:w-[200px]">
           <UISingleSelect
             options={statusOptions}
             selected={
