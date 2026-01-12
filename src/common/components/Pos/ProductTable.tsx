@@ -58,28 +58,28 @@ export function DialogProductTable({ onProductSelect, onScanSuccess, scanDisable
   return (
     <Card className="border-gray-200 shadow-sm flex flex-col h-auto">
       <CardHeader className="bg-white border-b border-gray-200 flex-shrink-0 px-2 sm:px-4 py-2 sm:py-3">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
-          <CardTitle className="flex items-center gap-2 text-gray-900">
-            <Package className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" aria-hidden="true" />
-            <span className="text-sm sm:text-base font-semibold">Danh sách sản phẩm</span>
-          </CardTitle>
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" aria-hidden="true" />
-              <Input
-                placeholder="Tìm theo tên, mô tả, thương hiệu, chất liệu, SKU..."
-                value={searchProduct}
-                onChange={handleSearchChange}
-                className="pl-8 sm:pl-10 h-8 sm:h-9 text-xs sm:text-sm border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                aria-label="Tìm kiếm sản phẩm"
-              />
-            </div>
+        <div className="flex flex-col gap-2 sm:gap-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-gray-900">
+              <Package className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" aria-hidden="true" />
+              <span className="text-sm sm:text-base font-semibold">Danh sách sản phẩm</span>
+            </CardTitle>
             {onScanSuccess && (
               <BarcodeScanner
                 onScanSuccess={onScanSuccess}
                 disabled={scanDisabled}
               />
             )}
+          </div>
+          <div className="relative w-full">
+            <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" aria-hidden="true" />
+            <Input
+              placeholder="Tìm theo tên, mô tả, thương hiệu, chất liệu, SKU..."
+              value={searchProduct}
+              onChange={handleSearchChange}
+              className="pl-8 sm:pl-10 h-8 sm:h-9 text-xs sm:text-sm border-gray-300 focus:border-blue-500 focus:ring-blue-500 w-full"
+              aria-label="Tìm kiếm sản phẩm"
+            />
           </div>
         </div>
       </CardHeader>
