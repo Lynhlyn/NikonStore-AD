@@ -2,6 +2,7 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/core/shadcn/components/ui/table";
 import { Button } from "@/core/shadcn/components/ui/button";
+import { Input } from "@/core/shadcn/components/ui/input";
 import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { SquarePen, ArrowUp, ArrowDown, Plus, Eye, Loader2, Search, Download } from "lucide-react";
 import { useAppNavigation } from "@/common/hooks";
@@ -18,6 +19,7 @@ import { UISingleSelect } from "@/core/ui/UISingleSelect";
 import { EStatusEnumString } from "@/common/enums/status";
 import { ESize } from "@/core/ui/Helpers/UIsize.enum";
 import { getStatusDisplay } from "@/common/utils/statusColor";
+import { useState, useEffect } from "react";
 
 const ProductTable = () => {
   const router = useRouter();
@@ -30,9 +32,28 @@ const ProductTable = () => {
     materialId: parseAsString.withDefault(""),
     strapTypeId: parseAsString.withDefault(""),
     status: parseAsString.withDefault(""),
+    keyword: parseAsString.withDefault(""),
     sort: parseAsString.withDefault("id"),
     direction: parseAsString.withDefault("desc"),
   });
+
+  const [searchInput, setSearchInput] = useState(queryStates.keyword);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setQueryStates((prev) => ({
+        ...prev,
+        keyword: searchInput,
+        page: 0,
+      }));
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  useEffect(() => {
+    setSearchInput(queryStates.keyword);
+  }, [queryStates.keyword]);
 
   const { data, refetch } = useFetchProductsQuery({
     page: queryStates.page,
@@ -40,6 +61,7 @@ const ProductTable = () => {
     size: 10,
     sort: queryStates.sort,
     direction: (queryStates.direction === "asc" || queryStates.direction === "desc") ? queryStates.direction : undefined,
+    keyword: queryStates.keyword || undefined,
     brandId: queryStates.brandId ? parseInt(queryStates.brandId) : undefined,
     categoryId: queryStates.categoryId ? parseInt(queryStates.categoryId) : undefined,
     materialId: queryStates.materialId ? parseInt(queryStates.materialId) : undefined,
@@ -152,6 +174,7 @@ const ProductTable = () => {
   const handleExportExcel = async () => {
     try {
       const result = await exportProductsToExcel({
+        keyword: queryStates.keyword || undefined,
         status: queryStates.status || undefined,
         categoryId: queryStates.categoryId || undefined,
         brandId: queryStates.brandId || undefined,
@@ -356,7 +379,18 @@ const ProductTable = () => {
         </div>
       </div>
 
-      <div className="mb-5 flex items-center gap-4 flex-wrap">
+      <div className="mb-5 space-y-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Tìm kiếm theo tên sản phẩm, thương hiệu, danh mục..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="pl-10 h-10 border-gray-300 focus:border-green-500 focus:ring-green-500"
+          />
+        </div>
+        <div className="flex items-center gap-4 flex-wrap">
         <div className="w-[200px]">
           <UISingleSelect
             options={brandOptions}
@@ -412,6 +446,7 @@ const ProductTable = () => {
             renderOption={(props) => <UISingleSelect.Option {...props} />}
           />
         </div>
+      </div>
       </div>
 
       {isLoading ? (
