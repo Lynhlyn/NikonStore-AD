@@ -31,24 +31,22 @@ export function OrderCart({ selectedOrder, isLoading, onUpdateQuantity, onClearO
   }
 
   const getUnitPrice = (item: any) => {
-    if (item.promotion && item.promotion.isActive) {
-      const discountedUnitPrice = item.totalAmount / item.quantity
-      return discountedUnitPrice
-    }
-    const unitPrice = item.price / item.quantity
-    return unitPrice
+    return item.price
   }
 
   const getOriginalUnitPrice = (item: any) => {
+    if (item.originalPrice) {
+      return item.originalPrice
+    }
+    
     if (item.promotion && item.promotion.isActive) {
-      const discountedUnitPrice = item.totalAmount / item.quantity
       if (item.promotion.discountType === "percentage") {
-        return Math.round(discountedUnitPrice / (1 - item.promotion.discountValue / 100))
+        return Math.round(item.price / (1 - item.promotion.discountValue / 100))
       } else if (item.promotion.discountType === "fixed_amount" || item.promotion.discountType === "amount") {
-        return discountedUnitPrice + item.promotion.discountValue
+        return item.price + item.promotion.discountValue
       }
     }
-    return item.price / item.quantity
+    return item.price
   }
 
   return (
@@ -117,7 +115,7 @@ export function OrderCart({ selectedOrder, isLoading, onUpdateQuantity, onClearO
                     ) : (
                       <>
                         <div className="text-blue-600 font-semibold text-sm">
-                          {formatCurrencyDisplay(item.price / item.quantity)} / sản phẩm
+                          {formatCurrencyDisplay(getUnitPrice(item))} / sản phẩm
                         </div>
                         <div className="text-xs text-gray-600 font-medium">
                           Tổng: {formatCurrencyDisplay(item.totalAmount)}
