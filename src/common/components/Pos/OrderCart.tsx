@@ -50,6 +50,15 @@ export function OrderCart({ selectedOrder, isLoading, onUpdateQuantity, onClearO
     return item.price
   }
 
+  const calculateOriginalTotal = () => {
+    if (!selectedOrder || !selectedOrder.orderDetails) return 0
+    return selectedOrder.orderDetails.reduce((total, item) => {
+      const originalPrice = getOriginalUnitPrice(item)
+      return total + (originalPrice * item.quantity)
+    }, 0)
+  }
+
+
   return (
     <Card className="border-gray-200 shadow-sm">
       <CardHeader className="bg-white border-b border-gray-200 px-3 sm:px-4 py-2 sm:py-3">
@@ -192,11 +201,11 @@ export function OrderCart({ selectedOrder, isLoading, onUpdateQuantity, onClearO
           <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 space-y-1.5 sm:space-y-2 bg-gray-50 rounded-lg p-3 sm:p-4 -mx-2 sm:-mx-4 -mb-2 sm:-mb-4">
             <div className="flex justify-between text-xs sm:text-sm text-gray-600">
               <span>Tạm tính:</span>
-              <span className="font-medium text-gray-900">{formatCurrencyDisplay(selectedOrder.subtotal)}</span>
+              <span className="font-medium text-gray-900">{formatCurrencyDisplay(calculateOriginalTotal())}</span>
             </div>
             {selectedOrder.productDiscount > 0 && (
               <div className="flex justify-between text-xs sm:text-sm text-green-600">
-                <span>Giảm giá sản phẩm:</span>
+                <span>Giảm giá sản phẩm(khuyến mãi):</span>
                 <span className="font-medium">-{formatCurrencyDisplay(selectedOrder.productDiscount)}</span>
               </div>
             )}
