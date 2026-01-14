@@ -457,6 +457,18 @@ export const CustomerFormModal = ({ isOpen, onClose, customer, onSuccess }: Cust
                 id="dateOfBirth"
                 type="date"
                 {...register("dateOfBirth")}
+                max={new Date().toISOString().split('T')[0]}
+                onChange={(e) => {
+                  const selectedDate = e.target.value
+                  const today = new Date().toISOString().split('T')[0]
+                  if (selectedDate > today) {
+                    toast.error("Không thể chọn ngày trong tương lai")
+                    e.target.value = ""
+                    setValue("dateOfBirth", "")
+                  } else {
+                    register("dateOfBirth").onChange(e)
+                  }
+                }}
               />
               {errors.dateOfBirth && (
                 <p className="text-sm text-red-500">{errors.dateOfBirth.message}</p>
