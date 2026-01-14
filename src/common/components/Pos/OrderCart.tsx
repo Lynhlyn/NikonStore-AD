@@ -4,6 +4,7 @@ import { ProductImage } from "@/common/components/Pos/ProductImage"
 import { formatCurrencyDisplay } from "@/common/utils/inutFormat"
 import { Button } from "@/core/shadcn/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/core/shadcn/components/ui/card"
+import { Input } from "@/core/shadcn/components/ui/input"
 import type { PosOrderResponse } from "@/lib/services/modules/posService/type"
 import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react"
 
@@ -136,9 +137,33 @@ export function OrderCart({ selectedOrder, isLoading, onUpdateQuantity, onClearO
                   >
                     <Minus className="w-3 h-3" aria-hidden="true" />
                   </Button>
-                  <span className="w-8 text-center font-semibold text-gray-900" aria-live="polite">
-                    {item.quantity}
-                  </span>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={item.quantity}
+                    onChange={(e) => {
+                      const value = Number.parseInt(e.target.value);
+                      if (value >= 1) {
+                        onUpdateQuantity(item.productDetailId, value);
+                      } else if (e.target.value === '') {
+                        // Allow empty input temporarily
+                        return;
+                      } else {
+                        onUpdateQuantity(item.productDetailId, 1);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      // Ensure minimum value of 1 when input loses focus
+                      const value = Number.parseInt(e.target.value);
+                      if (!value || value < 1) {
+                        onUpdateQuantity(item.productDetailId, 1);
+                      }
+                    }}
+                    onKeyDown={(e) => ['e', 'E', '+', '-', '.'].includes(e.key) && e.preventDefault()}
+                    className="w-10 h-7 text-center text-xs p-1 font-semibold"
+                    aria-label={`Số lượng ${item.productName}`}
+                    aria-live="polite"
+                  />
                   <Button
                     size="sm"
                     variant="outline"
