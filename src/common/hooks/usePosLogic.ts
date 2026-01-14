@@ -273,16 +273,25 @@ export const usePosLogic = (staffId: number) => {
 
   const handleVoucherChange = useCallback(
     async (voucher: Voucher | null) => {
-      if (!selectedOrderId) return;
+      console.log("[DEBUG] handleVoucherChange called", { selectedOrderId, voucherId: voucher?.id, voucherCode: voucher?.code });
+      
+      if (!selectedOrderId) {
+        console.warn("[DEBUG] No selectedOrderId, skipping voucher update");
+        return;
+      }
+      
       try {
+        console.log("[DEBUG] Calling updatePendingOrder API with voucherId:", voucher?.id);
         await updatePendingOrder({
           orderId: selectedOrderId,
           request: {
             voucherId: voucher?.id,
           },
         }).unwrap();
+        console.log("[DEBUG] Successfully updated voucher");
         await refreshData(selectedOrderId);
       } catch (error) {
+        console.error("[DEBUG] Error updating voucher:", error);
         toast.error("Không thể cập nhật voucher");
       }
     },
