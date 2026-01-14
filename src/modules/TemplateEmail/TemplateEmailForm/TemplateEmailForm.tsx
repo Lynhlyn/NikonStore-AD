@@ -427,9 +427,9 @@ export default function TemplateEmailForm({ templateId }: TemplateEmailFormProps
                     init={{
                       height: 500,
                       menubar: false,
-                      plugins: ['link', 'lists', 'table'],
+                      plugins: ['link', 'lists', 'table', 'code'],
                       toolbar:
-                        'undo redo | bold italic underline | forecolor | alignleft aligncenter alignright | bullist numlist | link table removeformat',
+                        'undo redo | bold italic underline | forecolor | alignleft aligncenter alignright | bullist numlist | link table | code | removeformat',
                       content_style:
                         'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size:14px }',
                       valid_elements:
