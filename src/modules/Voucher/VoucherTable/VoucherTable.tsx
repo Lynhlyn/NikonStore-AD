@@ -157,7 +157,20 @@ const VoucherTable = () => {
           Số lượng {getSortIcon("quantity")}
         </div>
       ),
-      meta: { width: "w-[100px]" },
+      meta: { width: "w-[150px]" },
+      cell: ({ row }: any) => {
+        const quantity = row.original.quantity;
+        const usedCount = row.original.usedCount || 0;
+        const remaining = quantity - usedCount;
+        return (
+          <div className="flex flex-col">
+            <span className="font-medium">{quantity}</span>
+            <span className={`text-xs ${remaining > 0 ? 'text-green-600' : 'text-red-600'}`}>
+              (còn lại: {remaining})
+            </span>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "discountValue",
